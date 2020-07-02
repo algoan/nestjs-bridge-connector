@@ -4,6 +4,10 @@
     "clientId": "a",
     "clientSecret": "b"
   },
+  "bridge":{
+    "clientId":"a",
+    "clientSecret": "b"
+  },
   "targetUrl": "https://test",
   "eventList": [
     "service_account_created"
