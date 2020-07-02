@@ -1,8 +1,10 @@
+import { join } from 'path';
 import { HttpExceptionFilter } from '@algoan/nestjs-http-exception-filter';
-import { NestFactory } from '@nestjs/core';
-import { INestApplication, Logger, ValidationPipe } from '@nestjs/common';
+import { NestFactory, NestApplication } from '@nestjs/core';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { WinstonModule } from 'nest-winston';
-import { format, LoggerOptions, transports } from 'winston';
+import { config } from 'node-config-ts';
+import { format, transports } from 'winston';
 
 import { AppModule } from './app.module';
 
@@ -12,11 +14,11 @@ const logger: Logger = new Logger(__filename);
  * Bootstrap method
  */
 const bootstrap = async (): Promise<void> => {
-  const port: number = 3000;
+  const port: number = config.port;
   const defaultLevel: string = process.env.DEBUG_LEVEL || 'info';
   const nodeEnv: string = process.env.NODE_ENV;
 
-  const app: INestApplication = await NestFactory.create(AppModule, {
+  const app: NestApplication = await NestFactory.create(AppModule, {
     logger: WinstonModule.createLogger({
       format:
         nodeEnv === 'production'
@@ -58,6 +60,11 @@ const bootstrap = async (): Promise<void> => {
     }),
   );
   app.useGlobalFilters(new HttpExceptionFilter());
+
+  if (nodeEnv !== 'production') {
+    app.setBaseViewsDir(join(__dirname, '..', 'views'));
+    app.setViewEngine('hbs');
+  }
 
   await app.listen(port);
   logger.log(`Application is listening to port ${port}`);

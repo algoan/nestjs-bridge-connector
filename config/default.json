@@ -8,5 +8,6 @@
   "eventList": [
     "service_account_created"
   ],
-  "restHooksSecret": "a"
+  "restHooksSecret": "a",
+  "port": 8080
 }

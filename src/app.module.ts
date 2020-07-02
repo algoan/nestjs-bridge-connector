@@ -19,7 +19,7 @@ import { HooksModule } from './hooks/hooks.module';
       provide: APP_INTERCEPTOR,
       useFactory: () => {
         const interceptor: LoggingInterceptor = new LoggingInterceptor();
-        interceptor.setUserPrefix('C-BI');
+        interceptor.setUserPrefix('C-BRIDGE');
 
         return interceptor;
       },
