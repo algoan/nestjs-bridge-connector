@@ -5,7 +5,7 @@ import { of } from 'rxjs';
 import { config } from 'node-config-ts';
 import { AlgoanModule } from '../../../algoan/algoan.module';
 import { AppModule } from '../../../app.module';
-import { UserResponse, AuthenticationResponse } from '../../interfaces/bridge.interface';
+import { UserResponse, AuthenticationResponse, ConnectItemResponse } from '../../interfaces/bridge.interface';
 import { BridgeClient } from './bridge.client';
 
 describe('BridgeClient', () => {
@@ -32,6 +32,21 @@ describe('BridgeClient', () => {
     expect(service).toBeDefined();
   });
 
+  it('sets the right headers', () => {
+    // eslint-disable-next-line @typescript-eslint/tslint/config
+    expect(httpService.axiosRef.defaults.headers.post as unknown).toMatchObject({
+      'Client-Id': config.bridge.clientId,
+      'Client-Secret': config.bridge.clientSecret,
+      'Bankin-Version': config.bridge.bankinVersion,
+    });
+    // eslint-disable-next-line @typescript-eslint/tslint/config
+    expect(httpService.axiosRef.defaults.headers.get as unknown).toMatchObject({
+      'Client-Id': config.bridge.clientId,
+      'Client-Secret': config.bridge.clientSecret,
+      'Bankin-Version': config.bridge.bankinVersion,
+    });
+  });
+
   it('can create a user', async () => {
     const result: AxiosResponse = {
       data: userResponse,
@@ -47,12 +62,8 @@ describe('BridgeClient', () => {
     expect(resp).toBe(userResponse);
 
     expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/users', {
-      headers: {
-        client_id: config.bridge.clientId,
-        client_secret: config.bridge.clientSecret,
-        bankin_version: '2019-02-18',
-      },
-      data: { email: 'mock@email.com', password: 'mockPassword' },
+      email: 'mock@email.com',
+      password: 'mockPassword',
     });
   });
 
@@ -76,12 +87,32 @@ describe('BridgeClient', () => {
     expect(resp).toBe(authResponse);
 
     expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/authenticate', {
+      email: 'mock@email.com',
+      password: 'mockPassword',
+    });
+  });
+
+  it('can connect a user to an item', async () => {
+    const connectItemResponse: ConnectItemResponse = {
+      redirect_url: 'the-redirect-url',
+    };
+    const result: AxiosResponse = {
+      data: connectItemResponse,
+      status: 200,
+      statusText: '',
+      headers: {},
+      config: {},
+    };
+
+    const spy = jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(result));
+
+    const resp = await service.connectItem('secret-access-token');
+    expect(resp).toBe(connectItemResponse);
+
+    expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/authenticate', {
       headers: {
-        client_id: config.bridge.clientId,
-        client_secret: config.bridge.clientSecret,
-        bankin_version: '2019-02-18',
+        authorisation: 'Bearer secret-access-token',
       },
-      data: { email: 'mock@email.com', password: 'mockPassword' },
     });
   });
 });

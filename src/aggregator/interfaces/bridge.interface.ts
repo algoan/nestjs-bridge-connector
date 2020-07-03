@@ -24,3 +24,10 @@ export interface UserAccount {
   email: string;
   password: string;
 }
+
+/**
+ * Response for connect item
+ */
+export interface ConnectItemResponse {
+  redirect_url: string;
+}
