@@ -46,10 +46,13 @@ describe('BridgeClient', () => {
     const resp = await service.register({ email: 'mock@email.com', password: 'mockPassword' });
     expect(resp).toBe(userResponse);
 
-    expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/users?email=mock@email.com&password=mockPassword', {
-      client_id: config.bridge.clientId,
-      client_secret: config.bridge.clientSecret,
-      bankin_version: '2019-02-18',
+    expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/users', {
+      headers: {
+        client_id: config.bridge.clientId,
+        client_secret: config.bridge.clientSecret,
+        bankin_version: '2019-02-18',
+      },
+      data: { email: 'mock@email.com', password: 'mockPassword' },
     });
   });
 
@@ -72,13 +75,13 @@ describe('BridgeClient', () => {
     const resp = await service.authenticate({ email: 'mock@email.com', password: 'mockPassword' });
     expect(resp).toBe(authResponse);
 
-    expect(spy).toHaveBeenCalledWith(
-      'https://sync.bankin.com/v2/authenticate?email=mock@email.com&password=mockPassword',
-      {
+    expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/authenticate', {
+      headers: {
         client_id: config.bridge.clientId,
         client_secret: config.bridge.clientSecret,
         bankin_version: '2019-02-18',
       },
-    );
+      data: { email: 'mock@email.com', password: 'mockPassword' },
+    });
   });
 });
