@@ -14,13 +14,16 @@ export class BridgeClient {
    * Creates a bridge user
    */
   public async register(userAccount: UserAccount): Promise<UserResponse> {
-    const url: string = `${config.bridge.baseUrl}/users?email=${userAccount.email}&password=${userAccount.password}`;
+    const url: string = `${config.bridge.baseUrl}/users`;
 
     const resp: AxiosResponse<UserResponse> = await this.httpService
       .post(url, {
-        client_id: config.bridge.clientId,
-        client_secret: config.bridge.clientSecret,
-        bankin_version: config.bridge.bankinVersion,
+        headers: {
+          client_id: config.bridge.clientId,
+          client_secret: config.bridge.clientSecret,
+          bankin_version: config.bridge.bankinVersion,
+        },
+        data: userAccount,
       })
       .toPromise();
     Logger.debug(`User created with email ${userAccount.email}`);
@@ -32,13 +35,16 @@ export class BridgeClient {
    * Authenticates a bridge user
    */
   public async authenticate(userAccount: UserAccount): Promise<AuthenticationResponse> {
-    const url: string = `${config.bridge.baseUrl}/authenticate?email=${userAccount.email}&password=${userAccount.password}`;
+    const url: string = `${config.bridge.baseUrl}/authenticate`;
 
     const resp: AxiosResponse<AuthenticationResponse> = await this.httpService
       .post(url, {
-        client_id: config.bridge.clientId,
-        client_secret: config.bridge.clientSecret,
-        bankin_version: config.bridge.bankinVersion,
+        headers: {
+          client_id: config.bridge.clientId,
+          client_secret: config.bridge.clientSecret,
+          bankin_version: config.bridge.bankinVersion,
+        },
+        data: userAccount,
       })
       .toPromise();
     Logger.debug(`Authenticated user ${userAccount.email}`);
