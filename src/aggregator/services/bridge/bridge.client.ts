@@ -14,13 +14,13 @@ export class BridgeClient {
    * Creates a bridge user
    */
   public async register(userAccount: UserAccount): Promise<BaseResponse> {
-    const url: string = `https://sync.bankin.com/v2/users?email=${userAccount.email}&password=${userAccount.password}`;
+    const url: string = `${config.bridge.baseUrl}/users?email=${userAccount.email}&password=${userAccount.password}`;
 
     const resp: AxiosResponse<BaseResponse> = await this.httpService
       .post(url, {
         client_id: config.bridge.clientId,
         client_secret: config.bridge.clientSecret,
-        bankin_version: '2019-02-18',
+        bankin_version: config.bridge.bankinVersion,
       })
       .toPromise();
     Logger.debug(`User created with email ${userAccount.email}`);
