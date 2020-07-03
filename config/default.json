@@ -4,6 +4,12 @@
     "clientId": "a",
     "clientSecret": "b"
   },
+  "bridge":{
+    "bankinVersion":"2019-02-18",
+    "baseUrl":"https://sync.bankin.com/v2",
+    "clientId":"a",
+    "clientSecret": "b"
+  },
   "targetUrl": "https://test",
   "eventList": [
     "service_account_created"
