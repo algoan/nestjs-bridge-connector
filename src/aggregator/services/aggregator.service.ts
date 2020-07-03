@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { BaseResponse, UserAccount } from '../interfaces/bridge.interface';
+import { UserResponse, UserAccount, AuthenticationResponse } from '../interfaces/bridge.interface';
 import { BridgeClient } from './bridge/bridge.client';
 
 /**
@@ -12,7 +12,14 @@ export class AggregatorService {
   /**
    * Validate the creation of the current user
    */
-  public async registerClient(userAccount: UserAccount): Promise<BaseResponse> {
+  public async registerClient(userAccount: UserAccount): Promise<UserResponse> {
     return this.bridgeClient.register(userAccount);
+  }
+
+  /**
+   * Authenticate the current user
+   */
+  public async authenticateClient(userAccount: UserAccount): Promise<AuthenticationResponse> {
+    return this.bridgeClient.authenticate(userAccount);
   }
 }

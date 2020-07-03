@@ -5,12 +5,18 @@ import { of } from 'rxjs';
 import { config } from 'node-config-ts';
 import { AlgoanModule } from '../../../algoan/algoan.module';
 import { AppModule } from '../../../app.module';
-import { BaseResponse } from '../../interfaces/bridge.interface';
+import { UserResponse, AuthenticationResponse } from '../../interfaces/bridge.interface';
 import { BridgeClient } from './bridge.client';
 
 describe('BridgeClient', () => {
   let service: BridgeClient;
   let httpService: HttpService;
+  const userResponse: UserResponse = {
+    uuid: 'mockUuid',
+    resource_type: 'user',
+    resource_uri: 'mockUri',
+    email: 'mock@email.com',
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -26,15 +32,9 @@ describe('BridgeClient', () => {
     expect(service).toBeDefined();
   });
 
-  it('returns a base response when called', async () => {
-    const mockResponse: BaseResponse = {
-      uuid: 'mockUuid',
-      resource_type: 'user',
-      resource_uri: 'mockUri',
-      email: 'mock@email.com',
-    };
+  it('can create a user', async () => {
     const result: AxiosResponse = {
-      data: mockResponse,
+      data: userResponse,
       status: 200,
       statusText: '',
       headers: {},
@@ -44,12 +44,41 @@ describe('BridgeClient', () => {
     const spy = jest.spyOn(httpService, 'post').mockImplementationOnce(() => of(result));
 
     const resp = await service.register({ email: 'mock@email.com', password: 'mockPassword' });
-    expect(resp).toBe(mockResponse);
+    expect(resp).toBe(userResponse);
 
     expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/users?email=mock@email.com&password=mockPassword', {
       client_id: config.bridge.clientId,
       client_secret: config.bridge.clientSecret,
       bankin_version: '2019-02-18',
     });
+  });
+
+  it('can authenticate a user', async () => {
+    const authResponse: AuthenticationResponse = {
+      user: userResponse,
+      access_token: 'mockAccessToken',
+      expires_at: 'mockDate',
+    };
+    const result: AxiosResponse = {
+      data: authResponse,
+      status: 200,
+      statusText: '',
+      headers: {},
+      config: {},
+    };
+
+    const spy = jest.spyOn(httpService, 'post').mockImplementationOnce(() => of(result));
+
+    const resp = await service.authenticate({ email: 'mock@email.com', password: 'mockPassword' });
+    expect(resp).toBe(authResponse);
+
+    expect(spy).toHaveBeenCalledWith(
+      'https://sync.bankin.com/v2/authenticate?email=mock@email.com&password=mockPassword',
+      {
+        client_id: config.bridge.clientId,
+        client_secret: config.bridge.clientSecret,
+        bankin_version: '2019-02-18',
+      },
+    );
   });
 });
