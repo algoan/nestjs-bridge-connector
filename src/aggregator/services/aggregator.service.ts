@@ -47,6 +47,7 @@ export class AggregatorService {
    */
   private static buildCredentials(bankUser: IBanksUser): UserAccount {
     return {
+      // bankUser.createdAt should exist, need to change the interface
       email: `${bankUser.id}-bankUser.createdAt@algoan-bridge.com`,
       password: `${bankUser.id}-bankUser.createdAt`,
     };

@@ -50,6 +50,7 @@ export class HooksService {
 
     switch (event.subscription.eventName) {
       case EventName.BANKREADER_LINK_REQUIRED:
+        // @ts-ignore
         await this.handleBankreaderLinkRequiredEvent(serviceAccount, event.payload as BankreaderLinkRequiredDTO);
         break;
 
@@ -83,10 +84,6 @@ export class HooksService {
      */
     const banksUser: BanksUser = await serviceAccount.getBanksUserById(payload.banksUserId);
     this.logger.debug(`Found BanksUser with id ${banksUser.id} and callback ${banksUser.callbackUrl}`);
-
-    if (banksUser.callbackUrl === undefined) {
-      throw new NotFoundException(`BanksUser ${banksUser.id} has no callback URL`);
-    }
 
     /**
      * 2. Generates a redirect URL
