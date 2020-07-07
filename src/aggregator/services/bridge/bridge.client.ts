@@ -50,7 +50,6 @@ export class BridgeClient {
    */
   public async authenticate(userAccount: UserAccount): Promise<AuthenticationResponse> {
     const url: string = `${config.bridge.baseUrl}/authenticate`;
-
     const resp: AxiosResponse<AuthenticationResponse> = await this.httpService.post(url, userAccount).toPromise();
     Logger.debug(`Authenticated user ${userAccount.email}`);
 
