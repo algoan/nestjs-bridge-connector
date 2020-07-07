@@ -13,14 +13,13 @@ import {
 } from '@algoan/rest';
 import { UnauthorizedException, Injectable, NotFoundException, Logger } from '@nestjs/common';
 
-import { BridgeAccount, BridgeTransaction } from 'src/aggregator/interfaces/bridge.interface';
-import { mapBridgeAccount, mapBridgeTransactions } from 'src/aggregator/services/bridge/bridge.utils';
 import { AlgoanService } from '../../algoan/algoan.service';
 import { AggregatorService } from '../../aggregator/services/aggregator.service';
+import { BridgeAccount, BridgeTransaction } from '../../aggregator/interfaces/bridge.interface';
+import { mapBridgeAccount, mapBridgeTransactions } from '../../aggregator/services/bridge/bridge.utils';
 import { EventDTO } from '../dto/event.dto';
 import { BankreaderLinkRequiredDTO } from '../dto/bandreader-link-required.dto';
 import { BankreaderRequiredDTO } from '../dto/bankreader-required.dto';
-
 /**
  * Hook service
  */
