@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { IBanksUser } from '@algoan/rest';
-import { UserResponse, UserAccount, AuthenticationResponse } from '../interfaces/bridge.interface';
+import {
+  UserResponse,
+  UserAccount,
+  AuthenticationResponse,
+  BridgeAccount,
+  BridgeTransaction,
+} from '../interfaces/bridge.interface';
 import { BridgeClient } from './bridge/bridge.client';
 
 /**
@@ -38,6 +44,33 @@ export class AggregatorService {
     const redirectResponse = await this.bridgeClient.connectItem(authenticationResponse.access_token);
 
     return redirectResponse.redirect_url;
+  }
+
+  /**
+   * Returns the Bridge Accounts for a user
+   *
+   * @param banksUser The bank user for which we generate the redirectUrl
+   */
+  public async getAccounts(accessToken: string): Promise<BridgeAccount[]> {
+    return this.bridgeClient.getAccounts(accessToken);
+  }
+
+  /**
+   * Returns the Bridge Transactions for an acount
+   *
+   * @param banksUser The bank user for which we generate the redirectUrl
+   */
+  public async getTransactions(accessToken: string, accountNumber: number): Promise<BridgeTransaction[]> {
+    return this.bridgeClient.getTransactions(accessToken, accountNumber);
+  }
+
+  /**
+   * Returns the Bridge Access Token for a User
+   *
+   * @param banksUser The bank user for which we generate the redirectUrl
+   */
+  public async getAccessToken(banksUser: IBanksUser): Promise<string> {
+    return (await this.authenticateClient(AggregatorService.buildCredentials(banksUser))).access_token;
   }
 
   /**
