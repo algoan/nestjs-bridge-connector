@@ -7,30 +7,40 @@ import {
   PostBanksUserAccountDTO,
   BanksUserTransactionType,
 } from '@algoan/rest';
-
 import {
   BridgeAccount,
   BridgeAccountType,
   BridgeAccountStatus,
   BridgeTransaction,
 } from '../../interfaces/bridge.interface';
+import { AggregatorService } from '../aggregator.service';
 
 /**
  * mapBridgeAccount transforms a bridge array of acccounts into
  * an array of Banks User accounts
  * @param accounts array of accounts from Bridge
+ * @param accessToken perenant access token for Bridge api
  */
-export const mapBridgeAccount = (accounts: BridgeAccount[]): PostBanksUserAccountDTO[] =>
-  accounts.map(fromBridgeToAlgoanAccounts);
+export const mapBridgeAccount = async (
+  accounts: BridgeAccount[],
+  accessToken: string,
+  aggregator: AggregatorService,
+): Promise<PostBanksUserAccountDTO[]> =>
+  Promise.all(accounts.map(async (account) => fromBridgeToAlgoanAccounts(account, accessToken, aggregator)));
 
 /**
  * Converts a single Bridge account instance to Algoan format
  * @param account
+ * @param accessToken perenant access token for Bridge api
  */
-const fromBridgeToAlgoanAccounts = (account: BridgeAccount): PostBanksUserAccountDTO => ({
+const fromBridgeToAlgoanAccounts = async (
+  account: BridgeAccount,
+  accessToken: string,
+  aggregator: AggregatorService,
+): Promise<PostBanksUserAccountDTO> => ({
   balanceDate: new Date(mapDate(account.updated_at)).toISOString(),
   balance: account.balance,
-  bank: account.name, // @TODO get bank name from Bridge Bank api
+  bank: await aggregator.getResourceName(accessToken, account.bank.resource_uri),
   connectionSource: 'BRIDGE',
   type: mapAccountType(account.type),
   bic: undefined,
@@ -115,16 +125,23 @@ const mapUsageType = (isPro: boolean): UsageType => (isPro ? UsageType.PROFESSIO
  * an array of banks user transactions
  *
  * @param bridgeTransactions TransactionWrapper from Bridge
+ * @param accessToken perenant access token for Bridge api
  */
-export const mapBridgeTransactions = (bridgeTransactions: BridgeTransaction[]): PostBanksUserTransactionDTO[] =>
-  bridgeTransactions.map((transaction) => ({
-    amount: transaction.amount,
-    simplifiedDescription: transaction.description,
-    description: transaction.raw_description,
-    banksUserCardId: undefined, // @TODO: Can we get this?
-    reference: transaction.id.toString(),
-    userDescription: transaction.description,
-    category: transaction.category.id.toString(), // @TODO: get category name from API
-    type: BanksUserTransactionType.UNKNOWN,
-    date: moment.tz(transaction.date, 'Europe/Paris').toISOString(),
-  }));
+export const mapBridgeTransactions = async (
+  bridgeTransactions: BridgeTransaction[],
+  accessToken: string,
+  aggregator: AggregatorService,
+): Promise<PostBanksUserTransactionDTO[]> =>
+  Promise.all(
+    bridgeTransactions.map(async (transaction) => ({
+      amount: transaction.amount,
+      simplifiedDescription: transaction.description,
+      description: transaction.raw_description,
+      banksUserCardId: undefined, // @TODO: Can we get this?
+      reference: transaction.id.toString(),
+      userDescription: transaction.description,
+      category: await aggregator.getResourceName(accessToken, transaction.category.resource_uri),
+      type: BanksUserTransactionType.UNKNOWN,
+      date: moment.tz(transaction.date, 'Europe/Paris').toISOString(),
+    })),
+  );

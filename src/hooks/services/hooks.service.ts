@@ -137,7 +137,7 @@ export class HooksService {
       message: `Bridge accounts retrieved for Banks User "${banksUser.id}"`,
       accounts,
     });
-    const algoanAccounts: PostBanksUserAccountDTO[] = mapBridgeAccount(accounts);
+    const algoanAccounts: PostBanksUserAccountDTO[] = await mapBridgeAccount(accounts, accessToken, this.aggregator);
     const createdAccounts: BanksUserAccount[] = await banksUser.createAccounts(algoanAccounts);
     this.logger.debug({
       message: `Algoan accounts created for Banks User "${banksUser.id}"`,
@@ -152,7 +152,11 @@ export class HooksService {
         accessToken,
         Number(account.reference),
       );
-      const algoanTransactions: PostBanksUserTransactionDTO[] = mapBridgeTransactions(transactions);
+      const algoanTransactions: PostBanksUserTransactionDTO[] = await mapBridgeTransactions(
+        transactions,
+        accessToken,
+        this.aggregator,
+      );
       await banksUser.createTransactions(account.id, algoanTransactions);
     }
 

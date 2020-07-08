@@ -10,6 +10,8 @@ import {
   BridgeAccount,
   BridgeTransaction,
   ListTransactionsResponse,
+  BridgeBank,
+  BridgeCategory,
 } from '../../interfaces/bridge.interface';
 
 /**
@@ -93,5 +95,18 @@ export class BridgeClient {
       .toPromise();
 
     return resp.data.resources;
+  }
+
+  /**
+   * Get a bridge resource by uri
+   */
+  public async getResourceName(accessToken: string, bridgeUri: string): Promise<string> {
+    const url: string = `${config.bridge.baseUrl}${bridgeUri}`;
+
+    const resp: AxiosResponse<BridgeBank | BridgeCategory> = await this.httpService
+      .get(url, { headers: { Authorization: `Bearer ${accessToken}` } })
+      .toPromise();
+
+    return resp.data.name;
   }
 }

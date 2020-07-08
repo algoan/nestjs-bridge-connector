@@ -158,3 +158,30 @@ export interface BridgeTransaction {
   };
   is_future: boolean;
 }
+
+/**
+ * Bridge Bank
+ */
+export interface BridgeBank {
+  id: number;
+  resource_uri: string;
+  resource_type: string;
+  name: string;
+  country_code: string;
+  automatic_refresh: boolean;
+}
+
+/**
+ * Bridge Category
+ */
+export interface BridgeCategory {
+  id: number;
+  resource_uri: string;
+  resource_type: string;
+  name: string;
+  parent?: {
+    id: number;
+    resource_uri: string;
+    resource_type: string;
+  };
+}
