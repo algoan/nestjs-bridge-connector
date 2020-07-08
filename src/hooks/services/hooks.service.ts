@@ -134,7 +134,7 @@ export class HooksService {
      */
     const accounts: BridgeAccount[] = await this.aggregator.getAccounts(accessToken);
     this.logger.debug({
-      message: `Budget Insight accounts retrieved for Banks User "${banksUser.id}"`,
+      message: `Bridge accounts retrieved for Banks User "${banksUser.id}"`,
       accounts,
     });
     const algoanAccounts: PostBanksUserAccountDTO[] = mapBridgeAccount(accounts);

@@ -16,16 +16,15 @@ import {
 } from '../../interfaces/bridge.interface';
 
 /**
- * mapBudgetInsightAccount transforms a budgetInsight array of connections into
+ * mapBridgeAccount transforms a bridge array of acccounts into
  * an array of Banks User accounts
- * @param connections arrays from Budget Insight
- * @param transactions The complete list of transactions
+ * @param accounts array of accounts from Bridge
  */
 export const mapBridgeAccount = (accounts: BridgeAccount[]): PostBanksUserAccountDTO[] =>
   accounts.map(fromBridgeToAlgoanAccounts);
 
 /**
- * Converts a single BI account instance to Algoan format
+ * Converts a single Bridge account instance to Algoan format
  * @param account
  */
 const fromBridgeToAlgoanAccounts = (account: BridgeAccount): PostBanksUserAccountDTO => ({
@@ -46,7 +45,6 @@ const fromBridgeToAlgoanAccounts = (account: BridgeAccount): PostBanksUserAccoun
     account.loan_details !== null
       ? {
           amount: account.loan_details.borrowed_capital,
-          debitedAccountId: '', // @TODO does not seem present in the Bridge response (https://docs.bridgeapi.io/reference#account-resource)
           startDate: mapDate(account.loan_details.opening_date),
           endDate: mapDate(account.loan_details.maturity_date),
           payment: account.loan_details.next_payment_amount,
@@ -55,12 +53,12 @@ const fromBridgeToAlgoanAccounts = (account: BridgeAccount): PostBanksUserAccoun
           type: 'OTHER',
         }
       : undefined,
-  savingsDetails: '', // @TODO what is this?
+  savingsDetails: mapAccountStatus(account.status),
 });
 
 /**
  * mapDate transforms an iso date in string into a timestamp or undefined
- * @param isoDate date from budget Insight, if null returns undefined
+ * @param isoDate date from bridge, if null returns undefined
  */
 const mapDate = (isoDate: string): number =>
   isoDate ? moment.tz(isoDate, 'Europe/Paris').toDate().getTime() : moment().toDate().getTime();
@@ -75,17 +73,19 @@ interface AccountTypeMapping {
 const ACCOUNT_TYPE_MAPPING: AccountTypeMapping = {
   [BridgeAccountType.CHECKING]: AccountType.CHECKINGS,
   [BridgeAccountType.SAVINGS]: AccountType.SAVINGS,
+  [BridgeAccountType.SECURITIES]: AccountType.SAVINGS,
   [BridgeAccountType.CARD]: AccountType.CREDIT_CARD,
   [BridgeAccountType.LOAN]: AccountType.LOAN,
-  // todo do we need to handle the other ones?
+  [BridgeAccountType.SHARE_SAVINGS_PLAN]: AccountType.SAVINGS,
+  [BridgeAccountType.LIFE_INSURANCE]: AccountType.SAVINGS,
 };
 
 /**
- * mapAccountType map the banksUser type from the budget Insight type
- * @param accountType BudgetInsight type
+ * mapAccountType map the banksUser type from the bridge type
+ * @param accountType bridge type
  */
-const mapAccountType = (accountType: BridgeAccountType): AccountType =>
-  ACCOUNT_TYPE_MAPPING[accountType] || AccountType.SAVINGS;
+// eslint-disable-next-line no-null/no-null
+const mapAccountType = (accountType: BridgeAccountType): AccountType => ACCOUNT_TYPE_MAPPING[accountType] || null;
 
 /**
  * AccountStatusMapping
@@ -95,19 +95,18 @@ interface AccountStatusMapping {
 }
 const ACCOUNT_STATUS_MAPPING: AccountStatusMapping = {
   [BridgeAccountStatus.OK]: 'ACTIVE',
-  // todo do we need to handle the other ones?
 };
 
 /**
- * mapAccountType map the banksUser type from the budget Insight type
- * @param accountType BudgetInsight type
+ * mapAccountStatus map the banksUser status from the bridge type
+ * @param accountStatus Bridge type
  */
-const mapAccountStatus = (accountType: BridgeAccountStatus): 'MANUAL' | 'ACTIVE' | 'ERROR' | 'NOT_FOUND' | 'CLOSED' =>
-  ACCOUNT_STATUS_MAPPING[accountType] || 'ERROR';
+const mapAccountStatus = (accountStatus: BridgeAccountStatus): 'MANUAL' | 'ACTIVE' | 'ERROR' | 'NOT_FOUND' | 'CLOSED' =>
+  ACCOUNT_STATUS_MAPPING[accountStatus] || 'ERROR';
 
 /**
- * mapAccountType map the banksUser type from the budget Insight type
- * @param transactionType BudgetInsight type
+ * mapUsageType map the banksUser usage from the bridge type
+ * @param isPro Bridge boolean
  */
 const mapUsageType = (isPro: boolean): UsageType => (isPro ? UsageType.PROFESSIONAL : UsageType.PERSONAL);
 
@@ -126,6 +125,6 @@ export const mapBridgeTransactions = (bridgeTransactions: BridgeTransaction[]): 
     reference: transaction.id.toString(),
     userDescription: transaction.description,
     category: transaction.category.id.toString(), // @TODO: get category name from API
-    type: BanksUserTransactionType.UNKNOWN, // @TODO: Can we get this?
+    type: BanksUserTransactionType.UNKNOWN,
     date: moment.tz(transaction.date, 'Europe/Paris').toISOString(),
   }));

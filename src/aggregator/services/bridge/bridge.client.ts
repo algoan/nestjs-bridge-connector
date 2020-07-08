@@ -65,7 +65,6 @@ export class BridgeClient {
     const resp: AxiosResponse<ConnectItemResponse> = await this.httpService
       .get(url, { headers: { Authorization: `Bearer ${accessToken}` } })
       .toPromise();
-    // Logger.debug(`Authenticated user ${userAccount.email}`);
 
     return resp.data;
   }
@@ -74,12 +73,11 @@ export class BridgeClient {
    * Get a bridge user's accounts
    */
   public async getAccounts(accessToken: string): Promise<BridgeAccount[]> {
-    const url: string = `${config.bridge.baseUrl}/accounts`; // ?limit=10 - do we care?
+    const url: string = `${config.bridge.baseUrl}/accounts`;
 
     const resp: AxiosResponse<ListAccountsResponse> = await this.httpService
       .get(url, { headers: { Authorization: `Bearer ${accessToken}` } })
       .toPromise();
-    // Logger.debug(`Authenticated user ${userAccount.email}`);
 
     return resp.data.resources;
   }
@@ -88,12 +86,11 @@ export class BridgeClient {
    * Get a bridge account's transactions
    */
   public async getTransactions(accessToken: string, accountNumber: number): Promise<BridgeTransaction[]> {
-    const url: string = `${config.bridge.baseUrl}/accounts/${accountNumber}/transactions`; // ?limit=12&until=2019-04-06 - do we care?
+    const url: string = `${config.bridge.baseUrl}/accounts/${accountNumber}/transactions`;
 
     const resp: AxiosResponse<ListTransactionsResponse> = await this.httpService
       .get(url, { headers: { Authorization: `Bearer ${accessToken}` } })
       .toPromise();
-    // Logger.debug(`Authenticated user ${userAccount.email}`);
 
     return resp.data.resources;
   }
