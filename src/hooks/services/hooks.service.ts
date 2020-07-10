@@ -80,7 +80,7 @@ export class HooksService {
    * @param serviceAccount Concerned Algoan service account attached to the subscription
    * @param payload Payload sent, containing the Banks User id
    */
-  private async handleBankreaderLinkRequiredEvent(
+  public async handleBankreaderLinkRequiredEvent(
     serviceAccount: ServiceAccount,
     payload: BankreaderLinkRequiredDTO,
   ): Promise<void> {
@@ -113,7 +113,7 @@ export class HooksService {
    * @param serviceAccount Concerned Algoan service account attached to the subscription
    * @param payload Payload sent, containing the Banks User id
    */
-  private async handleBankReaderRequiredEvent(
+  public async handleBankReaderRequiredEvent(
     serviceAccount: ServiceAccount,
     payload: BankreaderRequiredDTO,
   ): Promise<void> {

@@ -165,7 +165,7 @@ export interface BridgeTransaction {
 export interface BridgeBank {
   id: number;
   resource_uri: string;
-  resource_type: string;
+  resource_type: 'bank';
   name: string;
   country_code: string;
   automatic_refresh: boolean;
@@ -177,7 +177,7 @@ export interface BridgeBank {
 export interface BridgeCategory {
   id: number;
   resource_uri: string;
-  resource_type: string;
+  resource_type: 'category';
   name: string;
   parent?: {
     id: number;

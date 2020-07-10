@@ -3,19 +3,26 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BanksUserStatus, BanksUser, RequestBuilder } from '@algoan/rest';
 import { AlgoanModule } from '../../algoan/algoan.module';
 import { AppModule } from '../../app.module';
-import { UserResponse } from '../interfaces/bridge.interface';
+import { mockAccount, mockTransaction, mockAuthResponse } from '../interfaces/bridge-mock';
 import { AggregatorService } from './aggregator.service';
 import { BridgeClient } from './bridge/bridge.client';
 
 describe('AggregatorService', () => {
   let service: AggregatorService;
   let client: BridgeClient;
-  const userResponse: UserResponse = {
-    uuid: 'mockUuid',
-    resource_type: 'user',
-    resource_uri: 'mockUri',
-    email: 'mock@email.com',
-  };
+  const mockBanksUser = new BanksUser(
+    {
+      id: 'mockBanksUserId',
+      status: BanksUserStatus.ACCOUNTS_SYNCHRONIZED,
+      redirectUrl: 'mockRedirectUrl',
+      redirectUrlCreatedAt: 123456789,
+      redirectUrlTTL: 100,
+      callbackUrl: 'mockCallbackUrl',
+      scores: [],
+      analysis: { alerts: [], regularCashFlows: [], reliability: 'HIGH' },
+    },
+    new RequestBuilder('mockBaseURL', { clientId: 'mockClientId' }),
+  );
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -53,20 +60,6 @@ describe('AggregatorService', () => {
         redirect_url: 'https://bridge/redirection-url',
       });
 
-      const mockBanksUser = new BanksUser(
-        {
-          id: 'mockBanksUserId',
-          status: BanksUserStatus.ACCOUNTS_SYNCHRONIZED,
-          redirectUrl: 'mockRedirectUrl',
-          redirectUrlCreatedAt: 123456789,
-          redirectUrlTTL: 100,
-          callbackUrl: 'mockCallbackUrl',
-          scores: [],
-          analysis: { alerts: [], regularCashFlows: [], reliability: 'HIGH' },
-        },
-        new RequestBuilder('mockBaseURL', { clientId: 'mockClientId' }),
-      );
-
       const redirectUrl = await service.generateRedirectUrl(mockBanksUser);
       expect(registerSpy).toHaveBeenCalledWith({
         email: 'mockBanksUserId-bankUser.createdAt@algoan-bridge.com',
@@ -87,5 +80,42 @@ describe('AggregatorService', () => {
     it('should not try to re-create an item when there is one already', async () => {
       // TODO
     });
+  });
+
+  it('should get the accounts', async () => {
+    const spy = jest.spyOn(client, 'getAccounts').mockReturnValue(Promise.resolve([mockAccount]));
+    const token = 'token';
+    await service.getAccounts(token);
+
+    expect(spy).toBeCalledWith(token);
+  });
+
+  it('should get the transactions', async () => {
+    const spy = jest.spyOn(client, 'getTransactions').mockReturnValue(Promise.resolve([mockTransaction]));
+    const token = 'token';
+    const accountNumber = 23;
+    await service.getTransactions(token, accountNumber);
+
+    expect(spy).toBeCalledWith(token, accountNumber);
+  });
+
+  it('should get the accessToken', async () => {
+    const spy = jest.spyOn(client, 'authenticate').mockReturnValue(Promise.resolve(mockAuthResponse));
+    const accessToken = await service.getAccessToken(mockBanksUser);
+
+    expect(spy).toBeCalledWith({
+      email: 'mockBanksUserId-bankUser.createdAt@algoan-bridge.com',
+      password: 'mockBanksUserId-bankUser.createdAt',
+    });
+    expect(accessToken).toEqual(mockAuthResponse.access_token);
+  });
+
+  it('should get the resource name', async () => {
+    const spy = jest.spyOn(client, 'getResourceName').mockReturnValue(Promise.resolve('mockResourceName'));
+    const token = 'token';
+    const resourceUri = 'mockResoruceUri';
+    await service.getResourceName(token, resourceUri);
+
+    expect(spy).toBeCalledWith(token, resourceUri);
   });
 });

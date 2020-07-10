@@ -6,24 +6,18 @@ import { config } from 'node-config-ts';
 import { AlgoanModule } from '../../../algoan/algoan.module';
 import { AppModule } from '../../../app.module';
 import {
-  UserResponse,
-  AuthenticationResponse,
   ConnectItemResponse,
   ListAccountsResponse,
   BridgeAccountType,
   ListTransactionsResponse,
+  BridgeBank,
 } from '../../interfaces/bridge.interface';
+import { mockUserResponse, mockAuthResponse } from '../../interfaces/bridge-mock';
 import { BridgeClient } from './bridge.client';
 
 describe('BridgeClient', () => {
   let service: BridgeClient;
   let httpService: HttpService;
-  const userResponse: UserResponse = {
-    uuid: 'mockUuid',
-    resource_type: 'user',
-    resource_uri: 'mockUri',
-    email: 'mock@email.com',
-  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -56,7 +50,7 @@ describe('BridgeClient', () => {
 
   it('can create a user', async () => {
     const result: AxiosResponse = {
-      data: userResponse,
+      data: mockUserResponse,
       status: 200,
       statusText: '',
       headers: {},
@@ -66,7 +60,7 @@ describe('BridgeClient', () => {
     const spy = jest.spyOn(httpService, 'post').mockImplementationOnce(() => of(result));
 
     const resp = await service.register({ email: 'mock@email.com', password: 'mockPassword' });
-    expect(resp).toBe(userResponse);
+    expect(resp).toBe(mockUserResponse);
 
     expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/users', {
       email: 'mock@email.com',
@@ -75,13 +69,8 @@ describe('BridgeClient', () => {
   });
 
   it('can authenticate a user', async () => {
-    const authResponse: AuthenticationResponse = {
-      user: userResponse,
-      access_token: 'mockAccessToken',
-      expires_at: 'mockDate',
-    };
     const result: AxiosResponse = {
-      data: authResponse,
+      data: mockAuthResponse,
       status: 200,
       statusText: '',
       headers: {},
@@ -91,7 +80,7 @@ describe('BridgeClient', () => {
     const spy = jest.spyOn(httpService, 'post').mockImplementationOnce(() => of(result));
 
     const resp = await service.authenticate({ email: 'mock@email.com', password: 'mockPassword' });
-    expect(resp).toBe(authResponse);
+    expect(resp).toBe(mockAuthResponse);
 
     expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/authenticate', {
       email: 'mock@email.com',
@@ -232,6 +221,35 @@ describe('BridgeClient', () => {
     expect(spy).toHaveBeenCalledWith(`https://sync.bankin.com/v2/accounts/${accountNumber}/transactions`, {
       headers: {
         Authorization: 'Bearer secret-access-token',
+      },
+    });
+  });
+
+  it('can get a resources name by its uri', async () => {
+    const mockBank: BridgeBank = {
+      id: 10,
+      resource_uri: '/mockResourceUri',
+      resource_type: 'bank',
+      name: 'mockBankName',
+      country_code: 'FR',
+      automatic_refresh: false,
+    };
+    const result: AxiosResponse = {
+      data: mockBank,
+      status: 200,
+      statusText: '',
+      headers: {},
+      config: {},
+    };
+
+    const spy = jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(result));
+
+    const resp = await service.getResourceName('mockAccessToken', '/mockResourceUri');
+    expect(resp).toBe('mockBankName');
+
+    expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/mockResourceUri', {
+      headers: {
+        Authorization: 'Bearer mockAccessToken',
       },
     });
   });
