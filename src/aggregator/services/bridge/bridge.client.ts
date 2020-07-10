@@ -6,6 +6,12 @@ import {
   UserAccount,
   AuthenticationResponse,
   ConnectItemResponse,
+  ListAccountsResponse,
+  BridgeAccount,
+  BridgeTransaction,
+  ListTransactionsResponse,
+  BridgeBank,
+  BridgeCategory,
 } from '../../interfaces/bridge.interface';
 
 /**
@@ -46,7 +52,6 @@ export class BridgeClient {
    */
   public async authenticate(userAccount: UserAccount): Promise<AuthenticationResponse> {
     const url: string = `${config.bridge.baseUrl}/authenticate`;
-
     const resp: AxiosResponse<AuthenticationResponse> = await this.httpService.post(url, userAccount).toPromise();
     Logger.debug(`Authenticated user ${userAccount.email}`);
 
@@ -62,8 +67,46 @@ export class BridgeClient {
     const resp: AxiosResponse<ConnectItemResponse> = await this.httpService
       .get(url, { headers: { Authorization: `Bearer ${accessToken}` } })
       .toPromise();
-    // Logger.debug(`Authenticated user ${userAccount.email}`);
 
     return resp.data;
+  }
+
+  /**
+   * Get a bridge user's accounts
+   */
+  public async getAccounts(accessToken: string): Promise<BridgeAccount[]> {
+    const url: string = `${config.bridge.baseUrl}/accounts`;
+
+    const resp: AxiosResponse<ListAccountsResponse> = await this.httpService
+      .get(url, { headers: { Authorization: `Bearer ${accessToken}` } })
+      .toPromise();
+
+    return resp.data.resources;
+  }
+
+  /**
+   * Get a bridge account's transactions
+   */
+  public async getTransactions(accessToken: string, accountNumber: number): Promise<BridgeTransaction[]> {
+    const url: string = `${config.bridge.baseUrl}/accounts/${accountNumber}/transactions`;
+
+    const resp: AxiosResponse<ListTransactionsResponse> = await this.httpService
+      .get(url, { headers: { Authorization: `Bearer ${accessToken}` } })
+      .toPromise();
+
+    return resp.data.resources;
+  }
+
+  /**
+   * Get a bridge resource by uri
+   */
+  public async getResourceName(accessToken: string, bridgeUri: string): Promise<string> {
+    const url: string = `${config.bridge.baseUrl}${bridgeUri}`;
+
+    const resp: AxiosResponse<BridgeBank | BridgeCategory> = await this.httpService
+      .get(url, { headers: { Authorization: `Bearer ${accessToken}` } })
+      .toPromise();
+
+    return resp.data.name;
   }
 }

@@ -45,7 +45,7 @@ export class AppController {
   /**
    * Triggers the "bankreader_required" event
    * @param banksUserId Banks User id
-   * @param code Code returned by budget insight, in case of a success
+   * @param code Code returned by bridge, in case of a success
    */
   @Get('/triggers')
   @Render('index')
