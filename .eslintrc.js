@@ -6,6 +6,7 @@ module.exports = {
   },
   plugins: ['@typescript-eslint/eslint-plugin', 'nestjs'],
   extends: ['@algoan/eslint-config', 'plugin:nestjs/recommended'],
+  ignorePatterns: ['*.spec.ts'],
   root: true,
   env: {
     node: true,
