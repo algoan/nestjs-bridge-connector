@@ -4,11 +4,12 @@ import { Allow, IsInt, IsNotEmpty, IsOptional, ValidateNested } from 'class-vali
 import { ServiceAccountCreatedDTO } from './service-account-created.dto';
 import { ServiceAccountDeletedDTO } from './service-account-deleted.dto';
 import { SubscriptionDTO } from './subscription.dto';
+import { BankreaderRequiredDTO } from './bankreader-required.dto';
 
 /**
  * Events payload types
  */
-type Events = ServiceAccountCreatedDTO | ServiceAccountDeletedDTO;
+type Events = ServiceAccountCreatedDTO | ServiceAccountDeletedDTO | BankreaderRequiredDTO;
 
 /**
  * Event
