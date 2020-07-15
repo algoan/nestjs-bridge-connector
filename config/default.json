@@ -10,10 +10,12 @@
     "clientId":"a",
     "clientSecret": "b"
   },
-  "targetUrl": "https://test",
+  "targetUrl": "http://localhost:8080/hooks",
   "eventList": [
-    "service_account_created"
+    "service_account_created",
+    "bankreader_required",
+    "bankreader_link_required"
   ],
-  "restHooksSecret": "a",
+  "restHooksSecret": "qvdswcsdcsqdcqscqxw4",
   "port": 8080
 }
