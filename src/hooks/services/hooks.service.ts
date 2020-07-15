@@ -124,13 +124,7 @@ export class HooksService {
     const accessToken = await this.aggregator.getAccessToken(banksUser);
 
     /**
-     * @todo Add a retry policy to wait for accounts synchronization to be finished
-     * NOTE: Synchronization is finished if an error status is defined or if status === null and last_update !== null
-     * 2. Fetch user active connections
-     */
-
-    /**
-     * 3. Retrieves Bridge banks accounts and send them to Algoan
+     * 2. Retrieves Bridge banks accounts and send them to Algoan
      */
     const accounts: BridgeAccount[] = await this.aggregator.getAccounts(accessToken);
     this.logger.debug({
@@ -145,7 +139,7 @@ export class HooksService {
     });
 
     /**
-     * 4. For each synchronized accounts, get transactions
+     * 3. For each synchronized accounts, get transactions
      */
     for (const account of createdAccounts) {
       const transactions: BridgeTransaction[] = await this.aggregator.getTransactions(
@@ -161,7 +155,7 @@ export class HooksService {
     }
 
     /**
-     * 5. Notify Algoan that the process is finished
+     * 4. Notify Algoan that the process is finished
      */
     await banksUser.update({
       status: BanksUserStatus.FINISHED,
