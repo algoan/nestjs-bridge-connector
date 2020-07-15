@@ -88,7 +88,7 @@ export class HooksService {
      * 1. GET the banks user to retrieve the callback URL
      */
     const banksUser: BanksUser = await serviceAccount.getBanksUserById(payload.banksUserId);
-    this.logger.debug(`Found BanksUser with id ${banksUser.id} and callback ${banksUser.callbackUrl}`);
+    this.logger.debug(`Found BanksUser with id ${banksUser.id}`);
 
     /**
      * 2. Generates a redirect URL

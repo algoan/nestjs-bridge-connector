@@ -50,7 +50,7 @@ export class AppController {
   @Get('/triggers')
   @Render('index')
   public async triggerEvent(
-    @Query('code') code: string,
+    @Query('user_uuid') code: string,
   ): Promise<IRootResult & { code: string; bankreaderRequiredSubscription: Subscription }> {
     const bankreaderRequiredSubscription: Subscription = this.algoanService.algoanClient.serviceAccounts[0].subscriptions.find(
       (sub: Subscription) => sub.eventName === EventName.BANKREADER_REQUIRED,
