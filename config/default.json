@@ -6,7 +6,7 @@
   },
   "bridge":{
     "bankinVersion":"2019-02-18",
-    "baseUrl":"https://sync.bankin.com/v2",
+    "baseUrl":"https://sync.bankin.com",
     "clientId":"a",
     "clientSecret": "b"
   },

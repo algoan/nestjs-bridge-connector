@@ -62,12 +62,12 @@ describe('AggregatorService', () => {
 
       const redirectUrl = await service.generateRedirectUrl(mockBanksUser);
       expect(registerSpy).toHaveBeenCalledWith({
-        email: 'mockBanksUserId-bankUser.createdAt@algoan-bridge.com',
-        password: 'mockBanksUserId-bankUser.createdAt',
+        email: 'mockBanksUserId@algoan-bridge.com',
+        password: 'mockBanksUserId',
       });
       expect(authenticateSpy).toHaveBeenCalledWith({
-        email: 'mockBanksUserId-bankUser.createdAt@algoan-bridge.com',
-        password: 'mockBanksUserId-bankUser.createdAt',
+        email: 'mockBanksUserId@algoan-bridge.com',
+        password: 'mockBanksUserId',
       });
       expect(connectItemSpy).toHaveBeenCalledWith('access-token');
       expect(redirectUrl).toBe('https://bridge/redirection-url');
@@ -104,8 +104,8 @@ describe('AggregatorService', () => {
     const accessToken = await service.getAccessToken(mockBanksUser);
 
     expect(spy).toBeCalledWith({
-      email: 'mockBanksUserId-bankUser.createdAt@algoan-bridge.com',
-      password: 'mockBanksUserId-bankUser.createdAt',
+      email: 'mockBanksUserId@algoan-bridge.com',
+      password: 'mockBanksUserId',
     });
     expect(accessToken).toEqual(mockAuthResponse.access_token);
   });

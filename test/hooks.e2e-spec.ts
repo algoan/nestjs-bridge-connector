@@ -10,6 +10,7 @@ describe('HooksController (e2e)', () => {
   });
 
   describe('POST /hooks', () => {
+    // eslint-disable-next-line arrow-body-style
     it('HK001 - should be a bad request - no request body', async () => {
       return request(app.getHttpServer()).post('/hooks').send({}).expect(HttpStatus.BAD_REQUEST);
     });

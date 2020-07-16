@@ -35,13 +35,7 @@ describe('BridgeClient', () => {
 
   it('sets the right headers', () => {
     // eslint-disable-next-line @typescript-eslint/tslint/config
-    expect(httpService.axiosRef.defaults.headers.post as unknown).toMatchObject({
-      'Client-Id': config.bridge.clientId,
-      'Client-Secret': config.bridge.clientSecret,
-      'Bankin-Version': config.bridge.bankinVersion,
-    });
-    // eslint-disable-next-line @typescript-eslint/tslint/config
-    expect(httpService.axiosRef.defaults.headers.get as unknown).toMatchObject({
+    expect(httpService.axiosRef.defaults.headers.common as unknown).toMatchObject({
       'Client-Id': config.bridge.clientId,
       'Client-Secret': config.bridge.clientSecret,
       'Bankin-Version': config.bridge.bankinVersion,
@@ -228,7 +222,7 @@ describe('BridgeClient', () => {
   it('can get a resources name by its uri', async () => {
     const mockBank: BridgeBank = {
       id: 10,
-      resource_uri: '/mockResourceUri',
+      resource_uri: '/v2/mockResourceUri',
       resource_type: 'bank',
       name: 'mockBankName',
       country_code: 'FR',
@@ -244,7 +238,7 @@ describe('BridgeClient', () => {
 
     const spy = jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(result));
 
-    const resp = await service.getResourceName('mockAccessToken', '/mockResourceUri');
+    const resp = await service.getResourceName('mockAccessToken', mockBank.resource_uri);
     expect(resp).toBe('mockBankName');
 
     expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/mockResourceUri', {
