@@ -16,7 +16,7 @@ export class AggregatorService {
    * @param banksUser The bank user for which we generate the redirectUrl
    */
   public async generateRedirectUrl(banksUser: IBanksUser): Promise<string> {
-    const userAccount = AggregatorService.buildCredentials(banksUser);
+    const userAccount: UserAccount = AggregatorService.buildCredentials(banksUser);
     await this.bridgeClient.register(userAccount);
     const authenticationResponse = await this.bridgeClient.authenticate(userAccount);
     const redirectResponse = await this.bridgeClient.connectItem(authenticationResponse.access_token);
@@ -59,8 +59,8 @@ export class AggregatorService {
   private static buildCredentials(bankUser: IBanksUser): UserAccount {
     return {
       // bankUser.createdAt should exist, need to change the interface
-      email: `${bankUser.id}-bankUser.createdAt@algoan-bridge.com`,
-      password: `${bankUser.id}-bankUser.createdAt`,
+      email: `${bankUser.id}@algoan-bridge.com`,
+      password: `${bankUser.id}`,
     };
   }
 

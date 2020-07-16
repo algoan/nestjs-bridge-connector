@@ -2,7 +2,7 @@ import { join } from 'path';
 import { HttpExceptionFilter } from '@algoan/nestjs-http-exception-filter';
 import { NestFactory, NestApplication } from '@nestjs/core';
 import { Logger, ValidationPipe } from '@nestjs/common';
-import { WinstonModule } from 'nest-winston';
+import { WinstonModule, utilities } from 'nest-winston';
 import { config } from 'node-config-ts';
 import { format, transports } from 'winston';
 
@@ -19,22 +19,10 @@ const bootstrap = async (): Promise<void> => {
   const nodeEnv: string = process.env.NODE_ENV;
 
   const app: NestApplication = await NestFactory.create(AppModule, {
+    cors: true,
     logger: WinstonModule.createLogger({
       format:
-        nodeEnv === 'production'
-          ? format.json()
-          : format.combine(
-              format.colorize({
-                colors: {
-                  debug: 'blue',
-                  error: 'red',
-                  info: 'green',
-                  warn: 'yellow',
-                },
-              }),
-              format.simple(),
-              format.errors({ stack: true }),
-            ),
+        nodeEnv === 'production' ? format.json() : format.combine(format.timestamp(), utilities.format.nestLike()),
       level: defaultLevel,
       transports: [
         new transports.Console({
