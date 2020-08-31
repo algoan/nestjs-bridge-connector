@@ -14,6 +14,7 @@ import {
   MultiResourceCreationResponse,
   BanksUserTransaction,
   BanksUserTransactionType,
+  IServiceAccount,
 } from '@algoan/rest';
 import { EventDTO } from '../dto/event.dto';
 import { AggregatorModule } from '../../aggregator/aggregator.module';
@@ -46,13 +47,20 @@ describe('HooksService', () => {
     index: 32,
     id: 'eventId',
   };
+  const mockServiceAccountConfig = {
+    clientId: 'mockClientId',
+    clientSecret: 'mockClientSecret',
+    bankinVersion: 'mockBankinVersion',
+  };
 
   const mockServiceAccount: ServiceAccount = new ServiceAccount('mockBaseURL', {
     id: 'mockServiceAccountId',
     clientId: 'mockClientId',
     clientSecret: 'mockClientSecret',
     createdAt: 'mockCreatedAt',
-  });
+    config: mockServiceAccountConfig,
+  } as IServiceAccount);
+
   mockServiceAccount.subscriptions = [
     new Subscription(
       { id: 'mockEventSubId', eventName: EventName.BANKREADER_COMPLETED, status: 'ACTIVE', target: 'mockSubTarget' },
@@ -121,13 +129,14 @@ describe('HooksService', () => {
       .spyOn(aggregatorService, 'generateRedirectUrl')
       .mockReturnValue(Promise.resolve('mockRedirectUrl'));
     const banksUserSpy = jest.spyOn(mockBanksUser, 'update').mockResolvedValue();
+    mockServiceAccount.config = mockServiceAccountConfig;
     await hooksService.handleBankreaderLinkRequiredEvent(
       mockServiceAccount,
       mockEvent.payload as BankreaderLinkRequiredDTO,
     );
 
     expect(serviceAccountSpy).toBeCalledWith(mockEvent.payload.banksUserId);
-    expect(agreggatorSpy).toBeCalledWith(mockBanksUser);
+    expect(agreggatorSpy).toBeCalledWith(mockBanksUser, mockServiceAccountConfig);
     expect(banksUserSpy).toBeCalledWith({ redirectUrl: 'mockRedirectUrl' });
   });
 
@@ -176,12 +185,20 @@ describe('HooksService', () => {
     await hooksService.handleBankReaderRequiredEvent(mockServiceAccount, mockEvent.payload);
 
     expect(serviceAccountSpy).toBeCalledWith(mockEvent.payload.banksUserId);
-    expect(accessTokenSpy).toBeCalledWith(mockBanksUser);
-    expect(accountSpy).toBeCalledWith('mockPermToken');
-    expect(resourceNameSpy).toBeCalledWith('mockPermToken', mockAccount.bank.resource_uri);
+    expect(accessTokenSpy).toBeCalledWith(mockBanksUser, mockServiceAccountConfig);
+    expect(accountSpy).toBeCalledWith('mockPermToken', mockServiceAccountConfig);
+    expect(resourceNameSpy).toBeCalledWith('mockPermToken', mockAccount.bank.resource_uri, mockServiceAccountConfig);
     expect(banksUserAccountSpy).toBeCalledWith(mappedAccount);
-    expect(transactionSpy).toBeCalledWith('mockPermToken', Number(banksUserAccount.reference));
-    expect(resourceNameSpy).toBeCalledWith('mockPermToken', mockTransaction.category.resource_uri);
+    expect(transactionSpy).toBeCalledWith(
+      'mockPermToken',
+      Number(banksUserAccount.reference),
+      mockServiceAccountConfig,
+    );
+    expect(resourceNameSpy).toBeCalledWith(
+      'mockPermToken',
+      mockTransaction.category.resource_uri,
+      mockServiceAccountConfig,
+    );
     expect(banksUserTransactionSpy).toBeCalledWith(banksUserAccount.id, mappedTransaction);
     expect(banksUserUpdateSpy).toBeCalledWith({
       status: BanksUserStatus.FINISHED,
