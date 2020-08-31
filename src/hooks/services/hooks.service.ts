@@ -121,10 +121,18 @@ export class HooksService {
     serviceAccount: ServiceAccount,
     payload: BankreaderRequiredDTO,
   ): Promise<void> {
+    const banksUser: BanksUser = await serviceAccount.getBanksUserById(payload.banksUserId);
+
+    /**
+     * 0. Notify Algoan that the synchronization is starting
+     */
+    await banksUser.update({
+      status: BanksUserStatus.SYNCHRONIZING,
+    });
+
     /**
      * 1. Retrieves an access token from Bridge to access to the user accounts
      */
-    const banksUser: BanksUser = await serviceAccount.getBanksUserById(payload.banksUserId);
     const accessToken = await this.aggregator.getAccessToken(banksUser, serviceAccount.config as ClientConfig);
 
     /**
@@ -151,7 +159,14 @@ export class HooksService {
     });
 
     /**
-     * 3. For each synchronized accounts, get transactions
+     * 3. Notify Algoan that the accounts have been synchronized
+     */
+    await banksUser.update({
+      status: BanksUserStatus.ACCOUNTS_SYNCHRONIZED,
+    });
+
+    /**
+     * 4. For each synchronized accounts, get transactions
      */
     for (const account of createdAccounts) {
       const transactions: BridgeTransaction[] = await this.aggregator.getTransactions(
@@ -169,7 +184,7 @@ export class HooksService {
     }
 
     /**
-     * 4. Notify Algoan that the process is finished
+     * 5. Notify Algoan that the process is finished
      */
     await banksUser.update({
       status: BanksUserStatus.FINISHED,
