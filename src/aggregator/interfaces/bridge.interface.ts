@@ -33,10 +33,10 @@ export interface ConnectItemResponse {
 }
 
 /**
- * Response for list accounts
+ * Response for listing bridge objects
  */
-export interface ListAccountsResponse {
-  resources: BridgeAccount[];
+export interface ListResponse<T> {
+  resources: T[];
   pagination: {
     previous_uri: string | null;
     next_uri: string | null;
@@ -122,17 +122,6 @@ export enum BridgeAccountStatus {
 /* eslint-enable no-magic-numbers */
 
 /**
- * Response for list account transactions
- */
-export interface ListTransactionsResponse {
-  resources: BridgeTransaction[];
-  pagination: {
-    previous_uri: string | null;
-    next_uri: string | null;
-  };
-}
-
-/**
  * Bridge Transaction
  */
 export interface BridgeTransaction {
@@ -184,4 +173,12 @@ export interface BridgeCategory {
     resource_uri: string;
     resource_type: string;
   };
+}
+
+/**
+ * Bridge Item
+ * (for now, we only need those fields)
+ */
+export interface BridgeItem {
+  status: number;
 }

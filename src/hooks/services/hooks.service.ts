@@ -13,9 +13,11 @@ import {
 } from '@algoan/rest';
 import { UnauthorizedException, Injectable, Logger } from '@nestjs/common';
 
+import { config } from 'node-config-ts';
+import * as moment from 'moment';
 import { AlgoanService } from '../../algoan/algoan.service';
 import { AggregatorService } from '../../aggregator/services/aggregator.service';
-import { BridgeAccount, BridgeTransaction } from '../../aggregator/interfaces/bridge.interface';
+import { BridgeAccount, BridgeTransaction, BridgeItem } from '../../aggregator/interfaces/bridge.interface';
 import { mapBridgeAccount, mapBridgeTransactions } from '../../aggregator/services/bridge/bridge.utils';
 import { EventDTO } from '../dto/event.dto';
 import { BankreaderLinkRequiredDTO } from '../dto/bandreader-link-required.dto';
@@ -136,7 +138,33 @@ export class HooksService {
     const accessToken = await this.aggregator.getAccessToken(banksUser, serviceAccount.config as ClientConfig);
 
     /**
-     * 2. Retrieves Bridge banks accounts and send them to Algoan
+     * 2. Fetch user active items
+     */
+    const items: BridgeItem[] = await this.aggregator.getItems(accessToken, serviceAccount.config as ClientConfig);
+    let synchronizationCompleted = false;
+    const timeout = moment().add(config.bridge.synchronizationTimeout as number, 'seconds');
+
+    while (!synchronizationCompleted && moment().isBefore(timeout)) {
+      synchronizationCompleted = true;
+      for (const item of items) {
+        if (item.status !== 0) {
+          synchronizationCompleted = false;
+        }
+      }
+    }
+
+    if (!synchronizationCompleted) {
+      const err = new Error('Synchronization failed');
+      this.logger.error({
+        message: 'Synchronization failed after a timeout',
+        banksUserId: banksUser.id,
+        timeout: config.bridge.synchronizationTimeout,
+      });
+      throw err;
+    }
+
+    /**
+     * 3. Retrieves Bridge banks accounts and send them to Algoan
      */
     const accounts: BridgeAccount[] = await this.aggregator.getAccounts(
       accessToken,
@@ -159,14 +187,14 @@ export class HooksService {
     });
 
     /**
-     * 3. Notify Algoan that the accounts have been synchronized
+     * 4. Notify Algoan that the accounts have been synchronized
      */
     await banksUser.update({
       status: BanksUserStatus.ACCOUNTS_SYNCHRONIZED,
     });
 
     /**
-     * 4. For each synchronized accounts, get transactions
+     * 5. For each synchronized accounts, get transactions
      */
     for (const account of createdAccounts) {
       const transactions: BridgeTransaction[] = await this.aggregator.getTransactions(
@@ -184,7 +212,7 @@ export class HooksService {
     }
 
     /**
-     * 5. Notify Algoan that the process is finished
+     * 6. Notify Algoan that the process is finished
      */
     await banksUser.update({
       status: BanksUserStatus.FINISHED,

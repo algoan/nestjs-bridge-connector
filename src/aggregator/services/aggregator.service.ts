@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { IBanksUser } from '@algoan/rest';
-import { UserAccount, BridgeAccount, BridgeTransaction } from '../interfaces/bridge.interface';
+import { UserAccount, BridgeAccount, BridgeTransaction, BridgeItem } from '../interfaces/bridge.interface';
 import { BridgeClient, ClientConfig } from './bridge/bridge.client';
 
 /**
@@ -27,16 +27,14 @@ export class AggregatorService {
   /**
    * Returns the Bridge Accounts for a user
    *
-   * @param banksUser The bank user for which we generate the redirectUrl
    */
   public async getAccounts(accessToken: string, clientConfig?: ClientConfig): Promise<BridgeAccount[]> {
     return this.bridgeClient.getAccounts(accessToken, clientConfig);
   }
 
   /**
-   * Returns the Bridge Transactions for an acount
+   * Returns the Bridge Transactions for an account
    *
-   * @param banksUser The bank user for which we generate the redirectUrl
    */
   public async getTransactions(
     accessToken: string,
@@ -74,5 +72,12 @@ export class AggregatorService {
    */
   public async getResourceName(accessToken: string, bridgeUri: string, clientConfig?: ClientConfig): Promise<string> {
     return this.bridgeClient.getResourceName(accessToken, bridgeUri, clientConfig);
+  }
+
+  /**
+   * Returns the Items related to a user
+   */
+  public async getItems(accessToken: string, clientConfig?: ClientConfig): Promise<BridgeItem[]> {
+    return this.bridgeClient.getItems(accessToken, clientConfig);
   }
 }

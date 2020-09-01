@@ -6,12 +6,12 @@ import {
   UserAccount,
   AuthenticationResponse,
   ConnectItemResponse,
-  ListAccountsResponse,
+  ListResponse,
   BridgeAccount,
   BridgeTransaction,
-  ListTransactionsResponse,
   BridgeBank,
   BridgeCategory,
+  BridgeItem,
 } from '../../interfaces/bridge.interface';
 
 /**
@@ -81,7 +81,7 @@ export class BridgeClient {
   public async getAccounts(accessToken: string, clientConfig?: ClientConfig): Promise<BridgeAccount[]> {
     const url: string = `${config.bridge.baseUrl}/v2/accounts`;
 
-    const resp: AxiosResponse<ListAccountsResponse> = await this.httpService
+    const resp: AxiosResponse<ListResponse<BridgeAccount>> = await this.httpService
       .get(url, { headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) } })
       .toPromise();
 
@@ -98,7 +98,7 @@ export class BridgeClient {
   ): Promise<BridgeTransaction[]> {
     const url: string = `${config.bridge.baseUrl}/v2/accounts/${accountNumber}/transactions`;
 
-    const resp: AxiosResponse<ListTransactionsResponse> = await this.httpService
+    const resp: AxiosResponse<ListResponse<BridgeTransaction>> = await this.httpService
       .get(url, { headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) } })
       .toPromise();
 
@@ -130,6 +130,19 @@ export class BridgeClient {
 
       return 'UNKNOWN';
     }
+  }
+
+  /**
+   * Get a bridge user's items
+   */
+  public async getItems(accessToken: string, clientConfig?: ClientConfig): Promise<BridgeItem[]> {
+    const url: string = `${config.bridge.baseUrl}/v2/items`;
+
+    const resp: AxiosResponse<ListResponse<BridgeItem>> = await this.httpService
+      .get(url, { headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) } })
+      .toPromise();
+
+    return resp.data.resources;
   }
 
   /**
