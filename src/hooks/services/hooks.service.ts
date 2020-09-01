@@ -142,7 +142,7 @@ export class HooksService {
      */
     const items: BridgeItem[] = await this.aggregator.getItems(accessToken, serviceAccount.config as ClientConfig);
     let synchronizationCompleted = false;
-    const timeout = moment().add(config.bridge.synchronizationTimeout as number, 'seconds');
+    const timeout = moment().add(config.bridge.synchronizationTimeout, 'seconds');
 
     while (!synchronizationCompleted && moment().isBefore(timeout)) {
       synchronizationCompleted = true;
@@ -155,7 +155,7 @@ export class HooksService {
 
     if (!synchronizationCompleted) {
       const err = new Error('Synchronization failed');
-      this.logger.error({
+      this.logger.warn({
         message: 'Synchronization failed after a timeout',
         banksUserId: banksUser.id,
         timeout: config.bridge.synchronizationTimeout,
