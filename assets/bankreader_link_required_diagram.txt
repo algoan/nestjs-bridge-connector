@@ -6,7 +6,8 @@ Algoan -> Bridge connector: Send a "bankreader_link_required" event
 Bridge connector -> Algoan: GET /banks-users/:id
 note right of Algoan: Retrieves the concerned Banks User from the event payload sent
 Algoan -> Bridge connector: Returns the callback URL inside the Banks User
-Bridge connector -> Bridge connector: Generates a redirect URL
+Bridge connector -> Bridge: GET /connect/items/add/url
+note left of Bridge: Returns a redirectUrl
 Bridge connector -> Algoan: PATCH /banks-users/:id
 note left of Bridge connector: Sends back a redirect URL
-Algoan -> User: Redirects the User to BI user interface
+Algoan -> User: Redirects the User to Bridge user interface
