@@ -34,7 +34,7 @@ A simple connector using [NestJS](https://github.com/nestjs/nest) framework to c
 
 ## Goal and Philosophy
 
-A [connector](https://developers.algoan.com/public/docs/algoan_documentation/chatbot_and_services/connectors.html) is a web software able to connect a provider to Algoan's API. It subscribes to [REST Hooks](https://developers.algoan.com/public/docs/algoan_documentation/resthooks_and_events/resthooks.html) which lets Algoan notifying the connector when an specific [event](https://developers.algoan.com/public/docs/algoan_documentation/resthooks_and_events/resthooks.html#resthook-events) happens.
+A [connector](https://developers.algoan.com/public/docs/algoan_documentation/chatbot_and_services/connectors.html) is a web software able to connect a provider to Algoan's API. It subscribes to [REST Hooks](https://developers.algoan.com/public/docs/algoan_documentation/resthooks_and_events/resthooks.html) which lets Algoan notifying the connector when a specific [event](https://developers.algoan.com/public/docs/algoan_documentation/resthooks_and_events/resthooks.html#resthook-events) happens.
 
 More information on the [official documentation](https://developers.algoan.com).
 
@@ -190,7 +190,7 @@ _NOTE_: For security reasons, the `index.html` is not served in production envir
  
 ## Contributing
 
-We would love to have your contribute, thank you for that! 🎉
+We would love to have your contribution, thank you for that! 🎉
 
 If you want to add missing APIs, or correct an issue, you will have to follow this list of instructions.
 
