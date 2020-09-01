@@ -140,11 +140,11 @@ export class HooksService {
     /**
      * 2. Fetch user active items
      */
-    const items: BridgeItem[] = await this.aggregator.getItems(accessToken, serviceAccount.config as ClientConfig);
     let synchronizationCompleted = false;
     const timeout = moment().add(config.bridge.synchronizationTimeout, 'seconds');
 
     while (!synchronizationCompleted && moment().isBefore(timeout)) {
+      const items: BridgeItem[] = await this.aggregator.getItems(accessToken, serviceAccount.config as ClientConfig);
       synchronizationCompleted = true;
       for (const item of items) {
         if (item.status !== 0) {
