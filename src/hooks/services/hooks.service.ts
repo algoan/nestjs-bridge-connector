@@ -15,6 +15,7 @@ import { UnauthorizedException, Injectable, Logger } from '@nestjs/common';
 
 import { config } from 'node-config-ts';
 import * as moment from 'moment';
+import * as delay from 'delay';
 import { AlgoanService } from '../../algoan/algoan.service';
 import { AggregatorService } from '../../aggregator/services/aggregator.service';
 import { BridgeAccount, BridgeTransaction, BridgeItem } from '../../aggregator/interfaces/bridge.interface';
@@ -23,6 +24,8 @@ import { EventDTO } from '../dto/event.dto';
 import { BankreaderLinkRequiredDTO } from '../dto/bandreader-link-required.dto';
 import { BankreaderRequiredDTO } from '../dto/bankreader-required.dto';
 import { ClientConfig } from '../../aggregator/services/bridge/bridge.client';
+const SYNCHRONIZATION_WAITING_TIME: number = config.bridge.synchronizationWaitingTime;
+
 /**
  * Hook service
  */
@@ -149,6 +152,8 @@ export class HooksService {
       for (const item of items) {
         if (item.status !== 0) {
           synchronizationCompleted = false;
+          // Wait 5 seconds between each call
+          await delay(SYNCHRONIZATION_WAITING_TIME);
         }
       }
     }

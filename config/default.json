@@ -9,7 +9,8 @@
     "baseUrl":"https://sync.bankin.com",
     "clientId":"a",
     "clientSecret": "b",
-    "synchronizationTimeout": 1200
+    "synchronizationTimeout": 1200,
+    "synchronizationWaitingTime": 5000
   },
   "targetUrl": "http://localhost:8080/hooks",
   "eventList": [

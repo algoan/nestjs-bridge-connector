@@ -1,5 +1,8 @@
 {
   "eventList": [
     "service_account_created"
-  ]
+  ],
+  "bridge":{
+    "synchronizationWaitingTime": 0
+  }
 }
