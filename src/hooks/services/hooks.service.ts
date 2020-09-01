@@ -11,7 +11,7 @@ import {
   // PostBanksUserTransactionDTO,
   // PostBanksUserAccountDTO,
 } from '@algoan/rest';
-import { UnauthorizedException, Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { UnauthorizedException, Injectable, Logger } from '@nestjs/common';
 
 import { AlgoanService } from '../../algoan/algoan.service';
 import { AggregatorService } from '../../aggregator/services/aggregator.service';
@@ -20,6 +20,7 @@ import { mapBridgeAccount, mapBridgeTransactions } from '../../aggregator/servic
 import { EventDTO } from '../dto/event.dto';
 import { BankreaderLinkRequiredDTO } from '../dto/bandreader-link-required.dto';
 import { BankreaderRequiredDTO } from '../dto/bankreader-required.dto';
+import { ClientConfig } from '../../aggregator/services/bridge/bridge.client';
 /**
  * Hook service
  */
@@ -93,7 +94,10 @@ export class HooksService {
     /**
      * 2. Generates a redirect URL
      */
-    const redirectUrl: string = await this.aggregator.generateRedirectUrl(banksUser);
+    const redirectUrl: string = await this.aggregator.generateRedirectUrl(
+      banksUser,
+      serviceAccount.config as ClientConfig,
+    );
 
     /**
      * 3. Update the Banks-User, sending to Algoan the generated URL
@@ -129,17 +133,25 @@ export class HooksService {
     /**
      * 1. Retrieves an access token from Bridge to access to the user accounts
      */
-    const accessToken = await this.aggregator.getAccessToken(banksUser);
+    const accessToken = await this.aggregator.getAccessToken(banksUser, serviceAccount.config as ClientConfig);
 
     /**
      * 2. Retrieves Bridge banks accounts and send them to Algoan
      */
-    const accounts: BridgeAccount[] = await this.aggregator.getAccounts(accessToken);
+    const accounts: BridgeAccount[] = await this.aggregator.getAccounts(
+      accessToken,
+      serviceAccount.config as ClientConfig,
+    );
     this.logger.debug({
       message: `Bridge accounts retrieved for Banks User "${banksUser.id}"`,
       accounts,
     });
-    const algoanAccounts: PostBanksUserAccountDTO[] = await mapBridgeAccount(accounts, accessToken, this.aggregator);
+    const algoanAccounts: PostBanksUserAccountDTO[] = await mapBridgeAccount(
+      accounts,
+      accessToken,
+      this.aggregator,
+      serviceAccount.config as ClientConfig,
+    );
     const createdAccounts: BanksUserAccount[] = await banksUser.createAccounts(algoanAccounts);
     this.logger.debug({
       message: `Algoan accounts created for Banks User "${banksUser.id}"`,
@@ -160,11 +172,13 @@ export class HooksService {
       const transactions: BridgeTransaction[] = await this.aggregator.getTransactions(
         accessToken,
         Number(account.reference),
+        serviceAccount.config as ClientConfig,
       );
       const algoanTransactions: PostBanksUserTransactionDTO[] = await mapBridgeTransactions(
         transactions,
         accessToken,
         this.aggregator,
+        serviceAccount.config as ClientConfig,
       );
       await banksUser.createTransactions(account.id, algoanTransactions);
     }

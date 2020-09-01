@@ -14,6 +14,7 @@ import {
   BridgeTransaction,
 } from '../../interfaces/bridge.interface';
 import { AggregatorService } from '../aggregator.service';
+import { ClientConfig } from './bridge.client';
 
 /**
  * mapBridgeAccount transforms a bridge array of acccounts into
@@ -25,8 +26,11 @@ export const mapBridgeAccount = async (
   accounts: BridgeAccount[],
   accessToken: string,
   aggregator: AggregatorService,
+  clientConfig?: ClientConfig,
 ): Promise<PostBanksUserAccountDTO[]> =>
-  Promise.all(accounts.map(async (account) => fromBridgeToAlgoanAccounts(account, accessToken, aggregator)));
+  Promise.all(
+    accounts.map(async (account) => fromBridgeToAlgoanAccounts(account, accessToken, aggregator, clientConfig)),
+  );
 
 /**
  * Converts a single Bridge account instance to Algoan format
@@ -37,10 +41,11 @@ const fromBridgeToAlgoanAccounts = async (
   account: BridgeAccount,
   accessToken: string,
   aggregator: AggregatorService,
+  clientConfig?: ClientConfig,
 ): Promise<PostBanksUserAccountDTO> => ({
   balanceDate: new Date(mapDate(account.updated_at)).toISOString(),
   balance: account.balance,
-  bank: await aggregator.getResourceName(accessToken, account.bank.resource_uri),
+  bank: await aggregator.getResourceName(accessToken, account.bank.resource_uri, clientConfig),
   connectionSource: 'BRIDGE',
   type: mapAccountType(account.type),
   bic: undefined,
@@ -131,6 +136,7 @@ export const mapBridgeTransactions = async (
   bridgeTransactions: BridgeTransaction[],
   accessToken: string,
   aggregator: AggregatorService,
+  clientConfig?: ClientConfig,
 ): Promise<PostBanksUserTransactionDTO[]> =>
   Promise.all(
     bridgeTransactions.map(async (transaction) => ({
@@ -140,7 +146,7 @@ export const mapBridgeTransactions = async (
       banksUserCardId: undefined, // @TODO: Can we get this?
       reference: transaction.id.toString(),
       userDescription: transaction.description,
-      category: await aggregator.getResourceName(accessToken, transaction.category.resource_uri),
+      category: await aggregator.getResourceName(accessToken, transaction.category.resource_uri, clientConfig),
       type: BanksUserTransactionType.UNKNOWN,
       date: moment.tz(transaction.date, 'Europe/Paris').toISOString(),
     })),

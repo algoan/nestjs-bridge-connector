@@ -61,15 +61,21 @@ describe('AggregatorService', () => {
       });
 
       const redirectUrl = await service.generateRedirectUrl(mockBanksUser);
-      expect(registerSpy).toHaveBeenCalledWith({
-        email: 'mockBanksUserId@algoan-bridge.com',
-        password: 'mockBanksUserId',
-      });
-      expect(authenticateSpy).toHaveBeenCalledWith({
-        email: 'mockBanksUserId@algoan-bridge.com',
-        password: 'mockBanksUserId',
-      });
-      expect(connectItemSpy).toHaveBeenCalledWith('access-token');
+      expect(registerSpy).toHaveBeenCalledWith(
+        {
+          email: 'mockBanksUserId@algoan-bridge.com',
+          password: 'mockBanksUserId',
+        },
+        undefined,
+      );
+      expect(authenticateSpy).toHaveBeenCalledWith(
+        {
+          email: 'mockBanksUserId@algoan-bridge.com',
+          password: 'mockBanksUserId',
+        },
+        undefined,
+      );
+      expect(connectItemSpy).toHaveBeenCalledWith('access-token', undefined);
       expect(redirectUrl).toBe('https://bridge/redirection-url');
     });
 
@@ -87,7 +93,7 @@ describe('AggregatorService', () => {
     const token = 'token';
     await service.getAccounts(token);
 
-    expect(spy).toBeCalledWith(token);
+    expect(spy).toBeCalledWith(token, undefined);
   });
 
   it('should get the transactions', async () => {
@@ -96,17 +102,20 @@ describe('AggregatorService', () => {
     const accountNumber = 23;
     await service.getTransactions(token, accountNumber);
 
-    expect(spy).toBeCalledWith(token, accountNumber);
+    expect(spy).toBeCalledWith(token, accountNumber, undefined);
   });
 
   it('should get the accessToken', async () => {
     const spy = jest.spyOn(client, 'authenticate').mockReturnValue(Promise.resolve(mockAuthResponse));
     const accessToken = await service.getAccessToken(mockBanksUser);
 
-    expect(spy).toBeCalledWith({
-      email: 'mockBanksUserId@algoan-bridge.com',
-      password: 'mockBanksUserId',
-    });
+    expect(spy).toBeCalledWith(
+      {
+        email: 'mockBanksUserId@algoan-bridge.com',
+        password: 'mockBanksUserId',
+      },
+      undefined,
+    );
     expect(accessToken).toEqual(mockAuthResponse.access_token);
   });
 
@@ -116,6 +125,6 @@ describe('AggregatorService', () => {
     const resourceUri = 'mockResoruceUri';
     await service.getResourceName(token, resourceUri);
 
-    expect(spy).toBeCalledWith(token, resourceUri);
+    expect(spy).toBeCalledWith(token, resourceUri, undefined);
   });
 });

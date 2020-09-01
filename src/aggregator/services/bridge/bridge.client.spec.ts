@@ -33,15 +33,6 @@ describe('BridgeClient', () => {
     expect(service).toBeDefined();
   });
 
-  it('sets the right headers', () => {
-    // eslint-disable-next-line @typescript-eslint/tslint/config
-    expect(httpService.axiosRef.defaults.headers.common as unknown).toMatchObject({
-      'Client-Id': config.bridge.clientId,
-      'Client-Secret': config.bridge.clientSecret,
-      'Bankin-Version': config.bridge.bankinVersion,
-    });
-  });
-
   it('can create a user', async () => {
     const result: AxiosResponse = {
       data: mockUserResponse,
@@ -56,10 +47,20 @@ describe('BridgeClient', () => {
     const resp = await service.register({ email: 'mock@email.com', password: 'mockPassword' });
     expect(resp).toBe(mockUserResponse);
 
-    expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/users', {
-      email: 'mock@email.com',
-      password: 'mockPassword',
-    });
+    expect(spy).toHaveBeenCalledWith(
+      'https://sync.bankin.com/v2/users',
+      {
+        email: 'mock@email.com',
+        password: 'mockPassword',
+      },
+      {
+        headers: {
+          'Client-Id': config.bridge.clientId,
+          'Client-Secret': config.bridge.clientSecret,
+          'Bankin-Version': config.bridge.bankinVersion,
+        },
+      },
+    );
   });
 
   it('can authenticate a user', async () => {
@@ -76,10 +77,20 @@ describe('BridgeClient', () => {
     const resp = await service.authenticate({ email: 'mock@email.com', password: 'mockPassword' });
     expect(resp).toBe(mockAuthResponse);
 
-    expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/authenticate', {
-      email: 'mock@email.com',
-      password: 'mockPassword',
-    });
+    expect(spy).toHaveBeenCalledWith(
+      'https://sync.bankin.com/v2/authenticate',
+      {
+        email: 'mock@email.com',
+        password: 'mockPassword',
+      },
+      {
+        headers: {
+          'Client-Id': config.bridge.clientId,
+          'Client-Secret': config.bridge.clientSecret,
+          'Bankin-Version': config.bridge.bankinVersion,
+        },
+      },
+    );
   });
 
   it('can connect a user to an item', async () => {
@@ -102,6 +113,9 @@ describe('BridgeClient', () => {
     expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/connect/items/add/url?country=fr', {
       headers: {
         Authorization: 'Bearer secret-access-token',
+        'Client-Id': config.bridge.clientId,
+        'Client-Secret': config.bridge.clientSecret,
+        'Bankin-Version': config.bridge.bankinVersion,
       },
     });
   });
@@ -165,6 +179,9 @@ describe('BridgeClient', () => {
     expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/accounts', {
       headers: {
         Authorization: 'Bearer secret-access-token',
+        'Client-Id': config.bridge.clientId,
+        'Client-Secret': config.bridge.clientSecret,
+        'Bankin-Version': config.bridge.bankinVersion,
       },
     });
   });
@@ -215,6 +232,9 @@ describe('BridgeClient', () => {
     expect(spy).toHaveBeenCalledWith(`https://sync.bankin.com/v2/accounts/${accountNumber}/transactions`, {
       headers: {
         Authorization: 'Bearer secret-access-token',
+        'Client-Id': config.bridge.clientId,
+        'Client-Secret': config.bridge.clientSecret,
+        'Bankin-Version': config.bridge.bankinVersion,
       },
     });
   });
@@ -244,6 +264,9 @@ describe('BridgeClient', () => {
     expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/mockResourceUri', {
       headers: {
         Authorization: 'Bearer mockAccessToken',
+        'Client-Id': config.bridge.clientId,
+        'Client-Secret': config.bridge.clientSecret,
+        'Bankin-Version': config.bridge.bankinVersion,
       },
     });
   });

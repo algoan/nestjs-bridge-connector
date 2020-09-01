@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { IBanksUser } from '@algoan/rest';
 import { UserAccount, BridgeAccount, BridgeTransaction } from '../interfaces/bridge.interface';
-import { BridgeClient } from './bridge/bridge.client';
+import { BridgeClient, ClientConfig } from './bridge/bridge.client';
 
 /**
  * AggregatorService
@@ -15,11 +15,11 @@ export class AggregatorService {
    *
    * @param banksUser The bank user for which we generate the redirectUrl
    */
-  public async generateRedirectUrl(banksUser: IBanksUser): Promise<string> {
+  public async generateRedirectUrl(banksUser: IBanksUser, clientConfig?: ClientConfig): Promise<string> {
     const userAccount: UserAccount = AggregatorService.buildCredentials(banksUser);
-    await this.bridgeClient.register(userAccount);
-    const authenticationResponse = await this.bridgeClient.authenticate(userAccount);
-    const redirectResponse = await this.bridgeClient.connectItem(authenticationResponse.access_token);
+    await this.bridgeClient.register(userAccount, clientConfig);
+    const authenticationResponse = await this.bridgeClient.authenticate(userAccount, clientConfig);
+    const redirectResponse = await this.bridgeClient.connectItem(authenticationResponse.access_token, clientConfig);
 
     return redirectResponse.redirect_url;
   }
@@ -29,8 +29,8 @@ export class AggregatorService {
    *
    * @param banksUser The bank user for which we generate the redirectUrl
    */
-  public async getAccounts(accessToken: string): Promise<BridgeAccount[]> {
-    return this.bridgeClient.getAccounts(accessToken);
+  public async getAccounts(accessToken: string, clientConfig?: ClientConfig): Promise<BridgeAccount[]> {
+    return this.bridgeClient.getAccounts(accessToken, clientConfig);
   }
 
   /**
@@ -38,8 +38,12 @@ export class AggregatorService {
    *
    * @param banksUser The bank user for which we generate the redirectUrl
    */
-  public async getTransactions(accessToken: string, accountNumber: number): Promise<BridgeTransaction[]> {
-    return this.bridgeClient.getTransactions(accessToken, accountNumber);
+  public async getTransactions(
+    accessToken: string,
+    accountNumber: number,
+    clientConfig?: ClientConfig,
+  ): Promise<BridgeTransaction[]> {
+    return this.bridgeClient.getTransactions(accessToken, accountNumber, clientConfig);
   }
 
   /**
@@ -47,8 +51,9 @@ export class AggregatorService {
    *
    * @param banksUser The bank user for which we generate the redirectUrl
    */
-  public async getAccessToken(banksUser: IBanksUser): Promise<string> {
-    return (await this.bridgeClient.authenticate(AggregatorService.buildCredentials(banksUser))).access_token;
+  public async getAccessToken(banksUser: IBanksUser, clientConfig?: ClientConfig): Promise<string> {
+    return (await this.bridgeClient.authenticate(AggregatorService.buildCredentials(banksUser), clientConfig))
+      .access_token;
   }
 
   /**
@@ -67,7 +72,7 @@ export class AggregatorService {
   /**
    * Get a bridge resource by uri
    */
-  public async getResourceName(accessToken: string, bridgeUri: string): Promise<string> {
-    return this.bridgeClient.getResourceName(accessToken, bridgeUri);
+  public async getResourceName(accessToken: string, bridgeUri: string, clientConfig?: ClientConfig): Promise<string> {
+    return this.bridgeClient.getResourceName(accessToken, bridgeUri, clientConfig);
   }
 }

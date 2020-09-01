@@ -59,7 +59,7 @@ describe('Bridge Utils', () => {
 
     const mappedAccount = await mapBridgeAccount([mockAccount], 'mockAccessToken', aggregatorService);
 
-    expect(aggregatorSpy).toHaveBeenCalledWith('mockAccessToken', mockAccount.bank.resource_uri);
+    expect(aggregatorSpy).toHaveBeenCalledWith('mockAccessToken', mockAccount.bank.resource_uri, undefined);
     expect(mappedAccount).toEqual(expectedAccounts);
   });
 
@@ -81,6 +81,6 @@ describe('Bridge Utils', () => {
     const mappedTransaction = await mapBridgeTransactions([mockTransaction], 'mockAccessToken', aggregatorService);
 
     expect(mappedTransaction).toEqual(expectedTransaction);
-    expect(aggregatorSpy).toBeCalledWith('mockAccessToken', mockTransaction.category.resource_uri);
+    expect(aggregatorSpy).toBeCalledWith('mockAccessToken', mockTransaction.category.resource_uri, undefined);
   });
 });
