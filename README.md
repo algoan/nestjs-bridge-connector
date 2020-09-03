@@ -148,6 +148,8 @@ To configure your application properly, here is a list of key to set:
 | `bridge.clientId` | No | _string_ | Bridge Client ID for the sandbox |
 | `bridge.clientSecret` | No | _string_ | Bridge Client secret for the sandbox |
 | `bridge.bankinVersion` | No | _string_ | Bankin version |
+| `bridge.synchronizationTimeout` | No | _number_ | Timeout in seconds after each the synchronization trial is cancelled |
+| `bridge.synchronizationWaitingTime` | No | _number_ | Time in seconds to wait between each call to get items |
 | `targetUrl` | No | _string_ | Target URL for your resthook. See [the documentation](https://developers.algoan.com/public/docs/algoan_documentation/resthooks_and_events/resthooks.html#managing-your-resthook) for more information |
 | `eventList` | No | _array<string>_ | Event List you want to subscribe to |
 | `restHooksSecret` | No | _string_ | Resthooks secrets ensuring that all calls are made by Algoan. See [the documentation](https://developers.algoan.com/public/docs/algoan_documentation/resthooks_and_events/resthooks.html#validating-resthook-events) for more information |

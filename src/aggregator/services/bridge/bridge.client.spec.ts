@@ -7,10 +7,11 @@ import { AlgoanModule } from '../../../algoan/algoan.module';
 import { AppModule } from '../../../app.module';
 import {
   ConnectItemResponse,
-  ListAccountsResponse,
+  ListResponse,
   BridgeAccountType,
-  ListTransactionsResponse,
+  BridgeTransaction,
   BridgeBank,
+  BridgeAccount,
 } from '../../interfaces/bridge.interface';
 import { mockUserResponse, mockAuthResponse } from '../../interfaces/bridge-mock';
 import { BridgeClient } from './bridge.client';
@@ -121,7 +122,7 @@ describe('BridgeClient', () => {
   });
 
   it('can get a list of accounts', async () => {
-    const listAccountsResponse: ListAccountsResponse = {
+    const listAccountsResponse: ListResponse<BridgeAccount> = {
       resources: [
         {
           id: 2341501,
@@ -187,7 +188,7 @@ describe('BridgeClient', () => {
   });
 
   it('can get a list of transactions', async () => {
-    const listAccountTransactionsResponse: ListTransactionsResponse = {
+    const listAccountTransactionsResponse: ListResponse<BridgeTransaction> = {
       resources: [
         {
           id: 1000013123932,
