@@ -1,6 +1,7 @@
 import { HttpService, Injectable, Logger } from '@nestjs/common';
 import { config } from 'node-config-ts';
 import { AxiosResponse } from 'axios';
+import { isNil } from 'lodash';
 import {
   UserResponse,
   UserAccount,
@@ -93,16 +94,26 @@ export class BridgeClient {
    */
   public async getTransactions(
     accessToken: string,
-    accountNumber: number,
     clientConfig?: ClientConfig,
+    nextUri?: string,
+    transactions?: BridgeTransaction[],
   ): Promise<BridgeTransaction[]> {
-    const url: string = `${config.bridge.baseUrl}/v2/accounts/${accountNumber}/transactions`;
+    const uri: string = nextUri ?? '/v2/transactions?limit=100';
+    const url: string = `${config.bridge.baseUrl}${uri}`;
 
     const resp: AxiosResponse<ListResponse<BridgeTransaction>> = await this.httpService
-      .get(url, { headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) } })
+      .get(url, {
+        headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) },
+      })
       .toPromise();
 
-    return resp.data.resources;
+    const mergedTransactions: BridgeTransaction[] = [...(transactions ?? []), ...resp.data.resources];
+
+    if (!isNil(resp.data.pagination.next_uri)) {
+      return this.getTransactions(accessToken, clientConfig, resp.data.pagination.next_uri, mergedTransactions);
+    }
+
+    return mergedTransactions;
   }
 
   /**

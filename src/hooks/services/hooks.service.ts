@@ -192,23 +192,23 @@ export class HooksService {
     });
 
     /**
-     * 4. Notify Algoan that the accounts have been synchronized
+     * 3. Notify Algoan that the accounts have been synchronized
      */
     await banksUser.update({
       status: BanksUserStatus.ACCOUNTS_SYNCHRONIZED,
     });
 
     /**
-     * 5. For each synchronized accounts, get transactions
+     * 4. Retrieves Bridge transactions and send them to Algoan
      */
+    const transactions: BridgeTransaction[] = await this.aggregator.getTransactions(
+      accessToken,
+      serviceAccount.config as ClientConfig,
+    );
+
     for (const account of createdAccounts) {
-      const transactions: BridgeTransaction[] = await this.aggregator.getTransactions(
-        accessToken,
-        Number(account.reference),
-        serviceAccount.config as ClientConfig,
-      );
       const algoanTransactions: PostBanksUserTransactionDTO[] = await mapBridgeTransactions(
-        transactions,
+        transactions.filter((transaction: BridgeTransaction) => transaction.account.id === Number(account.reference)),
         accessToken,
         this.aggregator,
         serviceAccount.config as ClientConfig,
@@ -217,7 +217,7 @@ export class HooksService {
     }
 
     /**
-     * 6. Notify Algoan that the process is finished
+     * 5. Notify Algoan that the process is finished
      */
     await banksUser.update({
       status: BanksUserStatus.FINISHED,

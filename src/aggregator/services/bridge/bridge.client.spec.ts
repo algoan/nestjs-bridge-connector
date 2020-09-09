@@ -226,11 +226,10 @@ describe('BridgeClient', () => {
 
     const spy = jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(result));
 
-    const accountNumber = 1234;
-    const resp = await service.getTransactions('secret-access-token', accountNumber);
-    expect(resp).toBe(listAccountTransactionsResponse.resources);
+    const resp = await service.getTransactions('secret-access-token');
+    expect(resp).toEqual(listAccountTransactionsResponse.resources);
 
-    expect(spy).toHaveBeenCalledWith(`https://sync.bankin.com/v2/accounts/${accountNumber}/transactions`, {
+    expect(spy).toHaveBeenCalledWith(`https://sync.bankin.com/v2/transactions?limit=100`, {
       headers: {
         Authorization: 'Bearer secret-access-token',
         'Client-Id': config.bridge.clientId,
