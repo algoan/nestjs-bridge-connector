@@ -23,7 +23,7 @@ import { AlgoanModule } from '../../algoan/algoan.module';
 import { AppModule } from '../../app.module';
 import { AlgoanService } from '../../algoan/algoan.service';
 import { BankreaderLinkRequiredDTO } from '../dto/bandreader-link-required.dto';
-import { mockAccount, mockTransaction, mockItem } from '../../aggregator/interfaces/bridge-mock';
+import { mockAccount, mockTransaction } from '../../aggregator/interfaces/bridge-mock';
 import { mapBridgeAccount, mapBridgeTransactions } from '../../aggregator/services/bridge/bridge.utils';
 import { HooksService } from './hooks.service';
 
@@ -177,7 +177,6 @@ describe('HooksService', () => {
       .spyOn(mockServiceAccount, 'getBanksUserById')
       .mockReturnValue(Promise.resolve(mockBanksUser));
     const accessTokenSpy = jest.spyOn(aggregatorService, 'getAccessToken').mockResolvedValue('mockPermToken');
-    const itemsSpy = jest.spyOn(aggregatorService, 'getItems').mockResolvedValue([mockItem]);
     const accountSpy = jest.spyOn(aggregatorService, 'getAccounts').mockResolvedValue([mockAccount]);
     const banksUserAccountSpy = jest.spyOn(mockBanksUser, 'createAccounts').mockResolvedValue([banksUserAccount]);
     const transactionSpy = jest.spyOn(aggregatorService, 'getTransactions').mockResolvedValue([mockTransaction]);
@@ -192,7 +191,6 @@ describe('HooksService', () => {
 
     expect(serviceAccountSpy).toBeCalledWith(mockEvent.payload.banksUserId);
     expect(accessTokenSpy).toBeCalledWith(mockBanksUser, mockServiceAccountConfig);
-    expect(itemsSpy).toBeCalledWith('mockPermToken', mockServiceAccountConfig);
     expect(accountSpy).toBeCalledWith('mockPermToken', mockServiceAccountConfig);
     expect(resourceNameSpy).toBeCalledWith('mockPermToken', mockAccount.bank.resource_uri, mockServiceAccountConfig);
     expect(banksUserAccountSpy).toBeCalledWith(mappedAccount);

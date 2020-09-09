@@ -174,11 +174,3 @@ export interface BridgeCategory {
     resource_type: string;
   };
 }
-
-/**
- * Bridge Item
- * (for now, we only need those fields)
- */
-export interface BridgeItem {
-  status: number;
-}

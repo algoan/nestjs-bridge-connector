@@ -8,11 +8,6 @@ note left of Bridge connector: Update the banks user status to "SYNCHRONIZING"
 Bridge connector -> Bridge: POST /authenticate
 note left of Bridge: Generates a token with the banksUser's credentials
 Bridge -> Bridge connector: Returns an access token
-
-loop Get the item status until it is finished
-    Bridge connector -> Bridge: GET /item/:id/refresh/status
-end
-
 Bridge connector -> Bridge: GET /accounts
 Bridge -> Bridge connector: Returns a list of synchronized accounts
 Bridge connector -> Algoan: POST /banks-users/{banksUserId}/accounts
@@ -23,7 +18,5 @@ Bridge connector -> Bridge: GET /transactions
 Bridge -> Bridge connector: Returns a list of transactions
 Bridge connector -> Algoan: POST /banks-users/{banksUserId}/accounts/{accountId}/transactions
 end
-
-
 Bridge connector -> Algoan: PATCH /banks-users/:id
 note left of Bridge connector: Update the banks user status to "FINISHED"

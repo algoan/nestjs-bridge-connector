@@ -3,7 +3,6 @@ import {
   BridgeAccountStatus,
   BridgeAccountType,
   BridgeTransaction,
-  BridgeItem,
   UserResponse,
   AuthenticationResponse,
 } from './bridge.interface';
@@ -82,8 +81,4 @@ export const mockAuthResponse: AuthenticationResponse = {
   user: mockUserResponse,
   access_token: 'mockAccessToken',
   expires_at: 'mockDate',
-};
-
-export const mockItem: BridgeItem = {
-  status: 0,
 };
