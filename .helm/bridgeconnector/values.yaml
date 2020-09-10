@@ -1,0 +1,57 @@
+# Default values for ..
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+nameOverride: "bridgeconnector"
+fullnameOverride: "bridgeconnector"
+
+replicaCount: 1
+
+terminationGracePeriodSeconds: 60
+
+image:
+  repository: algoan/nestjs-bridge-connector
+  tag: latest
+  pullPolicy: Always
+
+containerPort: 8080
+
+datadog:
+  enabled: true
+
+readinessProbe:
+  initialDelaySeconds: 3
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 10
+
+environmentVariables:
+  PORT: 8080
+  NODE_ENV: production
+  DEPLOYMENT: production.secret
+  DEBUG_LEVEL: debug
+
+volumeMounts:
+  secret: /usr/src/app/config/deployment
+  config: /usr/src/app/config/env
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths: []
+  tls: []
+
+
+nodeSelector: {}
+
+tolerations: []
+
+config: '{}'
+
+secret: ''

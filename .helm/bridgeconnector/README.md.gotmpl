@@ -1,0 +1,28 @@
+{{ template "chart.header" . }}
+{{ template "chart.description" . }}
+
+{{ template "chart.versionLine" . }}
+
+{{ template "chart.sourceLinkLine" . }}
+
+## Installation
+
+### Add Helm repository
+
+```shell
+helm repo add renovate ...
+helm repo update
+```
+
+## Install Budget Insight connector chart
+
+
+```bash
+helm install -f values.yml renovate/renovate
+```
+
+## Configuration
+
+The following table lists the configurable parameters of the chart and the default values.
+
+{{ template "chart.valuesSection" . }}

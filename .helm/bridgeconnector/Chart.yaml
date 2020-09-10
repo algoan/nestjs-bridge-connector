@@ -1,0 +1,9 @@
+apiVersion: v1
+description: A Helm chart for Kubernetes allows you to deploy Algoan's NestJS Bridge connector
+name: budgetinsightconnector
+version: 1.0.2
+home: https://www.algoan.com
+maintainers:
+  - name: ALGOAN SAS
+    email: support@algoan.com
+    url: https://www.algoan.com
