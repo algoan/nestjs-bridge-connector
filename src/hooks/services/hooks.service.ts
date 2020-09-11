@@ -170,16 +170,16 @@ export class HooksService {
     });
 
     /**
-     * 4. For each synchronized accounts, get transactions
+     * 4. Retrieves Bridge transactions and send them to Algoan
      */
+    const transactions: BridgeTransaction[] = await this.aggregator.getTransactions(
+      accessToken,
+      serviceAccount.config as ClientConfig,
+    );
+
     for (const account of createdAccounts) {
-      const transactions: BridgeTransaction[] = await this.aggregator.getTransactions(
-        accessToken,
-        Number(account.reference),
-        serviceAccount.config as ClientConfig,
-      );
       const algoanTransactions: PostBanksUserTransactionDTO[] = await mapBridgeTransactions(
-        transactions,
+        transactions.filter((transaction: BridgeTransaction) => transaction.account.id === Number(account.reference)),
         accessToken,
         this.aggregator,
         serviceAccount.config as ClientConfig,

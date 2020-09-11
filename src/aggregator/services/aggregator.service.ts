@@ -36,12 +36,8 @@ export class AggregatorService {
    * Returns the Bridge Transactions for an account
    *
    */
-  public async getTransactions(
-    accessToken: string,
-    accountNumber: number,
-    clientConfig?: ClientConfig,
-  ): Promise<BridgeTransaction[]> {
-    return this.bridgeClient.getTransactions(accessToken, accountNumber, clientConfig);
+  public async getTransactions(accessToken: string, clientConfig?: ClientConfig): Promise<BridgeTransaction[]> {
+    return this.bridgeClient.getTransactions(accessToken, clientConfig);
   }
 
   /**
