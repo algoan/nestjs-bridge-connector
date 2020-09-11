@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { IBanksUser } from '@algoan/rest';
-import { UserAccount, BridgeAccount, BridgeTransaction, BridgeItem } from '../interfaces/bridge.interface';
+import { UserAccount, BridgeAccount, BridgeTransaction } from '../interfaces/bridge.interface';
 import { BridgeClient, ClientConfig } from './bridge/bridge.client';
 
 /**
@@ -72,12 +72,5 @@ export class AggregatorService {
    */
   public async getResourceName(accessToken: string, bridgeUri: string, clientConfig?: ClientConfig): Promise<string> {
     return this.bridgeClient.getResourceName(accessToken, bridgeUri, clientConfig);
-  }
-
-  /**
-   * Returns the Items related to a user
-   */
-  public async getItems(accessToken: string, clientConfig?: ClientConfig): Promise<BridgeItem[]> {
-    return this.bridgeClient.getItems(accessToken, clientConfig);
   }
 }

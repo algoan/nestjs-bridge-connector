@@ -11,7 +11,6 @@ import {
   BridgeTransaction,
   BridgeBank,
   BridgeCategory,
-  BridgeItem,
 } from '../../interfaces/bridge.interface';
 
 /**
@@ -130,19 +129,6 @@ export class BridgeClient {
 
       return 'UNKNOWN';
     }
-  }
-
-  /**
-   * Get a bridge user's items
-   */
-  public async getItems(accessToken: string, clientConfig?: ClientConfig): Promise<BridgeItem[]> {
-    const url: string = `${config.bridge.baseUrl}/v2/items`;
-
-    const resp: AxiosResponse<ListResponse<BridgeItem>> = await this.httpService
-      .get(url, { headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) } })
-      .toPromise();
-
-    return resp.data.resources;
   }
 
   /**
