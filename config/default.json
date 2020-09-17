@@ -18,6 +18,7 @@
     "bankreader_required",
     "bankreader_link_required"
   ],
-  "restHooksSecret": "qvdswcsdcsqdcqscqxw4",
-  "port": 8080
+  "restHooksSecret": "",
+  "port": 8080,
+  "banksUserIdPassword": ""
 }
