@@ -13,12 +13,9 @@ import {
 } from '@algoan/rest';
 import { UnauthorizedException, Injectable, Logger } from '@nestjs/common';
 
-import { config } from 'node-config-ts';
-import * as moment from 'moment';
-import * as delay from 'delay';
 import { AlgoanService } from '../../algoan/algoan.service';
 import { AggregatorService } from '../../aggregator/services/aggregator.service';
-import { BridgeAccount, BridgeTransaction } from '../../aggregator/interfaces/bridge.interface';
+import { AuthenticationResponse, BridgeAccount, BridgeTransaction } from '../../aggregator/interfaces/bridge.interface';
 import { mapBridgeAccount, mapBridgeTransactions } from '../../aggregator/services/bridge/bridge.utils';
 import { EventDTO } from '../dto/event.dto';
 import { BankreaderLinkRequiredDTO } from '../dto/bandreader-link-required.dto';
@@ -137,7 +134,12 @@ export class HooksService {
     /**
      * 1. Retrieves an access token from Bridge to access to the user accounts
      */
-    const accessToken = await this.aggregator.getAccessToken(banksUser, serviceAccount.config as ClientConfig);
+    const authenticationResponse: AuthenticationResponse = await this.aggregator.getAccessToken(
+      banksUser,
+      serviceAccount.config as ClientConfig,
+    );
+    const accessToken: string = authenticationResponse.access_token;
+    const bridgeUserId: string = authenticationResponse.user.uuid;
 
     /**
      * 2. Retrieves Bridge banks accounts and send them to Algoan
@@ -193,6 +195,18 @@ export class HooksService {
     await banksUser.update({
       status: BanksUserStatus.FINISHED,
     });
+
+    /**
+     * 6. Delete the user from Bridge
+     */
+    await this.aggregator.deleteUser(
+      {
+        bridgeUserId,
+        banksUser,
+        accessToken,
+      },
+      serviceAccount.config as ClientConfig,
+    );
 
     return;
   }

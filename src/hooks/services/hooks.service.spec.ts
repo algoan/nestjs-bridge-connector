@@ -176,11 +176,18 @@ describe('HooksService', () => {
     const serviceAccountSpy = jest
       .spyOn(mockServiceAccount, 'getBanksUserById')
       .mockReturnValue(Promise.resolve(mockBanksUser));
-    const accessTokenSpy = jest.spyOn(aggregatorService, 'getAccessToken').mockResolvedValue('mockPermToken');
+    const accessTokenSpy = jest
+      .spyOn(aggregatorService, 'getAccessToken')
+      .mockResolvedValue({
+        access_token: 'mockPermToken',
+        expires_at: '323423423423',
+        user: { email: 'test@test.com', uuid: 'rrr', resource_type: 's', resource_uri: '/..' },
+      });
     const accountSpy = jest.spyOn(aggregatorService, 'getAccounts').mockResolvedValue([mockAccount]);
     const banksUserAccountSpy = jest.spyOn(mockBanksUser, 'createAccounts').mockResolvedValue([banksUserAccount]);
     const transactionSpy = jest.spyOn(aggregatorService, 'getTransactions').mockResolvedValue([mockTransaction]);
     const resourceNameSpy = jest.spyOn(aggregatorService, 'getResourceName').mockResolvedValue('mockResourceName');
+    const deleteUserSpy = jest.spyOn(aggregatorService, 'deleteUser').mockResolvedValue();
     const banksUserTransactionSpy = jest
       .spyOn(mockBanksUser, 'createTransactions')
       .mockResolvedValue(banksUserTransactionResponse);
@@ -211,5 +218,10 @@ describe('HooksService', () => {
     expect(banksUserUpdateSpy).toHaveBeenNthCalledWith(3, {
       status: BanksUserStatus.FINISHED,
     });
+    expect(deleteUserSpy).toHaveBeenNthCalledWith(1, {
+      bridgeUserId: 'rrr',
+      banksUser: mockBanksUser,
+      accessToken: 'mockPermToken',
+    }, mockServiceAccountConfig);
   });
 });

@@ -1,6 +1,9 @@
+import { createHmac } from 'crypto';
 import { Injectable } from '@nestjs/common';
 import { IBanksUser } from '@algoan/rest';
-import { UserAccount, BridgeAccount, BridgeTransaction } from '../interfaces/bridge.interface';
+import { config } from 'node-config-ts';
+import { has } from 'lodash';
+import { UserAccount, BridgeAccount, BridgeTransaction, AuthenticationResponse } from '../interfaces/bridge.interface';
 import { BridgeClient, ClientConfig } from './bridge/bridge.client';
 
 /**
@@ -45,22 +48,8 @@ export class AggregatorService {
    *
    * @param banksUser The bank user for which we generate the redirectUrl
    */
-  public async getAccessToken(banksUser: IBanksUser, clientConfig?: ClientConfig): Promise<string> {
-    return (await this.bridgeClient.authenticate(AggregatorService.buildCredentials(banksUser), clientConfig))
-      .access_token;
-  }
-
-  /**
-   * Build Bridge account credentials for a BankUser
-   *
-   * @param bankUser
-   */
-  private static buildCredentials(bankUser: IBanksUser): UserAccount {
-    return {
-      // bankUser.createdAt should exist, need to change the interface
-      email: `${bankUser.id}@algoan-bridge.com`,
-      password: `${bankUser.id}`,
-    };
+  public async getAccessToken(banksUser: IBanksUser, clientConfig?: ClientConfig): Promise<AuthenticationResponse> {
+    return this.bridgeClient.authenticate(AggregatorService.buildCredentials(banksUser), clientConfig);
   }
 
   /**
@@ -68,5 +57,46 @@ export class AggregatorService {
    */
   public async getResourceName(accessToken: string, bridgeUri: string, clientConfig?: ClientConfig): Promise<string> {
     return this.bridgeClient.getResourceName(accessToken, bridgeUri, clientConfig);
+  }
+
+  /**
+   * Delete a user from Bridge
+   * @param banksUser
+   */
+  public async deleteUser(
+    params: { bridgeUserId: string; accessToken: string; banksUser: IBanksUser },
+    clientConfig?: ClientConfig,
+  ): Promise<void> {
+    const { password } = AggregatorService.buildCredentials(params.banksUser);
+
+    return this.bridgeClient.deleteUser(
+      params.accessToken,
+      {
+        password,
+        userId: params.bridgeUserId,
+      },
+      clientConfig,
+    );
+  }
+
+  /**
+   * Build Bridge account credentials for a BankUser
+   * https://docs.bridgeapi.io/docs/user-creation
+   *
+   * @param banksUser
+   */
+  private static buildCredentials(banksUser: IBanksUser): UserAccount {
+    const password: string = config.banksUserIdPassword;
+    let hash: string = createHmac('sha256', password).update(banksUser.id).digest('hex');
+    const maxPasswordLength: number = 72;
+
+    if (hash.length > maxPasswordLength) {
+      hash = hash.slice(0, maxPasswordLength);
+    }
+
+    return {
+      email: `${banksUser.id}@algoan-bridge.com`,
+      password: hash,
+    };
   }
 }

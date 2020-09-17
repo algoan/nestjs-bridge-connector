@@ -1,3 +1,4 @@
+import { createHmac } from 'crypto';
 import { HttpModule } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BanksUserStatus, BanksUser, RequestBuilder } from '@algoan/rest';
@@ -61,17 +62,18 @@ describe('AggregatorService', () => {
       });
 
       const redirectUrl = await service.generateRedirectUrl(mockBanksUser);
+      const expectedPassword: string = createHmac('sha256', 'random_pass').update('mockBanksUserId').digest('hex');
       expect(registerSpy).toHaveBeenCalledWith(
         {
           email: 'mockBanksUserId@algoan-bridge.com',
-          password: 'mockBanksUserId',
+          password: expectedPassword,
         },
         undefined,
       );
       expect(authenticateSpy).toHaveBeenCalledWith(
         {
           email: 'mockBanksUserId@algoan-bridge.com',
-          password: 'mockBanksUserId',
+          password: expectedPassword,
         },
         undefined,
       );
@@ -106,12 +108,13 @@ describe('AggregatorService', () => {
 
   it('should get the accessToken', async () => {
     const spy = jest.spyOn(client, 'authenticate').mockReturnValue(Promise.resolve(mockAuthResponse));
-    const accessToken = await service.getAccessToken(mockBanksUser);
+    const accessToken = (await service.getAccessToken(mockBanksUser)).access_token;
+    const expectedPassword: string = createHmac('sha256', 'random_pass').update('mockBanksUserId').digest('hex');
 
     expect(spy).toBeCalledWith(
       {
         email: 'mockBanksUserId@algoan-bridge.com',
-        password: 'mockBanksUserId',
+        password: expectedPassword,
       },
       undefined,
     );
