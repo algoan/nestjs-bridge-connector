@@ -4,5 +4,6 @@
   ],
   "bridge":{
     "synchronizationWaitingTime": 0
-  }
+  },
+  "banksUserIdPassword": "random_pass"
 }

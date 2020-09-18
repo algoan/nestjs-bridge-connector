@@ -2,6 +2,7 @@ import { join } from 'path';
 import { HttpExceptionFilter } from '@algoan/nestjs-http-exception-filter';
 import { NestFactory, NestApplication } from '@nestjs/core';
 import { Logger, ValidationPipe } from '@nestjs/common';
+import { isEmpty } from 'lodash';
 import { WinstonModule, utilities } from 'nest-winston';
 import { config } from 'node-config-ts';
 import { format, transports } from 'winston';
@@ -17,6 +18,10 @@ const bootstrap = async (): Promise<void> => {
   const port: number = config.port;
   const defaultLevel: string = process.env.DEBUG_LEVEL || 'info';
   const nodeEnv: string = process.env.NODE_ENV;
+
+  if (isEmpty(config.restHooksSecret) || isEmpty(config.banksUserIdPassword)) {
+    throw new Error('Missing required secret configurations');
+  }
 
   const app: NestApplication = await NestFactory.create(AppModule, {
     cors: true,
@@ -59,6 +64,6 @@ const bootstrap = async (): Promise<void> => {
 };
 bootstrap().catch((err: Error): void => {
   // eslint-disable-next-line
-  logger.error(err, `An error occurred when bootstrapping the application`);
+  logger.error(err.message, `An error occurred when bootstrapping the application`, err.stack);
   process.exit(1);
 });

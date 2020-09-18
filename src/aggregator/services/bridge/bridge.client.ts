@@ -143,6 +143,28 @@ export class BridgeClient {
   }
 
   /**
+   * Delete a user
+   * @param clientConfig Client configuration attached to Algoan's service account
+   */
+  public async deleteUser(
+    accessToken: string,
+    params: { userId: string; password: string },
+    clientConfig?: ClientConfig,
+  ): Promise<void> {
+    const uri: string = `/v2/users/${params.userId}`;
+    const url: string = `${config.bridge.baseUrl}${uri}`;
+
+    await this.httpService
+      .delete(url, {
+        headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) },
+        data: {
+          password: params.password,
+        },
+      })
+      .toPromise();
+  }
+
+  /**
    * Build the headers from the serviceAccount or from the default values in the config.bridge
    * @param clientConfig: configs found in  serviceAccount.config
    */
