@@ -22,7 +22,19 @@ export class AggregatorService {
     const userAccount: UserAccount = AggregatorService.buildCredentials(banksUser);
     await this.bridgeClient.register(userAccount, clientConfig);
     const authenticationResponse = await this.bridgeClient.authenticate(userAccount, clientConfig);
-    const redirectResponse = await this.bridgeClient.connectItem(authenticationResponse.access_token, clientConfig);
+
+    /**
+     * Extract the uuid from the callback URL
+     * As Bridge accepts only letters and numbers, replace "-" by a "z"
+     */
+    const splittedCbUrl: string[] = banksUser.callbackUrl.split('/');
+    const uuid: string = splittedCbUrl[splittedCbUrl.length - 1].replace(/-/g, 'z');
+
+    const redirectResponse = await this.bridgeClient.connectItem(
+      authenticationResponse.access_token,
+      uuid,
+      clientConfig,
+    );
 
     return redirectResponse.redirect_url;
   }

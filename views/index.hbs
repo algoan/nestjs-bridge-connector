@@ -63,7 +63,7 @@
           id: makeid(12),
         }, {
           headers: {
-            'x-hub-signature': CryptoJS.HmacSHA256(JSON.stringify(payload), '{{ bankreaderRequiredSubscription.secret }}').toString()
+            'x-hub-signature': 'sha256=' + CryptoJS.HmacSHA256(JSON.stringify(payload), '{{ bankreaderRequiredSubscription.secret }}').toString()
           }
         });
 
@@ -74,7 +74,9 @@
         /**
          * Create a new banks user
          */
-        return axios.post('{{ algoanBaseUrl }}' + '/v1/banks-users', {}, {
+        return axios.post('{{ algoanBaseUrl }}' + '/v1/banks-users', {
+          callbackUrl: 'http://localhost:8080/callback/2/dd288579-c758-4022-b1f6-d47b9e79b704',
+        }, {
           headers: {
             'Authorization': '{{token}}',
           }
@@ -98,7 +100,7 @@
             id: makeid(12),
           }, {
             headers: {
-              'x-hub-signature': CryptoJS.HmacSHA256(JSON.stringify(payload), '{{ subscription.secret }}').toString()
+              'x-hub-signature': 'sha256=' + CryptoJS.HmacSHA256(JSON.stringify(payload), '{{ subscription.secret }}').toString()
             }
           });
         });

@@ -44,7 +44,7 @@
     "winston": "^3.3.3"
   },
   "devDependencies": {
-    "@algoan/eslint-config": "^1.0.9",
+    "@algoan/eslint-config": "^1.0.6",
     "@commitlint/config-conventional": "^8.3.4",
     "@nestjs/cli": "^7.0.0",
     "@nestjs/schematics": "^7.0.0",

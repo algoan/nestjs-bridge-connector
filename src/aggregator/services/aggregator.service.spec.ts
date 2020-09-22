@@ -2,6 +2,8 @@ import { createHmac } from 'crypto';
 import { HttpModule } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BanksUserStatus, BanksUser, RequestBuilder } from '@algoan/rest';
+import { v4 as uuidV4 } from 'uuid';
+
 import { AlgoanModule } from '../../algoan/algoan.module';
 import { AppModule } from '../../app.module';
 import { mockAccount, mockTransaction, mockAuthResponse } from '../interfaces/bridge-mock';
@@ -11,6 +13,8 @@ import { BridgeClient } from './bridge/bridge.client';
 describe('AggregatorService', () => {
   let service: AggregatorService;
   let client: BridgeClient;
+  let uuid: string = uuidV4();
+  const callbackUrl: string = `http://algoan.com/callback/2/${uuid}`;
   const mockBanksUser = new BanksUser(
     {
       id: 'mockBanksUserId',
@@ -18,7 +22,7 @@ describe('AggregatorService', () => {
       redirectUrl: 'mockRedirectUrl',
       redirectUrlCreatedAt: 123456789,
       redirectUrlTTL: 100,
-      callbackUrl: 'mockCallbackUrl',
+      callbackUrl,
       scores: [],
       analysis: { alerts: [], regularCashFlows: [], reliability: 'HIGH' },
     },
@@ -77,7 +81,8 @@ describe('AggregatorService', () => {
         },
         undefined,
       );
-      expect(connectItemSpy).toHaveBeenCalledWith('access-token', undefined);
+      const extractedUuid: string = uuid.replace(/-/g, 'z');
+      expect(connectItemSpy).toHaveBeenCalledWith('access-token', extractedUuid, undefined);
       expect(redirectUrl).toBe('https://bridge/redirection-url');
     });
 

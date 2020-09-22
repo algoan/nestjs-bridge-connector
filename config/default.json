@@ -2,7 +2,8 @@
   "algoan": {
     "baseUrl": "http://localhost:3000",
     "clientId": "a",
-    "clientSecret": "b"
+    "clientSecret": "b",
+    "debug": false
   },
   "bridge":{
     "bankinVersion":"2019-02-18",
