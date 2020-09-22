@@ -1,5 +1,20 @@
 apiVersion: v1
 entries:
+  bridgeconnector:
+  - apiVersion: v1
+    created: "2020-09-22T14:33:28.130576981Z"
+    description: A Helm chart for Kubernetes allows you to deploy Algoan's NestJS
+      Bridge connector
+    digest: 971e08c7640421d4a6fa24a9db0721940d7a071290fc618c206d8ef7193b663e
+    home: https://www.algoan.com
+    maintainers:
+    - email: support@algoan.com
+      name: ALGOAN SAS
+      url: https://www.algoan.com
+    name: bridgeconnector
+    urls:
+    - https://github.com/algoan/nestjs-bridge-connector/releases/download/bridgeconnector-1.0.2/bridgeconnector-1.0.2.tgz
+    version: 1.0.2
   budgetinsightconnector:
   - apiVersion: v1
     created: "2020-09-22T14:29:01.714940633Z"
