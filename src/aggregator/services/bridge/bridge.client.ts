@@ -1,6 +1,6 @@
 import { HttpService, Injectable, Logger } from '@nestjs/common';
 import { config } from 'node-config-ts';
-import { AxiosResponse } from 'axios';
+import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { isNil } from 'lodash';
 import {
   UserResponse,
@@ -33,7 +33,20 @@ export class BridgeClient {
    */
   private readonly logger: Logger = new Logger(BridgeClient.name);
 
-  constructor(private readonly httpService: HttpService) {}
+  constructor(private readonly httpService: HttpService) {
+    this.httpService.axiosRef.interceptors.request.use(
+      (_config: AxiosRequestConfig): AxiosRequestConfig => {
+        this.logger.log(_config, 'Request to bridge');
+
+        return _config;
+      },
+    );
+    this.httpService.axiosRef.interceptors.response.use(undefined, async (error: AxiosError) => {
+      this.logger.error(error, error.stack, error.message);
+
+      return Promise.reject(error);
+    });
+  }
 
   /**
    * Creates a bridge user
@@ -65,8 +78,12 @@ export class BridgeClient {
   /**
    * Authenticates a bridge user
    */
-  public async connectItem(accessToken: string, clientConfig?: ClientConfig): Promise<ConnectItemResponse> {
-    const url: string = `${config.bridge.baseUrl}/v2/connect/items/add/url?country=fr`;
+  public async connectItem(
+    accessToken: string,
+    context: string,
+    clientConfig?: ClientConfig,
+  ): Promise<ConnectItemResponse> {
+    const url: string = `${config.bridge.baseUrl}/v2/connect/items/add/url?country=fr&context=${context}`;
 
     const resp: AxiosResponse<ConnectItemResponse> = await this.httpService
       .get(url, { headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) } })
@@ -151,14 +168,15 @@ export class BridgeClient {
     params: { userId: string; password: string },
     clientConfig?: ClientConfig,
   ): Promise<void> {
-    const uri: string = `/v2/users/${params.userId}`;
+    const uri: string = `/v2/users/${params.userId}?password=${params.password}`;
     const url: string = `${config.bridge.baseUrl}${uri}`;
 
     await this.httpService
       .delete(url, {
-        headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) },
-        data: {
-          password: params.password,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          ...BridgeClient.getHeaders(clientConfig),
+          'Content-Type': 'application/json',
         },
       })
       .toPromise();

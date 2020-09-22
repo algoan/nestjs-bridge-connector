@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AxiosResponse } from 'axios';
 import { of } from 'rxjs';
 import { config } from 'node-config-ts';
+import { v4 as uuidV4 } from 'uuid';
 import { AlgoanModule } from '../../../algoan/algoan.module';
 import { AppModule } from '../../../app.module';
 import {
@@ -107,11 +108,11 @@ describe('BridgeClient', () => {
     };
 
     const spy = jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(result));
-
-    const resp = await service.connectItem('secret-access-token');
+    const uuid: string = uuidV4().replace(/-/g, 'z');
+    const resp = await service.connectItem('secret-access-token', uuid);
     expect(resp).toBe(connectItemResponse);
 
-    expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/connect/items/add/url?country=fr', {
+    expect(spy).toHaveBeenCalledWith(`https://sync.bankin.com/v2/connect/items/add/url?country=fr&context=${uuid}`, {
       headers: {
         Authorization: 'Bearer secret-access-token',
         'Client-Id': config.bridge.clientId,

@@ -1,8 +1,6 @@
 import { Algoan, EventName } from '@algoan/rest';
-import { Injectable, OnModuleInit, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, OnModuleInit, InternalServerErrorException, Logger } from '@nestjs/common';
 import { config } from 'node-config-ts';
-import { ServiceAccount } from '@algoan/rest/dist/src/core/ServiceAccount';
-import { Subscription } from '@algoan/rest/dist/src/core/Subscription';
 
 /**
  * Algoan service
@@ -16,6 +14,11 @@ export class AlgoanService implements OnModuleInit {
   public algoanClient?: Algoan;
 
   /**
+   * Logger instance
+   */
+  private readonly logger: Logger = new Logger(AlgoanService.name);
+
+  /**
    * Fetch services and creates subscription
    */
   public async onModuleInit(): Promise<void> {
@@ -26,6 +29,7 @@ export class AlgoanService implements OnModuleInit {
       baseUrl: config.algoan.baseUrl,
       clientId: config.algoan.clientId,
       clientSecret: config.algoan.clientSecret,
+      debug: config.algoan.debug,
     });
 
     if (config.eventList === undefined) {
