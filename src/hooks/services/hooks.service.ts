@@ -46,7 +46,7 @@ export class HooksService {
       throw new UnauthorizedException(`No service account found for subscription ${event.subscription.id}`);
     }
 
-    // From the budget insight connector, need to find the bridge equivalent
+    // From the Bridge connector, need to find the bridge equivalent
     const subscription: Subscription = serviceAccount.subscriptions.find(
       (sub: Subscription) => sub.id === event.subscription.id,
     );

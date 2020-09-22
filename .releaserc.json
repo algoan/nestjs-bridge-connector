@@ -8,10 +8,10 @@
         "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
       }],
       ["@semantic-release/exec", {
-        "prepareCmd": "docker build -t algoan/budget-insight-connector ."
+        "prepareCmd": "docker build -t algoan/nestjs-bridge-connector ."
       }],
       ["semantic-release-docker", {
-        "name": "algoan/budget-insight-connector"
+        "name": "algoan/nestjs-bridge-connector"
       }]
     ],
     "preset": "angular"
