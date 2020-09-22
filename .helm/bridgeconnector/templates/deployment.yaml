@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "..fullname" . }}
+  labels:
+    app: {{ include "..name" . }}
+    chart: {{ include "..chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    name: {{ include "..name" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "..name" . }}
+      release: {{ .Release.Name }}
+      name: {{ include "..name" . }}
+  strategy:
+    type: RollingUpdate
+  minReadySeconds: 20
+  template:
+    metadata:
+      labels:
+        app: {{ include "..name" . }}
+        release: {{ .Release.Name }}
+        name: {{ include "..name" . }}
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - {{ include "..name" . }}
+              topologyKey: failure-domain.beta.kubernetes.io/zone
+            weight: 100
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 8080
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+          env:
+          {{- range $k, $v := .Values.environmentVariables }}
+            - name: {{ quote $k }}
+              value: {{ quote $v }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - name: {{ include "..name" . }}-secret
+              readOnly: true
+              mountPath: {{ .Values.volumeMounts.secret }}
+            - name: {{ include "..name" . }}-config
+              readOnly: true
+              mountPath: {{ .Values.volumeMounts.config }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{ toYaml . | indent 8 }}
+      {{- end }}
+      volumes:
+      - name: {{ include "..name" . }}-secret
+        secret:
+          secretName: {{ include "..name" . }}-secret
+      - name: {{ include "..name" . }}-config
+        configMap:
+          name: {{ include "..name" . }}-config

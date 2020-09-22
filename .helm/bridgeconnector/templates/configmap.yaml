@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-config
+data:
+  production.json: |-
+    {{ required "A valid .Values.config entry is required!" .Values.config | nindent 4 }}
