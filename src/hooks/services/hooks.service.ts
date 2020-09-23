@@ -42,6 +42,8 @@ export class HooksService {
   public async handleWebhook(event: EventDTO, signature: string): Promise<void> {
     const serviceAccount = this.algoanService.algoanClient.getServiceAccountBySubscriptionId(event.subscription.id);
 
+    this.logger.debug(serviceAccount, `Found a service account for subscription "${event.subscription.id}"`);
+
     if (serviceAccount === undefined) {
       throw new UnauthorizedException(`No service account found for subscription ${event.subscription.id}`);
     }
@@ -90,7 +92,7 @@ export class HooksService {
      * 1. GET the banks user to retrieve the callback URL
      */
     const banksUser: BanksUser = await serviceAccount.getBanksUserById(payload.banksUserId);
-    this.logger.debug(`Found BanksUser with id ${banksUser.id}`);
+    this.logger.debug({ banksUser, serviceAccount }, `Found BanksUser with id ${banksUser.id}`);
 
     /**
      * 2. Generates a redirect URL
