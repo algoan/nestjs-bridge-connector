@@ -141,7 +141,7 @@ describe('HooksService', () => {
     );
 
     expect(serviceAccountSpy).toBeCalledWith(mockEvent.payload.banksUserId);
-    expect(agreggatorSpy).toBeCalledWith(mockBanksUser, mockServiceAccountConfig);
+    expect(agreggatorSpy).toBeCalledWith(mockBanksUser, undefined, mockServiceAccountConfig);
     expect(banksUserSpy).toBeCalledWith({ redirectUrl: 'mockRedirectUrl' });
   });
 

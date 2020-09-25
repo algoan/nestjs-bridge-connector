@@ -81,9 +81,14 @@ export class BridgeClient {
   public async connectItem(
     accessToken: string,
     context: string,
+    email?: string,
     clientConfig?: ClientConfig,
   ): Promise<ConnectItemResponse> {
-    const url: string = `${config.bridge.baseUrl}/v2/connect/items/add/url?country=fr&context=${context}`;
+    let url: string = `${config.bridge.baseUrl}/v2/connect/items/add/url?country=fr&context=${context}`;
+
+    if (email !== undefined) {
+      url += `&prefill_email=${email}`;
+    }
 
     const resp: AxiosResponse<ConnectItemResponse> = await this.httpService
       .get(url, { headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) } })

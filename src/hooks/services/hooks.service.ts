@@ -7,9 +7,6 @@ import {
   PostBanksUserAccountDTO,
   PostBanksUserTransactionDTO,
   BanksUserStatus,
-  // BanksUserStatus,
-  // PostBanksUserTransactionDTO,
-  // PostBanksUserAccountDTO,
 } from '@algoan/rest';
 import { UnauthorizedException, Injectable, Logger } from '@nestjs/common';
 
@@ -88,17 +85,32 @@ export class HooksService {
     serviceAccount: ServiceAccount,
     payload: BankreaderLinkRequiredDTO,
   ): Promise<void> {
+    let email: string | undefined;
+
     /**
-     * 1. GET the banks user to retrieve the callback URL
+     * 1. GET the banks user to retrieve the callback URL and the application to get the email
      */
     const banksUser: BanksUser = await serviceAccount.getBanksUserById(payload.banksUserId);
     this.logger.debug({ banksUser, serviceAccount }, `Found BanksUser with id ${banksUser.id}`);
 
     /**
+     * 1-1. If the applicationId is defined, try to get an email
+     * If the request fails, do not block the process
+     */
+    if (payload.applicationId !== undefined) {
+      try {
+        const application = await serviceAccount.getApplicationById(payload.applicationId);
+        email = application.applicant?.contact?.email;
+      } catch (err) {
+        this.logger.warn(payload, `Application cannot be retrieved`);
+      }
+    }
+    /**
      * 2. Generates a redirect URL
      */
     const redirectUrl: string = await this.aggregator.generateRedirectUrl(
       banksUser,
+      email,
       serviceAccount.config as ClientConfig,
     );
 

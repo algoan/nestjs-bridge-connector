@@ -122,6 +122,37 @@ describe('BridgeClient', () => {
     });
   });
 
+  it('can connect a user to an item with a prefilled_email', async () => {
+    const email: string = 'test@test.com';
+    const connectItemResponse: ConnectItemResponse = {
+      redirect_url: 'the-redirect-url',
+    };
+    const result: AxiosResponse = {
+      data: connectItemResponse,
+      status: 200,
+      statusText: '',
+      headers: {},
+      config: {},
+    };
+
+    const spy = jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(result));
+    const uuid: string = uuidV4().replace(/-/g, 'z');
+    const resp = await service.connectItem('secret-access-token', uuid, email);
+    expect(resp).toBe(connectItemResponse);
+
+    expect(spy).toHaveBeenCalledWith(
+      `https://sync.bankin.com/v2/connect/items/add/url?country=fr&context=${uuid}&prefill_email=${email}`,
+      {
+        headers: {
+          Authorization: 'Bearer secret-access-token',
+          'Client-Id': config.bridge.clientId,
+          'Client-Secret': config.bridge.clientSecret,
+          'Bankin-Version': config.bridge.bankinVersion,
+        },
+      },
+    );
+  });
+
   it('can get a list of accounts', async () => {
     const listAccountsResponse: ListResponse<BridgeAccount> = {
       resources: [
