@@ -24,7 +24,7 @@
   "dependencies": {
     "@algoan/nestjs-http-exception-filter": "^1.0.5",
     "@algoan/nestjs-logging-interceptor": "^2.1.3",
-    "@algoan/rest": "^1.15.2",
+    "@algoan/rest": "^1.15.3",
     "@nestjs/common": "^7.4.4",
     "@nestjs/core": "^7.4.4",
     "@nestjs/platform-express": "^7.4.4",

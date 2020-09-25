@@ -18,7 +18,11 @@ export class AggregatorService {
    *
    * @param banksUser The bank user for which we generate the redirectUrl
    */
-  public async generateRedirectUrl(banksUser: IBanksUser, clientConfig?: ClientConfig): Promise<string> {
+  public async generateRedirectUrl(
+    banksUser: IBanksUser,
+    email?: string,
+    clientConfig?: ClientConfig,
+  ): Promise<string> {
     const userAccount: UserAccount = AggregatorService.buildCredentials(banksUser);
     await this.bridgeClient.register(userAccount, clientConfig);
     const authenticationResponse = await this.bridgeClient.authenticate(userAccount, clientConfig);
@@ -33,6 +37,7 @@ export class AggregatorService {
     const redirectResponse = await this.bridgeClient.connectItem(
       authenticationResponse.access_token,
       uuid,
+      email,
       clientConfig,
     );
 
