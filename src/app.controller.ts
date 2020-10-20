@@ -30,7 +30,9 @@ export class AppController {
   public async root(): Promise<IRootResult> {
     const appUrl: string = `http://localhost:${config.port}`;
 
-    const subscription: Subscription = this.algoanService.algoanClient.serviceAccounts[0].subscriptions.find(
+    const subscription:
+      | Subscription
+      | undefined = this.algoanService.algoanClient.serviceAccounts[0].subscriptions.find(
       (sub: Subscription) => sub.eventName === EventName.BANKREADER_LINK_REQUIRED,
     );
 
@@ -51,8 +53,10 @@ export class AppController {
   @Render('index')
   public async triggerEvent(
     @Query('user_uuid') code: string,
-  ): Promise<IRootResult & { code: string; bankreaderRequiredSubscription: Subscription }> {
-    const bankreaderRequiredSubscription: Subscription = this.algoanService.algoanClient.serviceAccounts[0].subscriptions.find(
+  ): Promise<IRootResult & { code: string; bankreaderRequiredSubscription?: Subscription }> {
+    const bankreaderRequiredSubscription:
+      | Subscription
+      | undefined = this.algoanService.algoanClient.serviceAccounts[0].subscriptions.find(
       (sub: Subscription) => sub.eventName === EventName.BANKREADER_REQUIRED,
     );
 
@@ -69,7 +73,7 @@ export class AppController {
  */
 interface IRootResult {
   algoanBaseUrl: string;
-  subscription: Subscription;
+  subscription?: Subscription;
   token: string;
   callbackUrl: string;
 }

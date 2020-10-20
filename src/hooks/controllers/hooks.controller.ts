@@ -5,7 +5,7 @@ import { HooksService } from '../services/hooks.service';
 /**
  * Headers interface
  */
-interface Headers {
+interface IHeaders {
   'x-hub-signature': string;
 }
 
@@ -21,7 +21,7 @@ export class HooksController {
    */
   @Post('/hooks')
   @HttpCode(HttpStatus.NO_CONTENT)
-  public async controlHook(@Body() event: EventDTO, @Headers() headers: Headers): Promise<void> {
+  public async controlHook(@Body() event: EventDTO, @Headers() headers: IHeaders): Promise<void> {
     return this.hooksService.handleWebhook(event, headers['x-hub-signature']);
   }
 }

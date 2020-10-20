@@ -163,8 +163,8 @@ describe('BridgeClient', () => {
           name: 'Compte Crédit Immobilier',
           balance: -140200,
           status: 0,
-          status_code_info: undefined,
-          status_code_description: undefined,
+          status_code_info: null,
+          status_code_description: null,
           updated_at: '2019-04-06T13:53:12Z',
           type: BridgeAccountType.CHECKING,
           currency_code: 'EUR',
@@ -189,12 +189,12 @@ describe('BridgeClient', () => {
             repaid_capital: 40200,
             remaining_capital: 100000,
           },
-          savings_details: undefined,
+          savings_details: null,
           is_pro: false,
           iban: 'FR2420020202260600024M02606',
         },
       ],
-      pagination: { next_uri: undefined, previous_uri: undefined },
+      pagination: { next_uri: null, previous_uri: null },
     };
     const result: AxiosResponse = {
       data: listAccountsResponse,
@@ -246,7 +246,7 @@ describe('BridgeClient', () => {
           is_future: false,
         },
       ],
-      pagination: { next_uri: undefined, previous_uri: undefined },
+      pagination: { next_uri: null, previous_uri: null },
     };
     const result: AxiosResponse = {
       data: listAccountTransactionsResponse,

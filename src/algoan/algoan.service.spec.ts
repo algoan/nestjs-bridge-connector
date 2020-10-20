@@ -25,7 +25,7 @@ describe('AlgoanService', () => {
   });
 
   it('should throw an error', async () => {
-    config.eventList = undefined;
+    config.eventList = [];
 
     await expect(service.onModuleInit()).rejects.toThrow('No event list given');
   });

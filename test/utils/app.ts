@@ -50,7 +50,7 @@ export const buildFakeApp = async (): Promise<INestApplication> => {
     baseUrl: fakeAlgoanBaseUrl,
     method: 'get',
     result: [],
-    path: '/v1/subscriptions',
+    path: `/v1/subscriptions?filter=${JSON.stringify({ eventName: { $in: config.eventList } })}`,
   });
   const fakePostSubscriptions: nock.Scope = fakeAPI({
     baseUrl: fakeAlgoanBaseUrl,
