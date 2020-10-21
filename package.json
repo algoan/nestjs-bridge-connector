@@ -61,7 +61,7 @@
     "commitlint": "^11.0.0",
     "cz-conventional-changelog": "^3.2.0",
     "eslint": "^7.11.0",
-    "eslint-config-prettier": "^6.10.0",
+    "eslint-config-prettier": "^6.13.0",
     "eslint-plugin-import": "^2.21.2",
     "eslint-plugin-nestjs": "^1.2.3",
     "husky": "^4.2.5",
