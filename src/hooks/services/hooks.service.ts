@@ -7,6 +7,8 @@ import {
   PostBanksUserAccountDTO,
   PostBanksUserTransactionDTO,
   BanksUserStatus,
+  SubscriptionEvent,
+  EventStatus,
 } from '@algoan/rest';
 import { UnauthorizedException, Injectable, Logger } from '@nestjs/common';
 
@@ -58,23 +60,36 @@ export class HooksService {
       throw new UnauthorizedException('Invalid X-Hub-Signature: you cannot call this API');
     }
 
-    switch (event.subscription.eventName) {
-      case EventName.BANKREADER_LINK_REQUIRED:
-        // @ts-ignore
-        await this.handleBankreaderLinkRequiredEvent(serviceAccount, event.payload as BankreaderLinkRequiredDTO);
-        break;
+    // ACKnowledge the subscription event
+    const se: SubscriptionEvent = subscription.event(event.id);
 
-      // case EventName.BANKREADER_CONFIGURATION_REQUIRED:
-      //   break;
+    try {
+      switch (event.subscription.eventName) {
+        case EventName.BANKREADER_LINK_REQUIRED:
+          // @ts-ignore
+          await this.handleBankreaderLinkRequiredEvent(serviceAccount, event.payload as BankreaderLinkRequiredDTO);
+          break;
 
-      case EventName.BANKREADER_REQUIRED:
-        await this.handleBankReaderRequiredEvent(serviceAccount, event.payload as BankreaderRequiredDTO);
-        break;
+        // case EventName.BANKREADER_CONFIGURATION_REQUIRED:
+        //   break;
 
-      // The default case should never be reached, as the eventName is already checked in the DTO
-      default:
-        return;
+        case EventName.BANKREADER_REQUIRED:
+          await this.handleBankReaderRequiredEvent(serviceAccount, event.payload as BankreaderRequiredDTO);
+          break;
+
+        // The default case should never be reached, as the eventName is already checked in the DTO
+        default:
+          void se.update({ status: EventStatus.FAILED });
+
+          return;
+      }
+    } catch (err) {
+      void se.update({ status: EventStatus.ERROR });
+
+      throw err;
     }
+
+    void se.update({ status: EventStatus.PROCESSED });
 
     return;
   }
