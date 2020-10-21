@@ -1,5 +1,6 @@
 import { Algoan, EventName } from '@algoan/rest';
 import { Injectable, OnModuleInit, InternalServerErrorException, Logger } from '@nestjs/common';
+import { isEmpty } from 'lodash';
 import { config } from 'node-config-ts';
 
 /**
@@ -11,7 +12,7 @@ export class AlgoanService implements OnModuleInit {
   /**
    * Algoan client
    */
-  public algoanClient?: Algoan;
+  public algoanClient!: Algoan;
 
   /**
    * Logger instance
@@ -32,7 +33,7 @@ export class AlgoanService implements OnModuleInit {
       debug: config.algoan.debug,
     });
 
-    if (config.eventList === undefined) {
+    if (isEmpty(config.eventList)) {
       throw new InternalServerErrorException('No event list given');
     }
 

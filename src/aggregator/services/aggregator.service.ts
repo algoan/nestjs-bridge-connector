@@ -2,7 +2,6 @@ import { createHmac } from 'crypto';
 import { Injectable } from '@nestjs/common';
 import { IBanksUser } from '@algoan/rest';
 import { config } from 'node-config-ts';
-import { has } from 'lodash';
 import { UserAccount, BridgeAccount, BridgeTransaction, AuthenticationResponse } from '../interfaces/bridge.interface';
 import { BridgeClient, ClientConfig } from './bridge/bridge.client';
 
@@ -31,7 +30,10 @@ export class AggregatorService {
      * Extract the uuid from the callback URL
      * As Bridge accepts only letters and numbers, replace "-" by a "z"
      */
-    const splittedCbUrl: string[] = banksUser.callbackUrl.split('/');
+    const splittedCbUrl: string[] | undefined = banksUser.callbackUrl?.split('/');
+    if (splittedCbUrl === undefined) {
+      throw new Error('No callbackUrl provided');
+    }
     const uuid: string = splittedCbUrl[splittedCbUrl.length - 1].replace(/-/g, 'z');
 
     const redirectResponse = await this.bridgeClient.connectItem(

@@ -78,7 +78,7 @@ export interface BridgeAccount {
     borrowed_capital: number;
     repaid_capital: number;
     remaining_capital: number;
-  };
+  } | null;
   savings_details: null; // couldn't findn ann example of this
   is_pro: boolean;
   iban: string;
