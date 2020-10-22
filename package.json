@@ -22,7 +22,7 @@
     "test:e2e": "npm t -- --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@algoan/nestjs-http-exception-filter": "^1.0.6",
+    "@algoan/nestjs-http-exception-filter": "^1.0.7",
     "@algoan/nestjs-logging-interceptor": "^2.1.4",
     "@algoan/rest": "^1.17.2",
     "@nestjs/common": "^7.4.4",
