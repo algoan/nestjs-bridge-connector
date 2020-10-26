@@ -15,6 +15,8 @@ import {
   BanksUserTransaction,
   BanksUserTransactionType,
   IServiceAccount,
+  SubscriptionEvent,
+  ISubscriptionEvent,
 } from '@algoan/rest';
 import { EventDTO } from '../dto/event.dto';
 import { AggregatorModule } from '../../aggregator/aggregator.module';
@@ -107,6 +109,9 @@ describe('HooksService', () => {
 
   describe('handleWebhook calls the correct event handling function', () => {
     beforeEach(() => {
+      jest
+        .spyOn(SubscriptionEvent.prototype, 'update')
+        .mockResolvedValue(({} as unknown) as ISubscriptionEvent & { id: string });
       jest.spyOn(algoanService.algoanClient, 'getServiceAccountBySubscriptionId').mockReturnValue(mockServiceAccount);
     });
     it('handles bankreader link required', async () => {
