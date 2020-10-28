@@ -60,13 +60,28 @@ export class HooksService {
       throw new UnauthorizedException('Invalid X-Hub-Signature: you cannot call this API');
     }
 
+    // Handle the event asynchronously
+    void this.dispatchAndHandleWebhook(event, subscription, serviceAccount);
+
+    return;
+  }
+
+  /**
+   * Dispatch to the right webhook handler and handle
+   *
+   * Allow to asynchronously handle (with `void`) the webhook and firstly respond 204 to the server
+   */
+  private async dispatchAndHandleWebhook(
+    event: EventDTO,
+    subscription: Subscription,
+    serviceAccount: ServiceAccount,
+  ): Promise<void> {
     // ACKnowledge the subscription event
     const se: SubscriptionEvent = subscription.event(event.id);
 
     try {
       switch (event.subscription.eventName) {
         case EventName.BANKREADER_LINK_REQUIRED:
-          // @ts-ignore
           await this.handleBankreaderLinkRequiredEvent(serviceAccount, event.payload as BankreaderLinkRequiredDTO);
           break;
 
@@ -90,8 +105,6 @@ export class HooksService {
     }
 
     void se.update({ status: EventStatus.PROCESSED });
-
-    return;
   }
 
   /**
