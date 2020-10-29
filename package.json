@@ -53,7 +53,7 @@
     "@semantic-release/git": "^9.0.0",
     "@types/express": "^4.17.3",
     "@types/jest": "26.0.15",
-    "@types/lodash": "^4.14.162",
+    "@types/lodash": "^4.14.163",
     "@types/node": "^14.14.6",
     "@types/supertest": "^2.0.8",
     "commitlint": "^11.0.0",
