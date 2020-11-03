@@ -26,7 +26,7 @@
     "@algoan/nestjs-logging-interceptor": "^2.1.5",
     "@algoan/rest": "^1.17.2",
     "@nestjs/common": "^7.4.4",
-    "@nestjs/core": "^7.4.4",
+    "@nestjs/core": "^7.5.1",
     "@nestjs/platform-express": "^7.4.4",
     "axios": "^0.20.0",
     "class-transformer": "^0.3.1",
