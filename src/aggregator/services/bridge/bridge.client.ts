@@ -21,6 +21,7 @@ export interface ClientConfig {
   clientId: string;
   clientSecret: string;
   bankinVersion: string;
+  nbOfMonths?: number;
 }
 
 /**
@@ -116,10 +117,12 @@ export class BridgeClient {
   public async getTransactions(
     accessToken: string,
     clientConfig?: ClientConfig,
+    lastUpdatedAt?: string | undefined,
     nextUri?: string,
     transactions?: BridgeTransaction[],
   ): Promise<BridgeTransaction[]> {
-    const uri: string = nextUri ?? '/v2/transactions?limit=100';
+    const uri: string =
+      nextUri ?? `/v2/transactions/updated?limit=100${!isNil(lastUpdatedAt) ? `&since=${lastUpdatedAt}` : ''}`;
     const url: string = `${config.bridge.baseUrl}${uri}`;
 
     const resp: AxiosResponse<ListResponse<BridgeTransaction>> = await this.httpService
@@ -131,7 +134,13 @@ export class BridgeClient {
     const mergedTransactions: BridgeTransaction[] = [...(transactions ?? []), ...resp.data.resources];
 
     if (!isNil(resp.data.pagination.next_uri)) {
-      return this.getTransactions(accessToken, clientConfig, resp.data.pagination.next_uri, mergedTransactions);
+      return this.getTransactions(
+        accessToken,
+        clientConfig,
+        lastUpdatedAt,
+        resp.data.pagination.next_uri,
+        mergedTransactions,
+      );
     }
 
     return mergedTransactions;

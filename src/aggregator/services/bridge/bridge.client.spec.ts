@@ -261,7 +261,7 @@ describe('BridgeClient', () => {
     const resp = await service.getTransactions('secret-access-token');
     expect(resp).toEqual(listAccountTransactionsResponse.resources);
 
-    expect(spy).toHaveBeenCalledWith(`https://sync.bankin.com/v2/transactions?limit=100`, {
+    expect(spy).toHaveBeenCalledWith(`https://sync.bankin.com/v2/transactions/updated?limit=100`, {
       headers: {
         Authorization: 'Bearer secret-access-token',
         'Client-Id': config.bridge.clientId,

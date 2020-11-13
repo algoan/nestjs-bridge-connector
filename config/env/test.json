@@ -3,7 +3,8 @@
     "service_account_created"
   ],
   "bridge":{
-    "synchronizationWaitingTime": 0
+    "synchronizationWaitingTime": 0,
+    "synchronizationTimeout": 0
   },
   "banksUserIdPassword": "random_pass"
 }

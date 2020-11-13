@@ -149,9 +149,9 @@ describe('AggregatorService', () => {
   it('should get the transactions', async () => {
     const spy = jest.spyOn(client, 'getTransactions').mockReturnValue(Promise.resolve([mockTransaction]));
     const token = 'token';
-    await service.getTransactions(token);
+    await service.getTransactions(token, undefined);
 
-    expect(spy).toBeCalledWith(token, undefined);
+    expect(spy).toBeCalledWith(token, undefined, undefined);
   });
 
   it('should get the accessToken', async () => {
