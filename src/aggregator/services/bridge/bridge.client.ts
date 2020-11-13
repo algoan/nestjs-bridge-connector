@@ -12,6 +12,7 @@ import {
   BridgeTransaction,
   BridgeBank,
   BridgeCategory,
+  BridgeUserInformation,
 } from '../../interfaces/bridge.interface';
 
 /**
@@ -185,6 +186,22 @@ export class BridgeClient {
         },
       })
       .toPromise();
+  }
+
+  /**
+   * Get user personal information
+   */
+  public async getUserPersonalInformation(
+    accessToken: string,
+    clientConfig?: ClientConfig,
+  ): Promise<BridgeUserInformation[]> {
+    const url: string = `${config.bridge.baseUrl}/v2/users/kyc`;
+
+    const resp: AxiosResponse<BridgeUserInformation[]> = await this.httpService
+      .get(url, { headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) } })
+      .toPromise();
+
+    return resp.data;
   }
 
   /**

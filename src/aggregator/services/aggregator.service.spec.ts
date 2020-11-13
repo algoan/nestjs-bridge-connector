@@ -6,7 +6,7 @@ import { v4 as uuidV4 } from 'uuid';
 
 import { AlgoanModule } from '../../algoan/algoan.module';
 import { AppModule } from '../../app.module';
-import { mockAccount, mockTransaction, mockAuthResponse } from '../interfaces/bridge-mock';
+import { mockAccount, mockTransaction, mockAuthResponse, mockPersonalInformation } from '../interfaces/bridge-mock';
 import { AggregatorService } from './aggregator.service';
 import { BridgeClient } from './bridge/bridge.client';
 
@@ -176,5 +176,15 @@ describe('AggregatorService', () => {
     await service.getResourceName(token, resourceUri);
 
     expect(spy).toBeCalledWith(token, resourceUri, undefined);
+  });
+
+  it('should get the personal information from the user', async () => {
+    const spy = jest
+      .spyOn(client, 'getUserPersonalInformation')
+      .mockReturnValue(Promise.resolve(mockPersonalInformation));
+    const token = 'token';
+    await service.getUserPersonalInformation(token);
+
+    expect(spy).toBeCalledWith(token, undefined);
   });
 });

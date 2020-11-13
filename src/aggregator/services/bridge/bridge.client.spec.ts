@@ -14,7 +14,7 @@ import {
   BridgeBank,
   BridgeAccount,
 } from '../../interfaces/bridge.interface';
-import { mockUserResponse, mockAuthResponse } from '../../interfaces/bridge-mock';
+import { mockUserResponse, mockAuthResponse, mockPersonalInformation } from '../../interfaces/bridge-mock';
 import { BridgeClient } from './bridge.client';
 
 describe('BridgeClient', () => {
@@ -294,6 +294,30 @@ describe('BridgeClient', () => {
     expect(resp).toBe('mockBankName');
 
     expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/mockResourceUri', {
+      headers: {
+        Authorization: 'Bearer mockAccessToken',
+        'Client-Id': config.bridge.clientId,
+        'Client-Secret': config.bridge.clientSecret,
+        'Bankin-Version': config.bridge.bankinVersion,
+      },
+    });
+  });
+
+  it('can get user information', async () => {
+    const result: AxiosResponse = {
+      data: mockPersonalInformation,
+      status: 200,
+      statusText: '',
+      headers: {},
+      config: {},
+    };
+
+    const spy = jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(result));
+
+    const resp = await service.getUserPersonalInformation('mockAccessToken');
+    expect(resp).toEqual(mockPersonalInformation);
+
+    expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/users/kyc', {
       headers: {
         Authorization: 'Bearer mockAccessToken',
         'Client-Id': config.bridge.clientId,
