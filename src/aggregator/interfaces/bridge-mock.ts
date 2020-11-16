@@ -101,7 +101,7 @@ export const mockPersonalInformation: BridgeUserInformation[] = [
     nb_kids: 0,
   },
   {
-    item_id: 1234568,
+    item_id: 5,
     sex: 'MALE',
     first_name: null, // eslint-disable-line no-null/no-null
     last_name: 'DUPONT',

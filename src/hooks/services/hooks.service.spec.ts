@@ -25,7 +25,7 @@ import { AlgoanModule } from '../../algoan/algoan.module';
 import { AppModule } from '../../app.module';
 import { AlgoanService } from '../../algoan/algoan.service';
 import { BankreaderLinkRequiredDTO } from '../dto/bandreader-link-required.dto';
-import { mockAccount, mockTransaction } from '../../aggregator/interfaces/bridge-mock';
+import { mockAccount, mockPersonalInformation, mockTransaction } from '../../aggregator/interfaces/bridge-mock';
 import { mapBridgeAccount, mapBridgeTransactions } from '../../aggregator/services/bridge/bridge.utils';
 import { HooksService } from './hooks.service';
 
@@ -187,6 +187,9 @@ describe('HooksService', () => {
       user: { email: 'test@test.com', uuid: 'rrr', resource_type: 's', resource_uri: '/..' },
     });
     const accountSpy = jest.spyOn(aggregatorService, 'getAccounts').mockResolvedValue([mockAccount]);
+    const userInfoSpy = jest
+      .spyOn(aggregatorService, 'getUserPersonalInformation')
+      .mockResolvedValue(mockPersonalInformation);
     const banksUserAccountSpy = jest.spyOn(mockBanksUser, 'createAccounts').mockResolvedValue([banksUserAccount]);
     const transactionSpy = jest.spyOn(aggregatorService, 'getTransactions').mockResolvedValue([mockTransaction]);
     const resourceNameSpy = jest.spyOn(aggregatorService, 'getResourceName').mockResolvedValue('mockResourceName');
@@ -196,12 +199,18 @@ describe('HooksService', () => {
       .mockResolvedValue(banksUserTransactionResponse);
     const banksUserUpdateSpy = jest.spyOn(mockBanksUser, 'update').mockResolvedValue();
     const mappedTransaction = await mapBridgeTransactions([mockTransaction], 'mockPermToken', aggregatorService);
-    const mappedAccount = await mapBridgeAccount([mockAccount], 'mockPermToken', aggregatorService);
+    const mappedAccount = await mapBridgeAccount(
+      [mockAccount],
+      mockPersonalInformation,
+      'mockPermToken',
+      aggregatorService,
+    );
     await hooksService.handleBankReaderRequiredEvent(mockServiceAccount, mockEvent.payload);
 
     expect(serviceAccountSpy).toBeCalledWith(mockEvent.payload.banksUserId);
     expect(accessTokenSpy).toBeCalledWith(mockBanksUser, mockServiceAccountConfig);
     expect(accountSpy).toBeCalledWith('mockPermToken', mockServiceAccountConfig);
+    expect(userInfoSpy).toBeCalledWith('mockPermToken', mockServiceAccountConfig);
     expect(resourceNameSpy).toBeCalledWith('mockPermToken', mockAccount.bank.resource_uri, mockServiceAccountConfig);
     expect(banksUserAccountSpy).toBeCalledWith(mappedAccount);
     expect(transactionSpy).toBeCalledWith('mockPermToken', mockServiceAccountConfig);

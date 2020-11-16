@@ -12,6 +12,7 @@ import {
   BridgeAccountType,
   BridgeAccountStatus,
   BridgeTransaction,
+  BridgeUserInformation,
 } from '../../interfaces/bridge.interface';
 import { AggregatorService } from '../aggregator.service';
 import { ClientConfig } from './bridge.client';
@@ -24,12 +25,15 @@ import { ClientConfig } from './bridge.client';
  */
 export const mapBridgeAccount = async (
   accounts: BridgeAccount[],
+  userInfo: BridgeUserInformation[],
   accessToken: string,
   aggregator: AggregatorService,
   clientConfig?: ClientConfig,
 ): Promise<PostBanksUserAccountDTO[]> =>
   Promise.all(
-    accounts.map(async (account) => fromBridgeToAlgoanAccounts(account, accessToken, aggregator, clientConfig)),
+    accounts.map(async (account) =>
+      fromBridgeToAlgoanAccounts(account, userInfo, accessToken, aggregator, clientConfig),
+    ),
   );
 
 /**
@@ -39,6 +43,7 @@ export const mapBridgeAccount = async (
  */
 const fromBridgeToAlgoanAccounts = async (
   account: BridgeAccount,
+  userInfo: BridgeUserInformation[],
   accessToken: string,
   aggregator: AggregatorService,
   clientConfig?: ClientConfig,
@@ -69,6 +74,7 @@ const fromBridgeToAlgoanAccounts = async (
         }
       : undefined,
   savingsDetails: mapAccountStatus(account.status),
+  owner: mapUserInfo(account.item.id, userInfo),
 });
 
 /**
@@ -124,6 +130,24 @@ const mapAccountStatus = (accountStatus: BridgeAccountStatus): 'MANUAL' | 'ACTIV
  * @param isPro Bridge boolean
  */
 const mapUsageType = (isPro: boolean): UsageType => (isPro ? UsageType.PROFESSIONAL : UsageType.PERSONAL);
+
+/**
+ * mapUserInfo map the user personal information with the account
+ */
+const mapUserInfo = (itemId: number, userInfo: BridgeUserInformation[]): { name: string } | undefined => {
+  const NOT_FOUND: number = -1;
+  const index: number = userInfo.findIndex(({ item_id }): boolean => item_id === itemId);
+
+  return index !== NOT_FOUND
+    ? {
+        name: [
+          userInfo[index].sex === 'MALE' ? 'MISTER' : 'MISS',
+          userInfo[index].first_name,
+          userInfo[index].last_name,
+        ].join(' '),
+      }
+    : undefined;
+};
 
 /**
  * mapBridgeTransactions transforms a bridge transaction wrapper into
