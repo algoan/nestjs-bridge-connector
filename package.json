@@ -25,7 +25,7 @@
     "@algoan/nestjs-http-exception-filter": "^1.0.8",
     "@algoan/nestjs-logging-interceptor": "^2.1.6",
     "@algoan/rest": "^1.18.0",
-    "@nestjs/common": "^7.4.4",
+    "@nestjs/common": "^7.5.2",
     "@nestjs/core": "^7.5.2",
     "@nestjs/platform-express": "^7.5.2",
     "axios": "^0.20.0",
