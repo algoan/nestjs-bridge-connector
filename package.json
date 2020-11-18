@@ -46,7 +46,7 @@
   "devDependencies": {
     "@algoan/eslint-config": "^1.1.1",
     "@commitlint/config-conventional": "^11.0.0",
-    "@nestjs/cli": "^7.5.2",
+    "@nestjs/cli": "^7.5.3",
     "@nestjs/schematics": "^7.2.1",
     "@nestjs/testing": "^7.5.3",
     "@semantic-release/exec": "^5.0.0",
