@@ -206,10 +206,12 @@ export class HooksService {
     /**
      * 2.b. Get personal information
      */
-    const userInfo: BridgeUserInformation[] = await this.aggregator.getUserPersonalInformation(
-      accessToken,
-      serviceAccount.config as ClientConfig,
-    );
+    let userInfo: BridgeUserInformation[] = [];
+    try {
+      userInfo = await this.aggregator.getUserPersonalInformation(accessToken, serviceAccount.config as ClientConfig);
+    } catch (err) {
+      this.logger.warn({ message: `Unable to get user personal information`, error: err });
+    }
 
     const algoanAccounts: PostBanksUserAccountDTO[] = await mapBridgeAccount(
       accounts,
