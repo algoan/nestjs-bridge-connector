@@ -204,7 +204,7 @@ describe('HooksService', () => {
     expect(accountSpy).toBeCalledWith('mockPermToken', mockServiceAccountConfig);
     expect(resourceNameSpy).toBeCalledWith('mockPermToken', mockAccount.bank.resource_uri, mockServiceAccountConfig);
     expect(banksUserAccountSpy).toBeCalledWith(mappedAccount);
-    expect(transactionSpy).toBeCalledWith('mockPermToken', mockServiceAccountConfig);
+    expect(transactionSpy).toBeCalledWith('mockPermToken', undefined, mockServiceAccountConfig);
     expect(resourceNameSpy).toBeCalledWith(
       'mockPermToken',
       mockTransaction.category.resource_uri,

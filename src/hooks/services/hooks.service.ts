@@ -12,6 +12,10 @@ import {
 } from '@algoan/rest';
 import { UnauthorizedException, Injectable, Logger } from '@nestjs/common';
 
+import { isEmpty } from 'lodash';
+import { config } from 'node-config-ts';
+import * as moment from 'moment';
+import * as delay from 'delay';
 import { AlgoanService } from '../../algoan/algoan.service';
 import { AggregatorService } from '../../aggregator/services/aggregator.service';
 import { AuthenticationResponse, BridgeAccount, BridgeTransaction } from '../../aggregator/interfaces/bridge.interface';
@@ -219,20 +223,56 @@ export class HooksService {
     /**
      * 4. Retrieves Bridge transactions and send them to Algoan
      */
-    const transactions: BridgeTransaction[] = await this.aggregator.getTransactions(
-      accessToken,
-      serviceAccount.config as ClientConfig,
-    );
+    const timeout = moment().add(config.bridge.synchronizationTimeout, 'seconds');
+    let lastUpdatedAt: string | undefined;
+    let firstFetchedDate: string;
+    let transactions: BridgeTransaction[] = [];
+    let sortedTransactions: BridgeTransaction[] = [];
+    /* eslint-disable no-magic-numbers */
+    const nbOfMonths: number = (serviceAccount.config as ClientConfig).nbOfMonths ?? 3;
 
-    for (const account of createdAccounts) {
-      const algoanTransactions: PostBanksUserTransactionDTO[] = await mapBridgeTransactions(
-        transactions.filter((transaction: BridgeTransaction) => transaction.account.id === Number(account.reference)),
+    do {
+      transactions = await this.aggregator.getTransactions(
         accessToken,
-        this.aggregator,
+        lastUpdatedAt,
         serviceAccount.config as ClientConfig,
       );
-      await banksUser.createTransactions(account.id, algoanTransactions);
-    }
+
+      for (const account of createdAccounts) {
+        const algoanTransactions: PostBanksUserTransactionDTO[] = await mapBridgeTransactions(
+          transactions.filter((transaction: BridgeTransaction) => transaction.account.id === Number(account.reference)),
+          accessToken,
+          this.aggregator,
+          serviceAccount.config as ClientConfig,
+        );
+        if (!isEmpty(algoanTransactions)) {
+          await banksUser.createTransactions(account.id, algoanTransactions);
+        }
+      }
+
+      /**
+       * Sort the transactions by updated_at
+       */
+      sortedTransactions = transactions?.sort((tr1: BridgeTransaction, tr2: BridgeTransaction) =>
+        /* eslint-disable no-magic-numbers */
+        moment(tr1.updated_at).isBefore(moment(tr2.updated_at)) ? 1 : -1,
+      );
+
+      lastUpdatedAt = sortedTransactions[0]?.updated_at ?? lastUpdatedAt;
+
+      /**
+       * Sort the transactions by date
+       */
+      sortedTransactions = transactions?.sort((tr1: BridgeTransaction, tr2: BridgeTransaction) =>
+        /* eslint-disable no-magic-numbers */
+        moment(tr1.date).isBefore(moment(tr2.date)) ? 1 : -1,
+      );
+
+      firstFetchedDate = sortedTransactions[0]?.date;
+
+      // Wait between each call
+      await delay(config.bridge.synchronizationWaitingTime);
+    } while (moment().diff(moment(firstFetchedDate), 'months') >= nbOfMonths && moment().isBefore(timeout));
 
     /**
      * 5. Notify Algoan that the process is finished
