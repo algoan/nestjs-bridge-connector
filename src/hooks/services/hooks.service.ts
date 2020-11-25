@@ -265,14 +265,13 @@ export class HooksService {
        */
       sortedTransactions = transactions?.sort((tr1: BridgeTransaction, tr2: BridgeTransaction) =>
         /* eslint-disable no-magic-numbers */
-        moment(tr1.date).isBefore(moment(tr2.date)) ? 1 : -1,
+        moment(tr1.date).isBefore(moment(tr2.date)) ? -1 : 1,
       );
 
       firstFetchedDate = sortedTransactions[0]?.date;
-
       // Wait between each call
       await delay(config.bridge.synchronizationWaitingTime);
-    } while (moment().diff(moment(firstFetchedDate), 'months') >= nbOfMonths && moment().isBefore(timeout));
+    } while (moment().diff(moment(firstFetchedDate), 'months') <= nbOfMonths && moment().isBefore(timeout));
 
     /**
      * 5. Notify Algoan that the process is finished
