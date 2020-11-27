@@ -5,6 +5,7 @@ import {
   BridgeTransaction,
   UserResponse,
   AuthenticationResponse,
+  BridgeUserInformation,
 } from './bridge.interface';
 
 export const mockAccount: BridgeAccount = {
@@ -82,3 +83,36 @@ export const mockAuthResponse: AuthenticationResponse = {
   access_token: 'mockAccessToken',
   expires_at: 'mockDate',
 };
+
+export const mockPersonalInformation: BridgeUserInformation[] = [
+  {
+    item_id: 1234567,
+    sex: 'MALE',
+    first_name: 'MICHEL',
+    last_name: 'DUPONT',
+    zip: '75001',
+    address: '7 RUE DES MOULINS 75001 PARIS FRANCE',
+    birthday: '1980-08-26',
+    job: null, // eslint-disable-line no-null/no-null
+    job_category: null, // eslint-disable-line no-null/no-null
+    job_category_details: null, // eslint-disable-line no-null/no-null
+    is_married: true,
+    is_owner: false,
+    nb_kids: 0,
+  },
+  {
+    item_id: 5,
+    sex: 'MALE',
+    first_name: null, // eslint-disable-line no-null/no-null
+    last_name: 'DUPONT',
+    zip: '75001',
+    address: null, // eslint-disable-line no-null/no-null
+    birthday: '1980-08-26',
+    job: 'Computer analyst',
+    job_category: null, // eslint-disable-line no-null/no-null
+    job_category_details: null, // eslint-disable-line no-null/no-null
+    is_married: null, // eslint-disable-line no-null/no-null
+    is_owner: null, // eslint-disable-line no-null/no-null
+    nb_kids: null, // eslint-disable-line no-null/no-null
+  },
+];

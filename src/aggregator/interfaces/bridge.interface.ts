@@ -174,3 +174,22 @@ export interface BridgeCategory {
     resource_type: string;
   };
 }
+
+/**
+ * Bridge User Information
+ */
+export interface BridgeUserInformation {
+  item_id: number;
+  sex?: 'FEMALE' | 'MALE' | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  zip?: string | null;
+  address?: string | null;
+  birthday?: Date | string | null;
+  job?: string | null;
+  job_category?: string | null; // @TODO: do we have an enum for that?
+  job_category_details?: string | null; // @TODO: do we have an enum for that?
+  is_married?: boolean | null;
+  is_owner?: boolean | null;
+  nb_kids?: number | null;
+}

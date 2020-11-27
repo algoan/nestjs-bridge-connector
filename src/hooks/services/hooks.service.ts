@@ -18,7 +18,12 @@ import * as moment from 'moment';
 import * as delay from 'delay';
 import { AlgoanService } from '../../algoan/algoan.service';
 import { AggregatorService } from '../../aggregator/services/aggregator.service';
-import { AuthenticationResponse, BridgeAccount, BridgeTransaction } from '../../aggregator/interfaces/bridge.interface';
+import {
+  AuthenticationResponse,
+  BridgeAccount,
+  BridgeTransaction,
+  BridgeUserInformation,
+} from '../../aggregator/interfaces/bridge.interface';
 import { mapBridgeAccount, mapBridgeTransactions } from '../../aggregator/services/bridge/bridge.utils';
 import { EventDTO } from '../dto/event.dto';
 import { BankreaderLinkRequiredDTO } from '../dto/bandreader-link-required.dto';
@@ -201,8 +206,20 @@ export class HooksService {
       message: `Bridge accounts retrieved for Banks User "${banksUser.id}"`,
       accounts,
     });
+
+    /**
+     * 2.b. Get personal information
+     */
+    let userInfo: BridgeUserInformation[] = [];
+    try {
+      userInfo = await this.aggregator.getUserPersonalInformation(accessToken, serviceAccount.config as ClientConfig);
+    } catch (err) {
+      this.logger.warn({ message: `Unable to get user personal information`, error: err });
+    }
+
     const algoanAccounts: PostBanksUserAccountDTO[] = await mapBridgeAccount(
       accounts,
+      userInfo,
       accessToken,
       this.aggregator,
       serviceAccount.config as ClientConfig,

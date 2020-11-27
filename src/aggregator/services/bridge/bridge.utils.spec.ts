@@ -10,7 +10,7 @@ import {
 import { BridgeAccount } from '../../interfaces/bridge.interface';
 import { AggregatorModule } from '../../aggregator.module';
 import { AggregatorService } from '../aggregator.service';
-import { mockAccount, mockTransaction } from '../../interfaces/bridge-mock';
+import { mockAccount, mockPersonalInformation, mockTransaction } from '../../interfaces/bridge-mock';
 import { AlgoanModule } from '../../../algoan/algoan.module';
 import { AppModule } from '../../../app.module';
 import { mapBridgeAccount, mapBridgeTransactions } from './bridge.utils';
@@ -54,10 +54,18 @@ describe('Bridge Utils', () => {
         status: 'ACTIVE',
         type: AccountType.CREDIT_CARD,
         usage: UsageType.PERSONAL,
+        owner: {
+          name: 'MISTER  DUPONT',
+        },
       },
     ];
 
-    const mappedAccount = await mapBridgeAccount([mockAccount], 'mockAccessToken', aggregatorService);
+    const mappedAccount = await mapBridgeAccount(
+      [mockAccount],
+      mockPersonalInformation,
+      'mockAccessToken',
+      aggregatorService,
+    );
 
     expect(aggregatorSpy).toHaveBeenCalledWith('mockAccessToken', mockAccount.bank.resource_uri, undefined);
     expect(mappedAccount).toEqual(expectedAccounts);

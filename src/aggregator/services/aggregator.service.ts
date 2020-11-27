@@ -2,7 +2,13 @@ import { createHmac } from 'crypto';
 import { Injectable } from '@nestjs/common';
 import { IBanksUser } from '@algoan/rest';
 import { config } from 'node-config-ts';
-import { UserAccount, BridgeAccount, BridgeTransaction, AuthenticationResponse } from '../interfaces/bridge.interface';
+import {
+  UserAccount,
+  BridgeAccount,
+  BridgeTransaction,
+  AuthenticationResponse,
+  BridgeUserInformation,
+} from '../interfaces/bridge.interface';
 import { BridgeClient, ClientConfig } from './bridge/bridge.client';
 
 /**
@@ -80,6 +86,16 @@ export class AggregatorService {
    */
   public async getResourceName(accessToken: string, bridgeUri: string, clientConfig?: ClientConfig): Promise<string> {
     return this.bridgeClient.getResourceName(accessToken, bridgeUri, clientConfig);
+  }
+
+  /**
+   * Returns the Bridge Personal information for a user
+   */
+  public async getUserPersonalInformation(
+    accessToken: string,
+    clientConfig?: ClientConfig,
+  ): Promise<BridgeUserInformation[]> {
+    return this.bridgeClient.getUserPersonalInformation(accessToken, clientConfig);
   }
 
   /**
