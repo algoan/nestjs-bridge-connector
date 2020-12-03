@@ -1,4 +1,5 @@
-import { HttpService, Injectable, Logger } from '@nestjs/common';
+import { CacheModule, CACHE_MANAGER, Inject, HttpService, Injectable, Logger } from '@nestjs/common';
+import { Cache } from 'cache-manager';
 import { config } from 'node-config-ts';
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { isNil } from 'lodash';
@@ -35,7 +36,7 @@ export class BridgeClient {
    */
   private readonly logger: Logger = new Logger(BridgeClient.name);
 
-  constructor(private readonly httpService: HttpService) {
+  constructor(@Inject(CACHE_MANAGER) private readonly cacheManager: Cache, private readonly httpService: HttpService) {
     this.httpService.axiosRef.interceptors.request.use(
       (_config: AxiosRequestConfig): AxiosRequestConfig => {
         this.logger.log(_config, 'Request to bridge');
@@ -153,6 +154,11 @@ export class BridgeClient {
   public async getResourceName(accessToken: string, bridgeUri: string, clientConfig?: ClientConfig): Promise<string> {
     const url: string = `${config.bridge.baseUrl}${bridgeUri}`;
 
+    const cached: string = (await this.cacheManager.get(url)) as string;
+    if (cached) {
+      return cached;
+    }
+
     try {
       const resp: AxiosResponse<BridgeBank | BridgeCategory> = await this.httpService
         .get(url, {
@@ -162,8 +168,10 @@ export class BridgeClient {
           },
         })
         .toPromise();
+      const { name } = resp.data;
+      await this.cacheManager.set(url, name, { ttl: 86400 });
 
-      return resp.data.name;
+      return name;
     } catch (err) {
       this.logger.warn({
         message: `An error occurred while retrieving ${bridgeUri}`,
