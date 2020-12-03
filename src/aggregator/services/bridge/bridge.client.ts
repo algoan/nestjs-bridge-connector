@@ -1,4 +1,4 @@
-import { CacheModule, CACHE_MANAGER, Inject, HttpService, Injectable, Logger } from '@nestjs/common';
+import { CACHE_MANAGER, Inject, HttpService, Injectable, Logger } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { config } from 'node-config-ts';
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';

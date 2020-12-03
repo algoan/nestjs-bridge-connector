@@ -1,5 +1,5 @@
 import { createHmac } from 'crypto';
-import { HttpModule } from '@nestjs/common';
+import { CacheModule, CACHE_MANAGER, HttpModule } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BanksUserStatus, BanksUser, RequestBuilder } from '@algoan/rest';
 import { v4 as uuidV4 } from 'uuid';
@@ -13,6 +13,7 @@ import { BridgeClient } from './bridge/bridge.client';
 describe('AggregatorService', () => {
   let service: AggregatorService;
   let client: BridgeClient;
+  let cacheManager: any;
   let uuid: string = uuidV4();
   const callbackUrl: string = `http://algoan.com/callback/2/${uuid}`;
   const mockBanksUser = new BanksUser(
@@ -31,12 +32,13 @@ describe('AggregatorService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [AppModule, HttpModule, AlgoanModule],
+      imports: [CacheModule.register({}), AppModule, HttpModule, AlgoanModule],
       providers: [AggregatorService, BridgeClient],
     }).compile();
 
     service = module.get<AggregatorService>(AggregatorService);
     client = module.get<BridgeClient>(BridgeClient);
+    cacheManager = module.get<any>(CACHE_MANAGER);
   });
 
   it('should be defined', () => {
