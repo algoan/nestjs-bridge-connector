@@ -1,4 +1,4 @@
-import { HttpModule, HttpService } from '@nestjs/common';
+import { CacheModule, CACHE_MANAGER, HttpModule, HttpService } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AxiosResponse } from 'axios';
 import { of } from 'rxjs';
@@ -20,15 +20,17 @@ import { BridgeClient } from './bridge.client';
 describe('BridgeClient', () => {
   let service: BridgeClient;
   let httpService: HttpService;
+  let cacheManager: any;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [AppModule, HttpModule, AlgoanModule],
+      imports: [CacheModule.register({}), AppModule, HttpModule, AlgoanModule],
       providers: [BridgeClient],
     }).compile();
 
     httpService = module.get<HttpService>(HttpService);
     service = module.get<BridgeClient>(BridgeClient);
+    cacheManager = module.get<any>(CACHE_MANAGER);
   });
 
   it('should be defined', () => {
