@@ -45,7 +45,7 @@ export class BridgeClient {
       },
     );
     this.httpService.axiosRef.interceptors.response.use(undefined, async (error: AxiosError) => {
-      this.logger.error(error, error.stack, error.message);
+      this.logger.error({ message: error.message, data: error.response?.data }, error.stack, error.message);
 
       return Promise.reject(error);
     });
