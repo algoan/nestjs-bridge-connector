@@ -1,5 +1,5 @@
 import { createHmac } from 'crypto';
-import { CacheModule, CACHE_MANAGER, HttpModule } from '@nestjs/common';
+import { CacheModule, CACHE_MANAGER, HttpModule, HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BanksUserStatus, BanksUser, RequestBuilder } from '@algoan/rest';
 import { v4 as uuidV4 } from 'uuid';
@@ -46,6 +46,44 @@ describe('AggregatorService', () => {
   });
 
   describe('generateRedirectUrl', () => {
+    it('should not throw when the user already exists', async () => {
+      const errorConflict: Error & { code?: number } = new Error('user already exists');
+      errorConflict.code = HttpStatus.CONFLICT;
+      const registerSpy = jest.spyOn(client, 'register').mockResolvedValueOnce(Promise.reject(errorConflict));
+      const authenticateSpy = jest.spyOn(client, 'authenticate').mockResolvedValueOnce({
+        access_token: 'access-token',
+        expires_at: '2019-05-06T11:08:25.040Z',
+        user: {
+          uuid: 'c2a26c9e-dc23-4f67-b887-bbae0f26c415',
+          resource_uri: '/v2/users/c2a26c9e-dc23-4f67-b887-bbae0f26c415',
+          resource_type: 'user',
+          email: 'john.doe@email.com',
+        },
+      });
+      const connectItemSpy = jest.spyOn(client, 'connectItem').mockResolvedValueOnce({
+        redirect_url: 'https://bridge/redirection-url',
+      });
+
+      const redirectUrl = await service.generateRedirectUrl(mockBanksUser);
+      const expectedPassword: string = createHmac('sha256', 'random_pass').update('mockBanksUserId').digest('hex');
+      expect(registerSpy).toHaveBeenCalledWith(
+        {
+          email: 'mockBanksUserId@algoan-bridge.com',
+          password: expectedPassword,
+        },
+        undefined,
+      );
+      expect(authenticateSpy).toHaveBeenCalledWith(
+        {
+          email: 'mockBanksUserId@algoan-bridge.com',
+          password: expectedPassword,
+        },
+        undefined,
+      );
+      const extractedUuid: string = uuid.replace(/-/g, 'z');
+      expect(connectItemSpy).toHaveBeenCalledWith('access-token', extractedUuid, undefined, undefined);
+      expect(redirectUrl).toBe('https://bridge/redirection-url');
+    });
     it('should create and setup an account and return the redirect link', async () => {
       const registerSpy = jest.spyOn(client, 'register').mockResolvedValueOnce({
         uuid: '79c8961c-bdf7-11e5-88a3-4f2c2aec0665',
