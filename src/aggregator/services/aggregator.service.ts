@@ -1,5 +1,5 @@
 import { createHmac } from 'crypto';
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { IBanksUser } from '@algoan/rest';
 import { config } from 'node-config-ts';
 import {
@@ -29,7 +29,15 @@ export class AggregatorService {
     clientConfig?: ClientConfig,
   ): Promise<string> {
     const userAccount: UserAccount = AggregatorService.buildCredentials(banksUser);
-    await this.bridgeClient.register(userAccount, clientConfig);
+    try {
+      await this.bridgeClient.register(userAccount, clientConfig);
+    } catch (err) {
+      const error: Error & { code?: number } = err as Error & { code?: number };
+      // Ignore error conflict user already exists
+      if (error.code !== HttpStatus.CONFLICT) {
+        throw error;
+      }
+    }
     const authenticationResponse = await this.bridgeClient.authenticate(userAccount, clientConfig);
 
     /**
