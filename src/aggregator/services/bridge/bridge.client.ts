@@ -37,18 +37,34 @@ export class BridgeClient {
   private readonly logger: Logger = new Logger(BridgeClient.name);
 
   constructor(@Inject(CACHE_MANAGER) private readonly cacheManager: Cache, private readonly httpService: HttpService) {
-    this.httpService.axiosRef.interceptors.request.use(
-      (_config: AxiosRequestConfig): AxiosRequestConfig => {
-        this.logger.log(_config, 'Request to bridge');
+    if (config.activateBridgeRequestInterceptor) {
+      this.httpService.axiosRef.interceptors.request.use(
+        (_config: AxiosRequestConfig): AxiosRequestConfig => {
+          this.logger.log({
+            config: _config,
+            message: `${_config.method} ${_config.url} - Request to Bridge`,
+          });
 
-        return _config;
-      },
-    );
-    this.httpService.axiosRef.interceptors.response.use(undefined, async (error: AxiosError) => {
-      this.logger.error({ message: error.message, data: error.response?.data }, error.stack, error.message);
+          return _config;
+        },
+      );
+      this.httpService.axiosRef.interceptors.response.use(
+        async (response: AxiosResponse) => {
+          this.logger.log({
+            message: `${response.config.method} ${response.config.url} - successfully responded`,
+            body: response.data,
+            headers: response.headers,
+          });
 
-      return Promise.reject(error);
-    });
+          return Promise.resolve(response);
+        },
+        async (error: AxiosError) => {
+          this.logger.error({ message: error.message, data: error.response?.data }, error.stack, error.message);
+
+          return Promise.reject(error);
+        },
+      );
+    }
   }
 
   /**
