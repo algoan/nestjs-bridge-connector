@@ -49,7 +49,7 @@
     "@commitlint/config-conventional": "^12.1.1",
     "@nestjs/cli": "^7.5.6",
     "@nestjs/schematics": "^7.2.8",
-    "@nestjs/testing": "^7.6.13",
+    "@nestjs/testing": "^7.6.15",
     "@semantic-release/exec": "^5.0.0",
     "@semantic-release/git": "^9.0.0",
     "@types/cache-manager": "^3.4.0",
