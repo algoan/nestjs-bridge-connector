@@ -27,7 +27,7 @@
     "@algoan/rest": "^2.3.0",
     "@nestjs/common": "^7.6.17",
     "@nestjs/core": "^7.6.15",
-    "@nestjs/platform-express": "^7.6.15",
+    "@nestjs/platform-express": "^7.6.17",
     "axios": "^0.21.1",
     "cache-manager": "^3.4.3",
     "class-transformer": "^0.3.2",
