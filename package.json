@@ -33,7 +33,7 @@
     "class-transformer": "^0.3.2",
     "class-validator": "^0.12.2",
     "delay": "^4.4.1",
-    "hbs": "^4.1.1",
+    "hbs": "^4.1.2",
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "moment-timezone": "^0.5.33",
