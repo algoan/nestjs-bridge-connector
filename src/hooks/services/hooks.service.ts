@@ -1,34 +1,34 @@
 import {
-  BanksUserAccount,
-  ServiceAccount,
-  Subscription,
-  EventName,
   BanksUser,
+  BanksUserAccount,
+  BanksUserStatus,
+  EventName,
+  EventStatus,
   PostBanksUserAccountDTO,
   PostBanksUserTransactionDTO,
-  BanksUserStatus,
+  ServiceAccount,
+  Subscription,
   SubscriptionEvent,
-  EventStatus,
 } from '@algoan/rest';
-import { UnauthorizedException, Injectable, Logger } from '@nestjs/common';
-
-import { isEmpty } from 'lodash';
-import { config } from 'node-config-ts';
-import * as moment from 'moment';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import * as delay from 'delay';
-import { AlgoanService } from '../../algoan/algoan.service';
-import { AggregatorService } from '../../aggregator/services/aggregator.service';
+import { isEmpty } from 'lodash';
+import * as moment from 'moment';
+import { config } from 'node-config-ts';
+
 import {
   AuthenticationResponse,
   BridgeAccount,
   BridgeTransaction,
   BridgeUserInformation,
 } from '../../aggregator/interfaces/bridge.interface';
+import { AggregatorService } from '../../aggregator/services/aggregator.service';
+import { ClientConfig } from '../../aggregator/services/bridge/bridge.client';
 import { mapBridgeAccount, mapBridgeTransactions } from '../../aggregator/services/bridge/bridge.utils';
-import { EventDTO } from '../dto/event.dto';
+import { AlgoanService } from '../../algoan/services/algoan.service';
 import { BankreaderLinkRequiredDTO } from '../dto/bandreader-link-required.dto';
 import { BankreaderRequiredDTO } from '../dto/bankreader-required.dto';
-import { ClientConfig } from '../../aggregator/services/bridge/bridge.client';
+import { EventDTO } from '../dto/event.dto';
 
 /**
  * Hook service

@@ -1,10 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { EventName } from '@algoan/rest';
-import { EventDTO } from '../dto/event.dto';
+import { Test, TestingModule } from '@nestjs/testing';
+
 import { AggregatorModule } from '../../aggregator/aggregator.module';
 import { AlgoanModule } from '../../algoan/algoan.module';
-import { HooksService } from '../services/hooks.service';
 import { AppModule } from '../../app.module';
+import { ConfigModule } from '../../config/config.module';
+import { EventDTO } from '../dto/event.dto';
+import { HooksService } from '../services/hooks.service';
 import { HooksController } from './hooks.controller';
 
 describe('Hooks Controller', () => {
@@ -13,7 +15,7 @@ describe('Hooks Controller', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [AppModule, AggregatorModule, AlgoanModule],
+      imports: [AppModule, AggregatorModule, AlgoanModule, ConfigModule],
       providers: [HooksService],
       controllers: [HooksController],
     }).compile();

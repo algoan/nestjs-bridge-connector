@@ -1,32 +1,34 @@
-/* eslint-disable max-lines */
-import { Test, TestingModule } from '@nestjs/testing';
 import {
-  Algoan,
-  ServiceAccount,
-  EventName,
-  Subscription,
-  RequestBuilder,
-  BanksUser,
-  BanksUserStatus,
-  BanksUserAccount,
   AccountType,
-  UsageType,
-  MultiResourceCreationResponse,
+  Algoan,
+  BanksUser,
+  BanksUserAccount,
+  BanksUserStatus,
   BanksUserTransaction,
   BanksUserTransactionType,
+  EventName,
   IServiceAccount,
-  SubscriptionEvent,
   ISubscriptionEvent,
+  MultiResourceCreationResponse,
+  RequestBuilder,
+  ServiceAccount,
+  Subscription,
+  SubscriptionEvent,
+  UsageType,
 } from '@algoan/rest';
-import { EventDTO } from '../dto/event.dto';
+/* eslint-disable max-lines */
+import { Test, TestingModule } from '@nestjs/testing';
+
 import { AggregatorModule } from '../../aggregator/aggregator.module';
-import { AggregatorService } from '../../aggregator/services/aggregator.service';
-import { AlgoanModule } from '../../algoan/algoan.module';
-import { AppModule } from '../../app.module';
-import { AlgoanService } from '../../algoan/algoan.service';
-import { BankreaderLinkRequiredDTO } from '../dto/bandreader-link-required.dto';
 import { mockAccount, mockPersonalInformation, mockTransaction } from '../../aggregator/interfaces/bridge-mock';
+import { AggregatorService } from '../../aggregator/services/aggregator.service';
 import { mapBridgeAccount, mapBridgeTransactions } from '../../aggregator/services/bridge/bridge.utils';
+import { AlgoanModule } from '../../algoan/algoan.module';
+import { AlgoanService } from '../../algoan/services/algoan.service';
+import { AppModule } from '../../app.module';
+import { ConfigModule } from '../../config/config.module';
+import { BankreaderLinkRequiredDTO } from '../dto/bandreader-link-required.dto';
+import { EventDTO } from '../dto/event.dto';
 import { HooksService } from './hooks.service';
 
 describe('HooksService', () => {
@@ -86,7 +88,7 @@ describe('HooksService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [AppModule, AggregatorModule, AlgoanModule],
+      imports: [AppModule, AggregatorModule, AlgoanModule, ConfigModule],
       providers: [HooksService],
     }).compile();
 

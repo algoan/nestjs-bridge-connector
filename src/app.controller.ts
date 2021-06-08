@@ -1,9 +1,9 @@
-import { Controller, Get, HttpCode, HttpStatus, Param, Query, Render } from '@nestjs/common';
+import { EventName, Subscription } from '@algoan/rest';
+import { Controller, Get, HttpCode, HttpStatus, Query, Render } from '@nestjs/common';
 import { config } from 'node-config-ts';
-import { Subscription, EventName } from '@algoan/rest';
 
+import { AlgoanService } from './algoan/services/algoan.service';
 import { AppService } from './app.service';
-import { AlgoanService } from './algoan/algoan.service';
 
 /**
  * App Controller with a GET / API
