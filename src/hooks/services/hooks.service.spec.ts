@@ -148,7 +148,12 @@ describe('HooksService', () => {
     );
 
     expect(serviceAccountSpy).toBeCalledWith(mockEvent.payload.banksUserId);
-    expect(agreggatorSpy).toBeCalledWith(mockBanksUser, undefined, mockServiceAccountConfig);
+    expect(agreggatorSpy).toBeCalledWith(
+      mockBanksUser.id,
+      mockBanksUser.callbackUrl,
+      undefined,
+      mockServiceAccountConfig,
+    );
     expect(banksUserSpy).toBeCalledWith({ redirectUrl: 'mockRedirectUrl' });
   });
 
@@ -210,7 +215,7 @@ describe('HooksService', () => {
     await hooksService.handleBankReaderRequiredEvent(mockServiceAccount, mockEvent.payload);
 
     expect(serviceAccountSpy).toBeCalledWith(mockEvent.payload.banksUserId);
-    expect(accessTokenSpy).toBeCalledWith(mockBanksUser, mockServiceAccountConfig);
+    expect(accessTokenSpy).toBeCalledWith(mockBanksUser.id, mockServiceAccountConfig);
     expect(accountSpy).toBeCalledWith('mockPermToken', mockServiceAccountConfig);
     expect(userInfoSpy).toBeCalledWith('mockPermToken', mockServiceAccountConfig);
     expect(resourceNameSpy).toBeCalledWith('mockPermToken', mockAccount.bank.resource_uri, mockServiceAccountConfig);
@@ -236,7 +241,7 @@ describe('HooksService', () => {
       1,
       {
         bridgeUserId: 'rrr',
-        banksUser: mockBanksUser,
+        id: mockBanksUser.id,
         accessToken: 'mockPermToken',
       },
       mockServiceAccountConfig,

@@ -149,7 +149,8 @@ export class HooksService {
      * 2. Generates a redirect URL
      */
     const redirectUrl: string = await this.aggregator.generateRedirectUrl(
-      banksUser,
+      banksUser.id,
+      banksUser.callbackUrl,
       email,
       serviceAccount.config as ClientConfig,
     );
@@ -189,7 +190,7 @@ export class HooksService {
      * 1. Retrieves an access token from Bridge to access to the user accounts
      */
     const authenticationResponse: AuthenticationResponse = await this.aggregator.getAccessToken(
-      banksUser,
+      banksUser.id,
       serviceAccount.config as ClientConfig,
     );
     const accessToken: string = authenticationResponse.access_token;
@@ -303,7 +304,7 @@ export class HooksService {
     await this.aggregator.deleteUser(
       {
         bridgeUserId,
-        banksUser,
+        id: banksUser.id,
         accessToken,
       },
       serviceAccount.config as ClientConfig,
