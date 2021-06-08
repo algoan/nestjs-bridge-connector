@@ -1,15 +1,16 @@
 import { Type } from 'class-transformer';
 import { Allow, IsInt, IsNotEmpty, IsOptional, ValidateNested } from 'class-validator';
 
+import { AggregatorLinkRequiredDTO } from './aggregator-link-required.dto';
+import { BankreaderRequiredDTO } from './bankreader-required.dto';
 import { ServiceAccountCreatedDTO } from './service-account-created.dto';
 import { ServiceAccountDeletedDTO } from './service-account-deleted.dto';
 import { SubscriptionDTO } from './subscription.dto';
-import { BankreaderRequiredDTO } from './bankreader-required.dto';
 
 /**
  * Events payload types
  */
-type Events = ServiceAccountCreatedDTO | ServiceAccountDeletedDTO | BankreaderRequiredDTO;
+type Events = ServiceAccountCreatedDTO | ServiceAccountDeletedDTO | BankreaderRequiredDTO | AggregatorLinkRequiredDTO;
 
 /**
  * Event

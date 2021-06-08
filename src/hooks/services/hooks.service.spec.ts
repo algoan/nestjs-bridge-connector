@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import {
   AccountType,
   Algoan,
@@ -16,17 +17,24 @@ import {
   SubscriptionEvent,
   UsageType,
 } from '@algoan/rest';
-/* eslint-disable max-lines */
+import { ContextIdFactory } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
+import { config } from 'node-config-ts';
 
 import { AggregatorModule } from '../../aggregator/aggregator.module';
 import { mockAccount, mockPersonalInformation, mockTransaction } from '../../aggregator/interfaces/bridge-mock';
 import { AggregatorService } from '../../aggregator/services/aggregator.service';
 import { mapBridgeAccount, mapBridgeTransactions } from '../../aggregator/services/bridge/bridge.utils';
 import { AlgoanModule } from '../../algoan/algoan.module';
+import { customerMock } from '../../algoan/dto/customer.objects.mock';
+import { AlgoanAnalysisService } from '../../algoan/services/algoan-analysis.service';
+import { AlgoanCustomerService } from '../../algoan/services/algoan-customer.service';
+import { AlgoanHttpService } from '../../algoan/services/algoan-http.service';
 import { AlgoanService } from '../../algoan/services/algoan.service';
 import { AppModule } from '../../app.module';
+import { CONFIG } from '../../config/config.module';
 import { ConfigModule } from '../../config/config.module';
+import { AggregatorLinkRequiredDTO } from '../dto/aggregator-link-required.dto';
 import { BankreaderLinkRequiredDTO } from '../dto/bandreader-link-required.dto';
 import { EventDTO } from '../dto/event.dto';
 import { HooksService } from './hooks.service';
@@ -35,6 +43,11 @@ describe('HooksService', () => {
   let hooksService: HooksService;
   let aggregatorService: AggregatorService;
   let algoanService: AlgoanService;
+  let algoanHttpService: AlgoanHttpService;
+  let algoanCustomerService: AlgoanCustomerService;
+  let algoanAnalysisService: AlgoanAnalysisService;
+  let serviceAccount: ServiceAccount;
+
   const mockEvent = {
     subscription: {
       id: 'mockEventSubId',
@@ -87,16 +100,34 @@ describe('HooksService', () => {
   );
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      imports: [AppModule, AggregatorModule, AlgoanModule, ConfigModule],
-      providers: [HooksService],
+    // To mock scoped DI
+    const contextId = ContextIdFactory.create();
+    jest.spyOn(ContextIdFactory, 'getByRequest').mockImplementation(() => contextId);
+
+    const moduleRef: TestingModule = await Test.createTestingModule({
+      imports: [AppModule, AlgoanModule, AggregatorModule, ConfigModule],
+      providers: [
+        HooksService,
+        {
+          provide: CONFIG,
+          useValue: config,
+        },
+        {
+          provide: ServiceAccount,
+          useValue: mockServiceAccount,
+        },
+      ],
     }).compile();
 
     jest.spyOn(Algoan.prototype, 'initRestHooks').mockResolvedValue();
 
-    hooksService = module.get<HooksService>(HooksService);
-    aggregatorService = module.get<AggregatorService>(AggregatorService);
-    algoanService = module.get<AlgoanService>(AlgoanService);
+    hooksService = await moduleRef.resolve<HooksService>(HooksService, contextId);
+    aggregatorService = await moduleRef.resolve<AggregatorService>(AggregatorService, contextId);
+    algoanService = await moduleRef.resolve<AlgoanService>(AlgoanService, contextId);
+    algoanHttpService = await moduleRef.resolve<AlgoanHttpService>(AlgoanHttpService, contextId);
+    algoanCustomerService = await moduleRef.resolve<AlgoanCustomerService>(AlgoanCustomerService, contextId);
+    algoanAnalysisService = await moduleRef.resolve<AlgoanAnalysisService>(AlgoanAnalysisService, contextId);
+    serviceAccount = await moduleRef.resolve<ServiceAccount>(ServiceAccount, contextId);
     await algoanService.onModuleInit();
   });
 
@@ -116,6 +147,15 @@ describe('HooksService', () => {
         .mockResolvedValue(({} as unknown) as ISubscriptionEvent & { id: string });
       jest.spyOn(algoanService.algoanClient, 'getServiceAccountBySubscriptionId').mockReturnValue(mockServiceAccount);
     });
+
+    it('handles aggregator link required', async () => {
+      mockEvent.subscription.eventName = EventName.AGGREGATOR_LINK_REQUIRED;
+      const spy = jest.spyOn(hooksService, 'handleAggregatorLinkRequired').mockResolvedValue();
+      await hooksService.handleWebhook(mockEvent as EventDTO, 'mockSignature');
+
+      expect(spy).toBeCalledWith(mockServiceAccount, mockEvent.payload);
+    });
+
     it('handles bankreader link required', async () => {
       mockEvent.subscription.eventName = EventName.BANKREADER_LINK_REQUIRED;
       const spy = jest.spyOn(hooksService, 'handleBankreaderLinkRequiredEvent').mockResolvedValue();
@@ -130,6 +170,30 @@ describe('HooksService', () => {
       await hooksService.handleWebhook(mockEvent as EventDTO, 'mockSignature');
 
       expect(spy).toBeCalledWith(mockServiceAccount, mockEvent.payload);
+    });
+  });
+
+  it('generates a redirect url on aggregator link required', async () => {
+    const mockEventPayload: AggregatorLinkRequiredDTO = { customerId: customerMock.id };
+    const algoanAuthenticateSpy = jest.spyOn(algoanHttpService, 'authenticate').mockReturnValue();
+    const getCustomerSpy = jest.spyOn(algoanCustomerService, 'getCustomerById').mockResolvedValue(customerMock);
+    const updateCustomerSpy = jest.spyOn(algoanCustomerService, 'updateCustomer').mockResolvedValue(customerMock);
+    const aggregatorSpy = jest
+      .spyOn(aggregatorService, 'generateRedirectUrl')
+      .mockReturnValue(Promise.resolve('mockRedirectUrl'));
+    mockServiceAccount.config = mockServiceAccountConfig;
+    await hooksService.handleAggregatorLinkRequired(mockServiceAccount, mockEventPayload);
+
+    expect(algoanAuthenticateSpy).toBeCalledWith(mockServiceAccount.clientId, mockServiceAccount.clientSecret);
+    expect(getCustomerSpy).toBeCalledWith(mockEventPayload.customerId);
+    expect(aggregatorSpy).toBeCalledWith(
+      customerMock.id,
+      customerMock.aggregationDetails?.callbackUrl,
+      customerMock.personalDetails?.contact?.email,
+      mockServiceAccountConfig,
+    );
+    expect(updateCustomerSpy).toBeCalledWith(customerMock.id, {
+      aggregationDetails: { aggregatorName: 'BRIDGE', redirectUrl: 'mockRedirectUrl' },
     });
   });
 

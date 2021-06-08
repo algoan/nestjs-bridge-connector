@@ -10,11 +10,11 @@ import {
   Subscription,
   SubscriptionEvent,
 } from '@algoan/rest';
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import * as delay from 'delay';
 import { isEmpty } from 'lodash';
 import * as moment from 'moment';
-import { config } from 'node-config-ts';
+import { config, Config } from 'node-config-ts';
 
 import {
   AuthenticationResponse,
@@ -25,7 +25,14 @@ import {
 import { AggregatorService } from '../../aggregator/services/aggregator.service';
 import { ClientConfig } from '../../aggregator/services/bridge/bridge.client';
 import { mapBridgeAccount, mapBridgeTransactions } from '../../aggregator/services/bridge/bridge.utils';
+import { AggregationDetailsAggregatorName, AggregationDetailsMode } from '../../algoan/dto/customer.enums';
+import { AggregationDetails, Customer } from '../../algoan/dto/customer.objects';
+import { AlgoanAnalysisService } from '../../algoan/services/algoan-analysis.service';
+import { AlgoanCustomerService } from '../../algoan/services/algoan-customer.service';
+import { AlgoanHttpService } from '../../algoan/services/algoan-http.service';
 import { AlgoanService } from '../../algoan/services/algoan.service';
+import { CONFIG } from '../../config/config.module';
+import { AggregatorLinkRequiredDTO } from '../dto/aggregator-link-required.dto';
 import { BankreaderLinkRequiredDTO } from '../dto/bandreader-link-required.dto';
 import { BankreaderRequiredDTO } from '../dto/bankreader-required.dto';
 import { EventDTO } from '../dto/event.dto';
@@ -40,7 +47,14 @@ export class HooksService {
    */
   private readonly logger: Logger = new Logger(HooksService.name);
 
-  constructor(private readonly algoanService: AlgoanService, private readonly aggregator: AggregatorService) {}
+  constructor(
+    @Inject(CONFIG) private readonly _config: Config,
+    private readonly algoanHttpService: AlgoanHttpService,
+    private readonly algoanCustomerService: AlgoanCustomerService,
+    private readonly algoanAnalysisService: AlgoanAnalysisService,
+    private readonly algoanService: AlgoanService,
+    private readonly aggregator: AggregatorService,
+  ) {}
 
   /**
    * Handle Algoan webhooks
@@ -90,6 +104,10 @@ export class HooksService {
 
     try {
       switch (event.subscription.eventName) {
+        case EventName.AGGREGATOR_LINK_REQUIRED:
+          await this.handleAggregatorLinkRequired(serviceAccount, event.payload as AggregatorLinkRequiredDTO);
+          break;
+
         case EventName.BANKREADER_LINK_REQUIRED:
           await this.handleBankreaderLinkRequiredEvent(serviceAccount, event.payload as BankreaderLinkRequiredDTO);
           break;
@@ -114,6 +132,51 @@ export class HooksService {
     }
 
     void se.update({ status: EventStatus.PROCESSED });
+  }
+
+  /**
+   * Handle the "aggregator_link_required" event
+   * Looks for a callback URL and generates a new redirect URL
+   * @param serviceAccount Concerned Algoan service account attached to the subscription
+   * @param payload Payload sent, containing the Banks User id
+   */
+  public async handleAggregatorLinkRequired(
+    serviceAccount: ServiceAccount,
+    payload: AggregatorLinkRequiredDTO,
+  ): Promise<void> {
+    // Authenticate to algoan
+    this.algoanHttpService.authenticate(serviceAccount.clientId, serviceAccount.clientSecret);
+
+    // Get user information and client config
+    const customer: Customer = await this.algoanCustomerService.getCustomerById(payload.customerId);
+    this.logger.debug({ customer, serviceAccount }, `Found Customer with id ${customer.id}`);
+
+    const aggregationDetails: AggregationDetails = {
+      aggregatorName: AggregationDetailsAggregatorName.BRIDGE,
+    };
+    switch (customer.aggregationDetails?.mode) {
+      case AggregationDetailsMode.REDIRECT:
+        // Generates a redirect URL
+        aggregationDetails.redirectUrl = await this.aggregator.generateRedirectUrl(
+          customer.id,
+          customer.aggregationDetails?.callbackUrl,
+          customer.personalDetails?.contact?.email,
+          serviceAccount.config as ClientConfig,
+        );
+        break;
+
+      default:
+        throw new Error(`Invalid bank connection mode ${customer.aggregationDetails?.mode}`);
+    }
+
+    // Update user with redirect link information and userId if provided
+    await this.algoanCustomerService.updateCustomer(payload.customerId, {
+      aggregationDetails,
+    });
+
+    this.logger.debug(`Updated Customer ${payload.customerId}`);
+
+    return;
   }
 
   /**
