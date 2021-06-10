@@ -23,8 +23,16 @@ import {
   BridgeUserInformation,
 } from '../../aggregator/interfaces/bridge.interface';
 import { AggregatorService } from '../../aggregator/services/aggregator.service';
+import {
+  mapBridgeAccount as mapBridgeAccountV2,
+  mapBridgeTransactions as mapBridgeTransactionsV2,
+} from '../../aggregator/services/bridge/bridge-v2.utils';
 import { ClientConfig } from '../../aggregator/services/bridge/bridge.client';
 import { mapBridgeAccount, mapBridgeTransactions } from '../../aggregator/services/bridge/bridge.utils';
+import {
+  Account as AnalysisAccount,
+  AccountTransaction as AnalysisTransaction,
+} from '../../algoan/dto/analysis.inputs';
 import { AggregationDetailsAggregatorName, AggregationDetailsMode } from '../../algoan/dto/customer.enums';
 import { AggregationDetails, Customer } from '../../algoan/dto/customer.objects';
 import { AlgoanAnalysisService } from '../../algoan/services/algoan-analysis.service';
@@ -34,6 +42,7 @@ import { AlgoanService } from '../../algoan/services/algoan.service';
 import { CONFIG } from '../../config/config.module';
 import { AggregatorLinkRequiredDTO } from '../dto/aggregator-link-required.dto';
 import { BankreaderLinkRequiredDTO } from '../dto/bandreader-link-required.dto';
+import { BanksDetailsRequiredDTO } from '../dto/bank-details-required.dto';
 import { BankreaderRequiredDTO } from '../dto/bankreader-required.dto';
 import { EventDTO } from '../dto/event.dto';
 
@@ -106,6 +115,10 @@ export class HooksService {
       switch (event.subscription.eventName) {
         case EventName.AGGREGATOR_LINK_REQUIRED:
           await this.handleAggregatorLinkRequired(serviceAccount, event.payload as AggregatorLinkRequiredDTO);
+          break;
+
+        case EventName.BANK_DETAILS_REQUIRED:
+          await this.handleBankDetailsRequiredEvent(serviceAccount, event.payload as BanksDetailsRequiredDTO);
           break;
 
         case EventName.BANKREADER_LINK_REQUIRED:
@@ -372,6 +385,113 @@ export class HooksService {
       },
       serviceAccount.config as ClientConfig,
     );
+
+    return;
+  }
+
+  /**
+   * Handle the "bank_details_required" subscription
+   * It triggers the banks accounts and transactions synchronization
+   * @param serviceAccount Concerned Algoan service account attached to the subscription
+   * @param payload Payload sent, containing the Banks User id
+   */
+  public async handleBankDetailsRequiredEvent(
+    serviceAccount: ServiceAccount,
+    payload: BanksDetailsRequiredDTO,
+  ): Promise<void> {
+    // Authenticate to algoan
+    this.algoanHttpService.authenticate(serviceAccount.clientId, serviceAccount.clientSecret);
+
+    // Get customer information
+    const customer: Customer = await this.algoanCustomerService.getCustomerById(payload.customerId);
+    this.logger.debug({ customer, serviceAccount }, `Found Customer with id ${customer.id}`);
+
+    // Retrieves an access token from Bridge to access to the user accounts
+    const authenticationResponse: AuthenticationResponse = await this.aggregator.getAccessToken(
+      customer.id,
+      serviceAccount.config as ClientConfig,
+    );
+    const accessToken: string = authenticationResponse.access_token;
+    const bridgeUserId: string = authenticationResponse.user.uuid;
+
+    // Retrieves Bridge banks accounts
+    const accounts: BridgeAccount[] = await this.aggregator.getAccounts(
+      accessToken,
+      serviceAccount.config as ClientConfig,
+    );
+    this.logger.debug({
+      message: `Bridge accounts retrieved for Customer "${customer.id}"`,
+      accounts,
+    });
+
+    // Get personal information
+    let userInfo: BridgeUserInformation[] = [];
+    try {
+      userInfo = await this.aggregator.getUserPersonalInformation(accessToken, serviceAccount.config as ClientConfig);
+    } catch (err) {
+      this.logger.warn({ message: `Unable to get user personal information`, error: err });
+    }
+
+    const algoanAccounts: AnalysisAccount[] = await mapBridgeAccountV2(
+      accounts,
+      userInfo,
+      accessToken,
+      this.aggregator,
+      serviceAccount.config as ClientConfig,
+    );
+
+    // Retrieves Bridge transactions
+    const timeout = moment().add(this._config.bridge.synchronizationTimeout, 'seconds');
+    let lastUpdatedAt: string | undefined;
+    let transactions: BridgeTransaction[] = [];
+    /* eslint-disable no-magic-numbers */
+    const nbOfMonths: number = (serviceAccount.config as ClientConfig).nbOfMonths ?? 3;
+
+    do {
+      const fetchedTransactions: BridgeTransaction[] = await this.aggregator.getTransactions(
+        accessToken,
+        lastUpdatedAt,
+        serviceAccount.config as ClientConfig,
+      );
+
+      transactions = transactions.concat(fetchedTransactions);
+      // Sort transactions by date
+      transactions = transactions.sort((tr1: BridgeTransaction, tr2: BridgeTransaction) =>
+        /* eslint-disable no-magic-numbers */
+        moment(tr1.date).isBefore(moment(tr2.date)) ? -1 : 1,
+      );
+    } while (
+      moment().diff(moment(transactions[0]?.date), 'months') <= nbOfMonths &&
+      moment().isBefore(timeout) &&
+      (await delay(this._config.bridge.synchronizationWaitingTime, { value: true }))
+    );
+
+    for (const account of algoanAccounts) {
+      const algoanTransactions: AnalysisTransaction[] = await mapBridgeTransactionsV2(
+        transactions.filter(
+          (transaction: BridgeTransaction) => transaction.account.id === Number(account.aggregator?.id),
+        ),
+        accessToken,
+        this.aggregator,
+        serviceAccount.config as ClientConfig,
+      );
+      if (!isEmpty(algoanTransactions)) {
+        account.transactions = algoanTransactions;
+      }
+    }
+
+    // Update the analysis
+    await this.algoanAnalysisService.updateAnalysis(customer.id, payload.analysisId, {
+      accounts: algoanAccounts,
+    });
+
+    // Delete the user from Bridge
+    const user = {
+      bridgeUserId,
+      id: customer.id,
+      accessToken,
+    };
+    await this.aggregator.deleteUser(user, serviceAccount.config as ClientConfig);
 
     return;
   }
