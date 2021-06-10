@@ -1,13 +1,13 @@
 import { createHmac } from 'crypto';
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { IBanksUser } from '@algoan/rest';
 import { config } from 'node-config-ts';
+
 import {
-  UserAccount,
+  AuthenticationResponse,
   BridgeAccount,
   BridgeTransaction,
-  AuthenticationResponse,
   BridgeUserInformation,
+  UserAccount,
 } from '../interfaces/bridge.interface';
 import { BridgeClient, ClientConfig } from './bridge/bridge.client';
 
@@ -24,11 +24,12 @@ export class AggregatorService {
    * @param banksUser The bank user for which we generate the redirectUrl
    */
   public async generateRedirectUrl(
-    banksUser: IBanksUser,
+    id: string,
+    callbackUrl?: string,
     email?: string,
     clientConfig?: ClientConfig,
   ): Promise<string> {
-    const userAccount: UserAccount = AggregatorService.buildCredentials(banksUser);
+    const userAccount: UserAccount = AggregatorService.buildCredentials(id);
     try {
       await this.bridgeClient.register(userAccount, clientConfig);
     } catch (err) {
@@ -44,7 +45,7 @@ export class AggregatorService {
      * Extract the uuid from the callback URL
      * As Bridge accepts only letters and numbers, replace "-" by a "z"
      */
-    const splittedCbUrl: string[] | undefined = banksUser.callbackUrl?.split('/');
+    const splittedCbUrl: string[] | undefined = callbackUrl?.split('/');
     if (splittedCbUrl === undefined) {
       throw new Error('No callbackUrl provided');
     }
@@ -85,8 +86,8 @@ export class AggregatorService {
    *
    * @param banksUser The bank user for which we generate the redirectUrl
    */
-  public async getAccessToken(banksUser: IBanksUser, clientConfig?: ClientConfig): Promise<AuthenticationResponse> {
-    return this.bridgeClient.authenticate(AggregatorService.buildCredentials(banksUser), clientConfig);
+  public async getAccessToken(id: string, clientConfig?: ClientConfig): Promise<AuthenticationResponse> {
+    return this.bridgeClient.authenticate(AggregatorService.buildCredentials(id), clientConfig);
   }
 
   /**
@@ -111,10 +112,10 @@ export class AggregatorService {
    * @param banksUser
    */
   public async deleteUser(
-    params: { bridgeUserId: string; accessToken: string; banksUser: IBanksUser },
+    params: { bridgeUserId: string; accessToken: string; id: string },
     clientConfig?: ClientConfig,
   ): Promise<void> {
-    const { password } = AggregatorService.buildCredentials(params.banksUser);
+    const { password } = AggregatorService.buildCredentials(params.id);
 
     return this.bridgeClient.deleteUser(
       params.accessToken,
@@ -132,9 +133,9 @@ export class AggregatorService {
    *
    * @param banksUser
    */
-  private static buildCredentials(banksUser: IBanksUser): UserAccount {
+  private static buildCredentials(id: string): UserAccount {
     const password: string = config.banksUserIdPassword;
-    let hash: string = createHmac('sha256', password).update(banksUser.id).digest('hex');
+    let hash: string = createHmac('sha256', password).update(id).digest('hex');
     const maxPasswordLength: number = 72;
 
     if (hash.length > maxPasswordLength) {
@@ -142,7 +143,7 @@ export class AggregatorService {
     }
 
     return {
-      email: `${banksUser.id}@algoan-bridge.com`,
+      email: `${id}@algoan-bridge.com`,
       password: hash,
     };
   }

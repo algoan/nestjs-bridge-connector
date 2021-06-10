@@ -1,21 +1,22 @@
-import { CacheModule, CACHE_MANAGER, HttpModule, HttpService } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
-import { AxiosResponse } from 'axios';
-import { of } from 'rxjs';
-import { config } from 'node-config-ts';
-import { v4 as uuidV4 } from 'uuid';
 import { AlgoanModule } from '../../../algoan/algoan.module';
 import { AppModule } from '../../../app.module';
+import { ConfigModule } from '../../../config/config.module';
+import { mockAuthResponse, mockPersonalInformation, mockUserResponse } from '../../interfaces/bridge-mock';
 import {
+  BridgeAccount,
+  BridgeAccountType,
+  BridgeBank,
+  BridgeTransaction,
   ConnectItemResponse,
   ListResponse,
-  BridgeAccountType,
-  BridgeTransaction,
-  BridgeBank,
-  BridgeAccount,
 } from '../../interfaces/bridge.interface';
-import { mockUserResponse, mockAuthResponse, mockPersonalInformation } from '../../interfaces/bridge-mock';
 import { BridgeClient } from './bridge.client';
+import { CACHE_MANAGER, CacheModule, HttpModule, HttpService } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { AxiosResponse } from 'axios';
+import { config } from 'node-config-ts';
+import { of } from 'rxjs';
+import { v4 as uuidV4 } from 'uuid';
 
 describe('BridgeClient', () => {
   let service: BridgeClient;
@@ -24,7 +25,7 @@ describe('BridgeClient', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [CacheModule.register({}), AppModule, HttpModule, AlgoanModule],
+      imports: [CacheModule.register({}), AppModule, HttpModule, AlgoanModule, ConfigModule],
       providers: [BridgeClient],
     }).compile();
 

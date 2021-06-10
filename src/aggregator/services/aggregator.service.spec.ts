@@ -1,12 +1,12 @@
-import { createHmac } from 'crypto';
-import { CacheModule, CACHE_MANAGER, HttpModule, HttpStatus } from '@nestjs/common';
+import { BanksUser, BanksUserStatus, RequestBuilder } from '@algoan/rest';
+import { CACHE_MANAGER, CacheModule, HttpModule, HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { BanksUserStatus, BanksUser, RequestBuilder } from '@algoan/rest';
+import { createHmac } from 'crypto';
 import { v4 as uuidV4 } from 'uuid';
 
 import { AlgoanModule } from '../../algoan/algoan.module';
 import { AppModule } from '../../app.module';
-import { mockAccount, mockTransaction, mockAuthResponse, mockPersonalInformation } from '../interfaces/bridge-mock';
+import { mockAccount, mockAuthResponse, mockPersonalInformation, mockTransaction } from '../interfaces/bridge-mock';
 import { AggregatorService } from './aggregator.service';
 import { BridgeClient } from './bridge/bridge.client';
 
@@ -64,7 +64,7 @@ describe('AggregatorService', () => {
         redirect_url: 'https://bridge/redirection-url',
       });
 
-      const redirectUrl = await service.generateRedirectUrl(mockBanksUser);
+      const redirectUrl = await service.generateRedirectUrl(mockBanksUser.id, mockBanksUser.callbackUrl);
       const expectedPassword: string = createHmac('sha256', 'random_pass').update('mockBanksUserId').digest('hex');
       expect(registerSpy).toHaveBeenCalledWith(
         {
@@ -105,7 +105,7 @@ describe('AggregatorService', () => {
         redirect_url: 'https://bridge/redirection-url',
       });
 
-      const redirectUrl = await service.generateRedirectUrl(mockBanksUser);
+      const redirectUrl = await service.generateRedirectUrl(mockBanksUser.id, mockBanksUser.callbackUrl);
       const expectedPassword: string = createHmac('sha256', 'random_pass').update('mockBanksUserId').digest('hex');
       expect(registerSpy).toHaveBeenCalledWith(
         {
@@ -148,7 +148,7 @@ describe('AggregatorService', () => {
         redirect_url: 'https://bridge/redirection-url',
       });
 
-      const redirectUrl = await service.generateRedirectUrl(mockBanksUser, email);
+      const redirectUrl = await service.generateRedirectUrl(mockBanksUser.id, mockBanksUser.callbackUrl, email);
       const expectedPassword: string = createHmac('sha256', 'random_pass').update('mockBanksUserId').digest('hex');
       expect(registerSpy).toHaveBeenCalledWith(
         {
@@ -196,7 +196,7 @@ describe('AggregatorService', () => {
 
   it('should get the accessToken', async () => {
     const spy = jest.spyOn(client, 'authenticate').mockReturnValue(Promise.resolve(mockAuthResponse));
-    const accessToken = (await service.getAccessToken(mockBanksUser)).access_token;
+    const accessToken = (await service.getAccessToken(mockBanksUser.id)).access_token;
     const expectedPassword: string = createHmac('sha256', 'random_pass').update('mockBanksUserId').digest('hex');
 
     expect(spy).toBeCalledWith(
