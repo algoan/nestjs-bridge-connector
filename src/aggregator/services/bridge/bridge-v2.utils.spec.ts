@@ -24,7 +24,7 @@ describe('Bridge Utils for Algoan v2 (Customer, Analysis)', () => {
       .mockReturnValue(Promise.resolve('mockResourceName'));
   });
 
-  it('should map the bridge account to a banksUser', async () => {
+  it("should map the bridge account to algoan customer's account", async () => {
     const expectedAccounts: Account[] = [
       {
         balance: 100,
@@ -62,7 +62,7 @@ describe('Bridge Utils for Algoan v2 (Customer, Analysis)', () => {
     expect(mappedAccount).toEqual(expectedAccounts);
   });
 
-  it('should map the bridge transactions to banksUser', async () => {
+  it("should map the bridge transactions to algoan customer's transactions", async () => {
     const expectedTransaction: AccountTransaction[] = [
       {
         dates: { debitedAt: '2019-04-06T13:53:12.000Z' },
