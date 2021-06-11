@@ -152,7 +152,7 @@ To configure your application properly, here is a list of key to set:
 | `eventList` | No | _array<string>_ | Event List you want to subscribe to |
 | `restHooksSecret` | No | _string_ | Resthooks secrets ensuring that all calls are made by Algoan. See [the documentation](https://developers.algoan.com/public/docs/algoan_documentation/resthooks_and_events/resthooks.html#validating-resthook-events) for more information |
 | `port` | No | _number_ | Application networking port |
-| `banksUserIdPassword` | Yes | _string_ | Password used to encrypt the banks user identifier to authenticate to Bridge. **Ensure that your password is hidden in your production environment** |
+| `customerIdPassword` | Yes | _string_ | Password used to encrypt the banks user identifier to authenticate to Bridge. **Ensure that your password is hidden in your production environment** |
 
 _NOTE_: Default values are defined in the [`config/default.json`](./config/default.json) file.
 

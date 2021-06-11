@@ -135,7 +135,7 @@ export class AggregatorService {
    * @param id id of the customer
    */
   private static buildCredentials(id: string): UserAccount {
-    const password: string = config.banksUserIdPassword;
+    const password: string = config.customerIdPassword;
     let hash: string = createHmac('sha256', password).update(id).digest('hex');
     const maxPasswordLength: number = 72;
 

@@ -6,5 +6,5 @@
     "synchronizationWaitingTime": 0,
     "synchronizationTimeout": 2
   },
-  "banksUserIdPassword": "random_pass"
+  "customerIdPassword": "random_pass"
 }
