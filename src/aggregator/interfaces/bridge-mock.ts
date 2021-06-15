@@ -1,11 +1,12 @@
 import {
+  AuthenticationResponse,
   BridgeAccount,
   BridgeAccountStatus,
   BridgeAccountType,
+  BridgeRefreshStatus,
   BridgeTransaction,
-  UserResponse,
-  AuthenticationResponse,
   BridgeUserInformation,
+  UserResponse,
 } from './bridge.interface';
 
 export const mockAccount: BridgeAccount = {
@@ -116,3 +117,11 @@ export const mockPersonalInformation: BridgeUserInformation[] = [
     nb_kids: null, // eslint-disable-line no-null/no-null
   },
 ];
+
+export const mockRefreshStatus: BridgeRefreshStatus = {
+  status: 'finished',
+  refresh_at: new Date().toISOString(),
+  mfa: null, // eslint-disable-line no-null/no-null
+  refresh_accounts_count: 0,
+  total_accounts_count: 0,
+};

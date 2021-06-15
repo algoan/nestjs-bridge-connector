@@ -1,7 +1,18 @@
+import { CacheModule, CACHE_MANAGER, HttpModule, HttpService } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { AxiosResponse } from 'axios';
+import { config } from 'node-config-ts';
+import { of } from 'rxjs';
+import { v4 as uuidV4 } from 'uuid';
 import { AlgoanModule } from '../../../algoan/algoan.module';
 import { AppModule } from '../../../app.module';
 import { ConfigModule } from '../../../config/config.module';
-import { mockAuthResponse, mockPersonalInformation, mockUserResponse } from '../../interfaces/bridge-mock';
+import {
+  mockAuthResponse,
+  mockPersonalInformation,
+  mockRefreshStatus,
+  mockUserResponse,
+} from '../../interfaces/bridge-mock';
 import {
   BridgeAccount,
   BridgeAccountType,
@@ -11,12 +22,6 @@ import {
   ListResponse,
 } from '../../interfaces/bridge.interface';
 import { BridgeClient } from './bridge.client';
-import { CACHE_MANAGER, CacheModule, HttpModule, HttpService } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
-import { AxiosResponse } from 'axios';
-import { config } from 'node-config-ts';
-import { of } from 'rxjs';
-import { v4 as uuidV4 } from 'uuid';
 
 describe('BridgeClient', () => {
   let service: BridgeClient;
@@ -36,6 +41,53 @@ describe('BridgeClient', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  it('can refresh an item', async () => {
+    const result: AxiosResponse = {
+      data: {},
+      status: 202,
+      statusText: '',
+      headers: {},
+      config: {},
+    };
+
+    const spy = jest.spyOn(httpService, 'post').mockImplementationOnce(() => of(result));
+
+    await service.refreshItem('mockItemId', 'secret-access-token');
+
+    expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/items/mockItemId/refresh', {
+      headers: {
+        Authorization: 'Bearer secret-access-token',
+        'Client-Id': config.bridge.clientId,
+        'Client-Secret': config.bridge.clientSecret,
+        'Bankin-Version': config.bridge.bankinVersion,
+      },
+    });
+  });
+
+  it('can get the status of a refresh of an item', async () => {
+    const result: AxiosResponse = {
+      data: mockRefreshStatus,
+      status: 200,
+      statusText: '',
+      headers: {},
+      config: {},
+    };
+
+    const spy = jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(result));
+
+    const resp = await service.getRefreshStatus('mockItemId', 'secret-access-token');
+    expect(resp).toBe(mockRefreshStatus);
+
+    expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/items/mockItemId/refresh/status', {
+      headers: {
+        Authorization: 'Bearer secret-access-token',
+        'Client-Id': config.bridge.clientId,
+        'Client-Secret': config.bridge.clientSecret,
+        'Bankin-Version': config.bridge.bankinVersion,
+      },
+    });
   });
 
   it('can create a user', async () => {
