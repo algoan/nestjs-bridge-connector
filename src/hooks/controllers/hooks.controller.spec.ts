@@ -1,4 +1,5 @@
 import { EventName } from '@algoan/rest';
+import { ContextIdFactory } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { AggregatorModule } from '../../aggregator/aggregator.module';
@@ -14,14 +15,18 @@ describe('Hooks Controller', () => {
   let hooksService: HooksService;
 
   beforeEach(async () => {
+    // To mock scoped DI
+    const contextId = ContextIdFactory.create();
+    jest.spyOn(ContextIdFactory, 'getByRequest').mockImplementation(() => contextId);
+
     const module: TestingModule = await Test.createTestingModule({
       imports: [AppModule, AggregatorModule, AlgoanModule, ConfigModule],
       providers: [HooksService],
       controllers: [HooksController],
     }).compile();
 
-    controller = module.get<HooksController>(HooksController);
-    hooksService = module.get<HooksService>(HooksService);
+    controller = await module.resolve<HooksController>(HooksController, contextId);
+    hooksService = await module.resolve<HooksService>(HooksService, contextId);
   });
 
   it('should be defined', () => {
