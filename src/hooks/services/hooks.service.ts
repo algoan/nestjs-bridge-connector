@@ -441,6 +441,7 @@ export class HooksService {
     );
 
     // Retrieves Bridge transactions
+    // eslint-disable-next-line no-underscore-dangle
     const timeout = moment().add(this._config.bridge.synchronizationTimeout, 'seconds');
     let lastUpdatedAt: string | undefined;
     let transactions: BridgeTransaction[] = [];
@@ -463,6 +464,7 @@ export class HooksService {
     } while (
       moment().diff(moment(transactions[0]?.date), 'months') <= nbOfMonths &&
       moment().isBefore(timeout) &&
+      // eslint-disable-next-line no-underscore-dangle
       (await delay(this._config.bridge.synchronizationWaitingTime, { value: true }))
     );
 
