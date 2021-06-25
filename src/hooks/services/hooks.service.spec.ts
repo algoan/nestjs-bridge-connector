@@ -26,6 +26,7 @@ import { mockAccount, mockPersonalInformation, mockTransaction } from '../../agg
 import { AggregatorService } from '../../aggregator/services/aggregator.service';
 import { mapBridgeAccount, mapBridgeTransactions } from '../../aggregator/services/bridge/bridge.utils';
 import { AlgoanModule } from '../../algoan/algoan.module';
+import { analysisMock } from '../../algoan/dto/analysis.objects.mock';
 import { customerMock } from '../../algoan/dto/customer.objects.mock';
 import { AlgoanAnalysisService } from '../../algoan/services/algoan-analysis.service';
 import { AlgoanCustomerService } from '../../algoan/services/algoan-customer.service';
@@ -151,6 +152,14 @@ describe('HooksService', () => {
     it('handles aggregator link required', async () => {
       mockEvent.subscription.eventName = EventName.AGGREGATOR_LINK_REQUIRED;
       const spy = jest.spyOn(hooksService, 'handleAggregatorLinkRequired').mockResolvedValue();
+      await hooksService.handleWebhook(mockEvent as EventDTO, 'mockSignature');
+
+      expect(spy).toBeCalledWith(mockServiceAccount, mockEvent.payload);
+    });
+
+    it('handles bank details required', async () => {
+      mockEvent.subscription.eventName = EventName.BANK_DETAILS_REQUIRED;
+      const spy = jest.spyOn(hooksService, 'handleBankDetailsRequiredEvent').mockResolvedValue();
       await hooksService.handleWebhook(mockEvent as EventDTO, 'mockSignature');
 
       expect(spy).toBeCalledWith(mockServiceAccount, mockEvent.payload);
@@ -306,6 +315,162 @@ describe('HooksService', () => {
       {
         bridgeUserId: 'rrr',
         id: mockBanksUser.id,
+        accessToken: 'mockPermToken',
+      },
+      mockServiceAccountConfig,
+    );
+  });
+
+  it('synchronizes the accounts on bank details required', async () => {
+    const algoanAuthenticateSpy = jest.spyOn(algoanHttpService, 'authenticate').mockReturnValue();
+    const getCustomerSpy = jest.spyOn(algoanCustomerService, 'getCustomerById').mockResolvedValue(customerMock);
+    const updateAnalysisSpy = jest.spyOn(algoanAnalysisService, 'updateAnalysis').mockResolvedValue(analysisMock);
+    mockServiceAccount.config = mockServiceAccountConfig;
+    const accessTokenSpy = jest.spyOn(aggregatorService, 'getAccessToken').mockResolvedValue({
+      access_token: 'mockPermToken',
+      expires_at: '323423423423',
+      user: { email: 'test@test.com', uuid: 'rrr', resource_type: 's', resource_uri: '/..' },
+    });
+    const accountSpy = jest
+      .spyOn(aggregatorService, 'getAccounts')
+      .mockResolvedValue([mockAccount, { ...mockAccount, id: 0 }]);
+    const userInfoSpy = jest
+      .spyOn(aggregatorService, 'getUserPersonalInformation')
+      .mockResolvedValue(mockPersonalInformation);
+    const date = new Date().toISOString();
+    const transactionSpy = jest
+      .spyOn(aggregatorService, 'getTransactions')
+      .mockResolvedValueOnce([
+        { ...mockTransaction, date, account: { ...mockTransaction.account, id: mockAccount.id } },
+      ])
+      .mockResolvedValue([{ ...mockTransaction, account: { ...mockTransaction.account, id: mockAccount.id } }]);
+    const resourceNameSpy = jest.spyOn(aggregatorService, 'getResourceName').mockResolvedValue('mockResourceName');
+    const deleteUserSpy = jest.spyOn(aggregatorService, 'deleteUser').mockResolvedValue();
+
+    const mockEventPayload = {
+      customerId: customerMock.id,
+      analysisId: analysisMock.id,
+      temporaryCode: 'mockTemporaryToken',
+    };
+
+    await hooksService.handleBankDetailsRequiredEvent(mockServiceAccount, mockEventPayload);
+
+    expect(algoanAuthenticateSpy).toBeCalledWith(mockServiceAccount.clientId, mockServiceAccount.clientSecret);
+    expect(getCustomerSpy).toBeCalledWith(mockEventPayload.customerId);
+    expect(updateAnalysisSpy).toBeCalledWith(customerMock.id, mockEventPayload.analysisId, {
+      accounts: [
+        {
+          aggregator: {
+            id: '1234',
+          },
+          balance: 100,
+          balanceDate: '2019-04-06T13:53:12.000Z',
+          bank: {
+            id: '6',
+            name: 'mockResourceName',
+          },
+          bic: undefined,
+          currency: 'USD',
+          details: {
+            loan: {
+              amount: 140200,
+              endDate: '2026-12-30T23:00:00.000Z',
+              interestRate: 1.25,
+              payment: 1000,
+              remainingCapital: 100000,
+              startDate: '2013-01-09T23:00:00.000Z',
+              type: 'OTHER',
+            },
+            savings: undefined,
+          },
+          iban: 'mockIban',
+          name: 'mockBridgeAccountName',
+          owners: [
+            {
+              name: ' DUPONT',
+            },
+          ],
+          type: 'CREDIT_CARD',
+          usage: 'PERSONAL',
+          transactions: [
+            {
+              aggregator: {
+                category: 'mockResourceName',
+                id: '23',
+              },
+              amount: 30,
+              currency: 'USD',
+              dates: {
+                bookedAt: undefined,
+                debitedAt: '2019-04-06T13:53:12.000Z',
+              },
+              description: 'mockRawDescription',
+              isComing: false,
+            },
+            {
+              aggregator: {
+                category: 'mockResourceName',
+                id: '23',
+              },
+              amount: 30,
+              currency: 'USD',
+              dates: {
+                bookedAt: undefined,
+                debitedAt: date,
+              },
+              description: 'mockRawDescription',
+              isComing: false,
+            },
+          ],
+        },
+        {
+          aggregator: {
+            id: '0',
+          },
+          balance: 100,
+          balanceDate: '2019-04-06T13:53:12.000Z',
+          bank: {
+            id: '6',
+            name: 'mockResourceName',
+          },
+          bic: undefined,
+          currency: 'USD',
+          details: {
+            loan: {
+              amount: 140200,
+              endDate: '2026-12-30T23:00:00.000Z',
+              interestRate: 1.25,
+              payment: 1000,
+              remainingCapital: 100000,
+              startDate: '2013-01-09T23:00:00.000Z',
+              type: 'OTHER',
+            },
+            savings: undefined,
+          },
+          iban: 'mockIban',
+          name: 'mockBridgeAccountName',
+          owners: [
+            {
+              name: ' DUPONT',
+            },
+          ],
+          type: 'CREDIT_CARD',
+          usage: 'PERSONAL',
+        },
+      ],
+    });
+
+    expect(accessTokenSpy).toBeCalledWith(customerMock.id, mockServiceAccountConfig);
+    expect(accountSpy).toBeCalledWith('mockPermToken', mockServiceAccountConfig);
+    expect(userInfoSpy).toBeCalledWith('mockPermToken', mockServiceAccountConfig);
+    expect(resourceNameSpy).toBeCalledTimes(4);
+    expect(transactionSpy).toBeCalledTimes(2);
+    expect(transactionSpy).toBeCalledWith('mockPermToken', undefined, mockServiceAccountConfig);
+    expect(deleteUserSpy).toHaveBeenNthCalledWith(
+      1,
+      {
+        bridgeUserId: 'rrr',
+        id: customerMock.id,
         accessToken: 'mockPermToken',
       },
       mockServiceAccountConfig,

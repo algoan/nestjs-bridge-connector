@@ -36,7 +36,7 @@ export interface AccountOwner {
 }
 
 /**
- * Accoun tBank
+ * Account tBank
  */
 export interface AccountBank {
   id?: string;
@@ -50,7 +50,7 @@ export interface AccountBank {
  */
 export interface AccountDetails {
   savings?: AccountDetailsSavings;
-  loans?: AccountDetailsLoans;
+  loan?: AccountDetailsLoans;
 }
 
 /**
