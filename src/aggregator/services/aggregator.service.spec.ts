@@ -1,11 +1,16 @@
 import { CacheModule, HttpModule, HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { createHmac } from 'crypto';
-import { customerMock } from '../../algoan/dto/customer.objects.mock';
-
 import { AlgoanModule } from '../../algoan/algoan.module';
+import { customerMock } from '../../algoan/dto/customer.objects.mock';
 import { AppModule } from '../../app.module';
-import { mockAccount, mockAuthResponse, mockPersonalInformation, mockTransaction } from '../interfaces/bridge-mock';
+import {
+  mockAccount,
+  mockAuthResponse,
+  mockPersonalInformation,
+  mockRefreshStatus,
+  mockTransaction,
+} from '../interfaces/bridge-mock';
 import { AggregatorService } from './aggregator.service';
 import { BridgeClient } from './bridge/bridge.client';
 
@@ -180,6 +185,24 @@ describe('AggregatorService', () => {
     it('should not try to re-create an item when there is one already', async () => {
       // TODO
     });
+  });
+
+  it('should refresh an item', async () => {
+    const spy = jest.spyOn(client, 'refreshItem').mockReturnValue(Promise.resolve());
+    const itemId = 'mockItemId';
+    const token = 'mockToken';
+    await service.refresh(itemId, token);
+
+    expect(spy).toBeCalledWith(itemId, token, undefined);
+  });
+
+  it('should refresh an item', async () => {
+    const spy = jest.spyOn(client, 'getRefreshStatus').mockReturnValue(Promise.resolve(mockRefreshStatus));
+    const itemId = 'mockItemId';
+    const token = 'mockToken';
+    await service.getRefreshStatus(itemId, token);
+
+    expect(spy).toBeCalledWith(itemId, token, undefined);
   });
 
   it('should get the accounts', async () => {

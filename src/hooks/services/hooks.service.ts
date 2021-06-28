@@ -4,10 +4,10 @@ import * as delay from 'delay';
 import { isEmpty } from 'lodash';
 import * as moment from 'moment';
 import { Config } from 'node-config-ts';
-
 import {
   AuthenticationResponse,
   BridgeAccount,
+  BridgeRefreshStatus,
   BridgeTransaction,
   BridgeUserInformation,
 } from '../../aggregator/interfaces/bridge.interface';
@@ -177,6 +177,8 @@ export class HooksService {
     serviceAccount: ServiceAccount,
     payload: BanksDetailsRequiredDTO,
   ): Promise<void> {
+    const saConfig: ClientConfig = serviceAccount.config as ClientConfig;
+
     // Authenticate to algoan
     this.algoanHttpService.authenticate(serviceAccount.clientId, serviceAccount.clientSecret);
 
@@ -185,18 +187,29 @@ export class HooksService {
     this.logger.debug({ customer, serviceAccount }, `Found Customer with id ${customer.id}`);
 
     // Retrieves an access token from Bridge to access to the user accounts
-    const authenticationResponse: AuthenticationResponse = await this.aggregator.getAccessToken(
-      customer.id,
-      serviceAccount.config as ClientConfig,
-    );
+    const authenticationResponse: AuthenticationResponse = await this.aggregator.getAccessToken(customer.id, saConfig);
     const accessToken: string = authenticationResponse.access_token;
     const bridgeUserId: string = authenticationResponse.user.uuid;
 
+    if (customer.aggregationDetails.userId !== undefined) {
+      // Init refresh
+      await this.aggregator.refresh(customer.aggregationDetails.userId, accessToken, saConfig);
+
+      // Wait until refresh is finished
+      let refresh: BridgeRefreshStatus;
+      const timeoutRefresh: moment.Moment = moment().add(this.config.bridge.synchronizationTimeout);
+
+      do {
+        refresh = await this.aggregator.getRefreshStatus(customer.aggregationDetails.userId, accessToken, saConfig);
+      } while (
+        refresh?.status !== 'finished' &&
+        moment().isBefore(timeoutRefresh) &&
+        (await delay(this.config.bridge.synchronizationWaitingTime, { value: true }))
+      );
+    }
+
     // Retrieves Bridge banks accounts
-    const accounts: BridgeAccount[] = await this.aggregator.getAccounts(
-      accessToken,
-      serviceAccount.config as ClientConfig,
-    );
+    const accounts: BridgeAccount[] = await this.aggregator.getAccounts(accessToken, saConfig);
     this.logger.debug({
       message: `Bridge accounts retrieved for Customer "${customer.id}"`,
       accounts,
@@ -205,7 +218,7 @@ export class HooksService {
     // Get personal information
     let userInfo: BridgeUserInformation[] = [];
     try {
-      userInfo = await this.aggregator.getUserPersonalInformation(accessToken, serviceAccount.config as ClientConfig);
+      userInfo = await this.aggregator.getUserPersonalInformation(accessToken, saConfig);
     } catch (err) {
       this.logger.warn({ message: `Unable to get user personal information`, error: err });
     }
@@ -215,7 +228,7 @@ export class HooksService {
       userInfo,
       accessToken,
       this.aggregator,
-      serviceAccount.config as ClientConfig,
+      saConfig,
     );
 
     // Retrieves Bridge transactions
@@ -223,13 +236,13 @@ export class HooksService {
     let lastUpdatedAt: string | undefined;
     let transactions: BridgeTransaction[] = [];
     /* eslint-disable no-magic-numbers */
-    const nbOfMonths: number = (serviceAccount.config as ClientConfig).nbOfMonths ?? 3;
+    const nbOfMonths: number = saConfig.nbOfMonths ?? 3;
 
     do {
       const fetchedTransactions: BridgeTransaction[] = await this.aggregator.getTransactions(
         accessToken,
         lastUpdatedAt,
-        serviceAccount.config as ClientConfig,
+        saConfig,
       );
 
       transactions = transactions.concat(fetchedTransactions);
@@ -251,7 +264,7 @@ export class HooksService {
         ),
         accessToken,
         this.aggregator,
-        serviceAccount.config as ClientConfig,
+        saConfig,
       );
       if (!isEmpty(algoanTransactions)) {
         account.transactions = algoanTransactions;
@@ -269,7 +282,7 @@ export class HooksService {
       id: customer.id,
       accessToken,
     };
-    await this.aggregator.deleteUser(user, serviceAccount.config as ClientConfig);
+    await this.aggregator.deleteUser(user, saConfig);
 
     return;
   }

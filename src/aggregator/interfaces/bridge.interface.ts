@@ -193,3 +193,15 @@ export interface BridgeUserInformation {
   is_owner?: boolean | null;
   nb_kids?: number | null;
 }
+
+/**
+ * Status of a refresh
+ * https://docs.bridgeapi.io/reference#get-a-refresh-status
+ */
+export interface BridgeRefreshStatus {
+  status: string;
+  refresh_at: Date | string;
+  mfa?: Record<string, unknown> | null;
+  refresh_accounts_count?: number | null;
+  total_accounts_count?: number | null;
+}

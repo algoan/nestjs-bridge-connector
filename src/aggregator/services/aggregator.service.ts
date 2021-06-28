@@ -1,10 +1,10 @@
 import { createHmac } from 'crypto';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { config } from 'node-config-ts';
-
 import {
   AuthenticationResponse,
   BridgeAccount,
+  BridgeRefreshStatus,
   BridgeTransaction,
   BridgeUserInformation,
   UserAccount,
@@ -17,6 +17,28 @@ import { BridgeClient, ClientConfig } from './bridge/bridge.client';
 @Injectable()
 export class AggregatorService {
   constructor(private readonly bridgeClient: BridgeClient) {}
+
+  /**
+   * Refresh a connection
+   * @param id id of the connection
+   * @param accessToken access token of the connection
+   */
+  public async refresh(id: string | number, accessToken: string, clientConfig?: ClientConfig): Promise<void> {
+    return this.bridgeClient.refreshItem(id, accessToken, clientConfig);
+  }
+
+  /**
+   * Get the status of the refresh of a connection
+   * @param id id of the connection
+   * @param accessToken access token of the connection
+   */
+  public async getRefreshStatus(
+    id: string | number,
+    accessToken: string,
+    clientConfig?: ClientConfig,
+  ): Promise<BridgeRefreshStatus> {
+    return this.bridgeClient.getRefreshStatus(id, accessToken, clientConfig);
+  }
 
   /**
    * Create the Bridge Webview url base on the client and it's callbackUrl

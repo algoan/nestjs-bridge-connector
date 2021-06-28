@@ -1,19 +1,20 @@
-import { CACHE_MANAGER, Inject, HttpService, Injectable, Logger } from '@nestjs/common';
-import { Cache } from 'cache-manager';
-import { config } from 'node-config-ts';
+import { CACHE_MANAGER, HttpService, Inject, Injectable, Logger } from '@nestjs/common';
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { Cache } from 'cache-manager';
 import { isNil } from 'lodash';
+import { config } from 'node-config-ts';
 import {
-  UserResponse,
-  UserAccount,
   AuthenticationResponse,
-  ConnectItemResponse,
-  ListResponse,
   BridgeAccount,
-  BridgeTransaction,
   BridgeBank,
   BridgeCategory,
+  BridgeRefreshStatus,
+  BridgeTransaction,
   BridgeUserInformation,
+  ConnectItemResponse,
+  ListResponse,
+  UserAccount,
+  UserResponse,
 } from '../../interfaces/bridge.interface';
 
 /**
@@ -110,6 +111,32 @@ export class BridgeClient {
     }
 
     const resp: AxiosResponse<ConnectItemResponse> = await this.httpService
+      .get(url, { headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) } })
+      .toPromise();
+
+    return resp.data;
+  }
+
+  /**
+   * Refresh an item
+   */
+  public async refreshItem(id: string | number, accessToken: string, clientConfig?: ClientConfig): Promise<void> {
+    const url: string = `${config.bridge.baseUrl}/v2/items/${id}/refresh`;
+    await this.httpService
+      .post(url, { headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) } })
+      .toPromise();
+  }
+
+  /**
+   * Get status of a refresh
+   */
+  public async getRefreshStatus(
+    id: string | number,
+    accessToken: string,
+    clientConfig?: ClientConfig,
+  ): Promise<BridgeRefreshStatus> {
+    const url: string = `${config.bridge.baseUrl}/v2/items/${id}/refresh/status`;
+    const resp: AxiosResponse<BridgeRefreshStatus> = await this.httpService
       .get(url, { headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) } })
       .toPromise();
 
