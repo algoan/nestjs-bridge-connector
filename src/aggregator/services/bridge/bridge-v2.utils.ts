@@ -13,7 +13,7 @@ import { ClientConfig } from './bridge.client';
 
 /**
  * mapBridgeAccount transforms a bridge array of accounts into
- * an array of Banks User accounts
+ * an array of algoan v2 accounts
  * @param accounts array of accounts from Bridge
  * @param accessToken permanent access token for Bridge api
  */
@@ -103,14 +103,14 @@ const ACCOUNT_TYPE_MAPPING: AccountTypeMapping = {
 };
 
 /**
- * mapAccountType map the banksUser type from the bridge type
+ * mapAccountType map the algoan v2 type from the bridge type
  * @param accountType bridge type
  */
 // eslint-disable-next-line no-null/no-null
 const mapAccountType = (accountType: BridgeAccountType): AccountType => ACCOUNT_TYPE_MAPPING[accountType] || null;
 
 /**
- * mapUsageType map the banksUser usage from the bridge type
+ * mapUsageType map the algoan v2 usage from the bridge type
  * @param isPro Bridge boolean
  */
 const mapUsageType = (isPro: boolean): AccountUsage => (isPro ? AccountUsage.PROFESSIONAL : AccountUsage.PERSONAL);
@@ -133,7 +133,7 @@ const mapUserInfo = (itemId: number, userInfo: BridgeUserInformation[]): Account
 
 /**
  * mapBridgeTransactions transforms a bridge transaction wrapper into
- * an array of banks user transactions
+ * an array of algoan v2 transactions
  *
  * @param bridgeTransactions TransactionWrapper from Bridge
  * @param accessToken permanent access token for Bridge api

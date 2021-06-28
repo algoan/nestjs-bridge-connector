@@ -1,8 +1,7 @@
-import { BanksUser, BanksUserStatus, RequestBuilder } from '@algoan/rest';
-import { CACHE_MANAGER, CacheModule, HttpModule, HttpStatus } from '@nestjs/common';
+import { CacheModule, HttpModule, HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { createHmac } from 'crypto';
-import { v4 as uuidV4 } from 'uuid';
+import { customerMock } from '../../algoan/dto/customer.objects.mock';
 
 import { AlgoanModule } from '../../algoan/algoan.module';
 import { AppModule } from '../../app.module';
@@ -13,22 +12,6 @@ import { BridgeClient } from './bridge/bridge.client';
 describe('AggregatorService', () => {
   let service: AggregatorService;
   let client: BridgeClient;
-  let cacheManager: any;
-  let uuid: string = uuidV4();
-  const callbackUrl: string = `http://algoan.com/callback/2/${uuid}`;
-  const mockBanksUser = new BanksUser(
-    {
-      id: 'mockBanksUserId',
-      status: BanksUserStatus.ACCOUNTS_SYNCHRONIZED,
-      redirectUrl: 'mockRedirectUrl',
-      redirectUrlCreatedAt: 123456789,
-      redirectUrlTTL: 100,
-      callbackUrl,
-      scores: [],
-      analysis: { alerts: [], regularCashFlows: [], reliability: 'HIGH' },
-    },
-    new RequestBuilder('mockBaseURL', { clientId: 'mockClientId' }),
-  );
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -38,7 +21,6 @@ describe('AggregatorService', () => {
 
     service = module.get<AggregatorService>(AggregatorService);
     client = module.get<BridgeClient>(BridgeClient);
-    cacheManager = module.get<any>(CACHE_MANAGER);
   });
 
   it('should be defined', () => {
@@ -64,24 +46,31 @@ describe('AggregatorService', () => {
         redirect_url: 'https://bridge/redirection-url',
       });
 
-      const redirectUrl = await service.generateRedirectUrl(mockBanksUser.id, mockBanksUser.callbackUrl);
-      const expectedPassword: string = createHmac('sha256', 'random_pass').update('mockBanksUserId').digest('hex');
+      const redirectUrl = await service.generateRedirectUrl(
+        customerMock.id,
+        customerMock.aggregationDetails.callbackUrl,
+      );
+      const expectedPassword: string = createHmac('sha256', 'random_pass').update(customerMock.id).digest('hex');
       expect(registerSpy).toHaveBeenCalledWith(
         {
-          email: 'mockBanksUserId@algoan-bridge.com',
+          email: `${customerMock.id}@algoan-bridge.com`,
           password: expectedPassword,
         },
         undefined,
       );
       expect(authenticateSpy).toHaveBeenCalledWith(
         {
-          email: 'mockBanksUserId@algoan-bridge.com',
+          email: `${customerMock.id}@algoan-bridge.com`,
           password: expectedPassword,
         },
         undefined,
       );
-      const extractedUuid: string = uuid.replace(/-/g, 'z');
-      expect(connectItemSpy).toHaveBeenCalledWith('access-token', extractedUuid, undefined, undefined);
+      expect(connectItemSpy).toHaveBeenCalledWith(
+        'access-token',
+        customerMock.aggregationDetails.callbackUrl,
+        undefined,
+        undefined,
+      );
       expect(redirectUrl).toBe('https://bridge/redirection-url');
     });
     it('should create and setup an account and return the redirect link', async () => {
@@ -105,28 +94,35 @@ describe('AggregatorService', () => {
         redirect_url: 'https://bridge/redirection-url',
       });
 
-      const redirectUrl = await service.generateRedirectUrl(mockBanksUser.id, mockBanksUser.callbackUrl);
-      const expectedPassword: string = createHmac('sha256', 'random_pass').update('mockBanksUserId').digest('hex');
+      const redirectUrl = await service.generateRedirectUrl(
+        customerMock.id,
+        customerMock.aggregationDetails.callbackUrl,
+      );
+      const expectedPassword: string = createHmac('sha256', 'random_pass').update(customerMock.id).digest('hex');
       expect(registerSpy).toHaveBeenCalledWith(
         {
-          email: 'mockBanksUserId@algoan-bridge.com',
+          email: `${customerMock.id}@algoan-bridge.com`,
           password: expectedPassword,
         },
         undefined,
       );
       expect(authenticateSpy).toHaveBeenCalledWith(
         {
-          email: 'mockBanksUserId@algoan-bridge.com',
+          email: `${customerMock.id}@algoan-bridge.com`,
           password: expectedPassword,
         },
         undefined,
       );
-      const extractedUuid: string = uuid.replace(/-/g, 'z');
-      expect(connectItemSpy).toHaveBeenCalledWith('access-token', extractedUuid, undefined, undefined);
+      expect(connectItemSpy).toHaveBeenCalledWith(
+        'access-token',
+        customerMock.aggregationDetails.callbackUrl,
+        undefined,
+        undefined,
+      );
       expect(redirectUrl).toBe('https://bridge/redirection-url');
     });
 
-    it('should create and setup an account and return the redirect link with a prefill email', async () => {
+    it('should create and setup an account and return the redirect link with a pre-fill email', async () => {
       const email: string = 'test@test.com';
       const registerSpy = jest.spyOn(client, 'register').mockResolvedValueOnce({
         uuid: '79c8961c-bdf7-11e5-88a3-4f2c2aec0665',
@@ -148,24 +144,32 @@ describe('AggregatorService', () => {
         redirect_url: 'https://bridge/redirection-url',
       });
 
-      const redirectUrl = await service.generateRedirectUrl(mockBanksUser.id, mockBanksUser.callbackUrl, email);
-      const expectedPassword: string = createHmac('sha256', 'random_pass').update('mockBanksUserId').digest('hex');
+      const redirectUrl = await service.generateRedirectUrl(
+        customerMock.id,
+        customerMock.aggregationDetails.callbackUrl,
+        email,
+      );
+      const expectedPassword: string = createHmac('sha256', 'random_pass').update(customerMock.id).digest('hex');
       expect(registerSpy).toHaveBeenCalledWith(
         {
-          email: 'mockBanksUserId@algoan-bridge.com',
+          email: `${customerMock.id}@algoan-bridge.com`,
           password: expectedPassword,
         },
         undefined,
       );
       expect(authenticateSpy).toHaveBeenCalledWith(
         {
-          email: 'mockBanksUserId@algoan-bridge.com',
+          email: `${customerMock.id}@algoan-bridge.com`,
           password: expectedPassword,
         },
         undefined,
       );
-      const extractedUuid: string = uuid.replace(/-/g, 'z');
-      expect(connectItemSpy).toHaveBeenCalledWith('access-token', extractedUuid, email, undefined);
+      expect(connectItemSpy).toHaveBeenCalledWith(
+        'access-token',
+        customerMock.aggregationDetails.callbackUrl,
+        email,
+        undefined,
+      );
       expect(redirectUrl).toBe('https://bridge/redirection-url');
     });
 
@@ -196,12 +200,12 @@ describe('AggregatorService', () => {
 
   it('should get the accessToken', async () => {
     const spy = jest.spyOn(client, 'authenticate').mockReturnValue(Promise.resolve(mockAuthResponse));
-    const accessToken = (await service.getAccessToken(mockBanksUser.id)).access_token;
-    const expectedPassword: string = createHmac('sha256', 'random_pass').update('mockBanksUserId').digest('hex');
+    const accessToken = (await service.getAccessToken(customerMock.id)).access_token;
+    const expectedPassword: string = createHmac('sha256', 'random_pass').update(customerMock.id).digest('hex');
 
     expect(spy).toBeCalledWith(
       {
-        email: 'mockBanksUserId@algoan-bridge.com',
+        email: `${customerMock.id}@algoan-bridge.com`,
         password: expectedPassword,
       },
       undefined,
@@ -212,7 +216,7 @@ describe('AggregatorService', () => {
   it('should get the resource name', async () => {
     const spy = jest.spyOn(client, 'getResourceName').mockReturnValue(Promise.resolve('mockResourceName'));
     const token = 'token';
-    const resourceUri = 'mockResoruceUri';
+    const resourceUri = 'mockResourceUri';
     await service.getResourceName(token, resourceUri);
 
     expect(spy).toBeCalledWith(token, resourceUri, undefined);

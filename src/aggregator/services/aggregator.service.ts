@@ -21,7 +21,8 @@ export class AggregatorService {
   /**
    * Create the Bridge Webview url base on the client and it's callbackUrl
    *
-   * @param banksUser The bank user for which we generate the redirectUrl
+   * @param id id of the customer to generate a redirectUrl
+   * @param callbackUrl callback url of the redirect url
    */
   public async generateRedirectUrl(
     id: string,
@@ -84,7 +85,7 @@ export class AggregatorService {
   /**
    * Returns the Bridge Access Token for a User
    *
-   * @param banksUser The bank user for which we generate the redirectUrl
+   * @param id id of the customer
    */
   public async getAccessToken(id: string, clientConfig?: ClientConfig): Promise<AuthenticationResponse> {
     return this.bridgeClient.authenticate(AggregatorService.buildCredentials(id), clientConfig);
@@ -109,7 +110,7 @@ export class AggregatorService {
 
   /**
    * Delete a user from Bridge
-   * @param banksUser
+   * @param params.id id of the customer
    */
   public async deleteUser(
     params: { bridgeUserId: string; accessToken: string; id: string },
@@ -131,10 +132,10 @@ export class AggregatorService {
    * Build Bridge account credentials for a BankUser
    * https://docs.bridgeapi.io/docs/user-creation
    *
-   * @param banksUser
+   * @param id id of the customer
    */
   private static buildCredentials(id: string): UserAccount {
-    const password: string = config.banksUserIdPassword;
+    const password: string = config.customerIdPassword;
     let hash: string = createHmac('sha256', password).update(id).digest('hex');
     const maxPasswordLength: number = 72;
 

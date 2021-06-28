@@ -37,14 +37,13 @@ describe('HooksController (e2e)', () => {
             id: 'unknown',
             target: 'http://',
             status: 'ACTIVE',
-            eventName: 'bankreader_link_required',
+            eventName: 'aggregator_link_required',
           },
           id: 'random',
           index: 1,
           time: Date.now(),
           payload: {
-            banksUserId: 'banks_user_id',
-            applicationId: 'app_id',
+            customerId: 'customer_id',
           },
         })
         .expect(HttpStatus.UNAUTHORIZED);
@@ -72,8 +71,7 @@ describe('HooksController (e2e)', () => {
           index: 1,
           time: Date.now(),
           payload: {
-            banksUserId: 'banks_user_id',
-            applicationId: 'app_id',
+            customerId: 'customer_id',
           },
         })
         .expect(HttpStatus.NO_CONTENT);

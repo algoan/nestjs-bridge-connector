@@ -38,11 +38,11 @@ describe('Hooks Controller', () => {
       subscription: {
         id: 'b3cf907a5a66c1a7f5490fe1',
         target: 'https://bankease.com/algoan-hook/',
-        eventName: EventName.BANKREADER_CONFIGURATION_REQUIRED,
+        eventName: EventName.AGGREGATOR_LINK_REQUIRED,
         status: 'ACTIVE',
       },
       payload: {
-        banksUserId: '2a0bf32e3180329b3167e777',
+        customerId: '2a0bf32e3180329b3167e777',
       },
       time: 1586177798388,
       index: 32,

@@ -19,7 +19,7 @@ const bootstrap = async (): Promise<void> => {
   const defaultLevel: string = process.env.DEBUG_LEVEL ?? 'info';
   const nodeEnv: string | undefined = process.env.NODE_ENV;
 
-  if (isEmpty(config.restHooksSecret) || isEmpty(config.banksUserIdPassword)) {
+  if (isEmpty(config.restHooksSecret) || isEmpty(config.customerIdPassword)) {
     throw new Error('Missing required secret configurations');
   }
 

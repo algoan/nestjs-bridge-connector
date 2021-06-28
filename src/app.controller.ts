@@ -33,7 +33,7 @@ export class AppController {
     const subscription:
       | Subscription
       | undefined = this.algoanService.algoanClient.serviceAccounts[0].subscriptions.find(
-      (sub: Subscription) => sub.eventName === EventName.BANKREADER_LINK_REQUIRED,
+      (sub: Subscription) => sub.eventName === EventName.AGGREGATOR_LINK_REQUIRED,
     );
 
     return {
@@ -45,25 +45,25 @@ export class AppController {
   }
 
   /**
-   * Triggers the "bankreader_required" event
-   * @param banksUserId Banks User id
+   * Triggers the "bank_details_required" event
+   * @param customerId Customer id
    * @param code Code returned by bridge, in case of a success
    */
   @Get('/triggers')
   @Render('index')
   public async triggerEvent(
     @Query('user_uuid') code: string,
-  ): Promise<IRootResult & { code: string; bankreaderRequiredSubscription?: Subscription }> {
-    const bankreaderRequiredSubscription:
+  ): Promise<IRootResult & { code: string; bankDetailsRequiredSubscription?: Subscription }> {
+    const bankDetailsRequiredSubscription:
       | Subscription
       | undefined = this.algoanService.algoanClient.serviceAccounts[0].subscriptions.find(
-      (sub: Subscription) => sub.eventName === EventName.BANKREADER_REQUIRED,
+      (sub: Subscription) => sub.eventName === EventName.BANK_DETAILS_REQUIRED,
     );
 
     return {
       ...(await this.root()),
       code,
-      bankreaderRequiredSubscription,
+      bankDetailsRequiredSubscription,
     };
   }
 }

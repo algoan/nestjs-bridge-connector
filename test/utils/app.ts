@@ -55,7 +55,7 @@ export const buildFakeApp = async (): Promise<INestApplication> => {
   const fakePostSubscriptions: nock.Scope = fakeAPI({
     baseUrl: fakeAlgoanBaseUrl,
     method: 'post',
-    result: { id: '1', eventName: 'bankreader_link_required', target: 'http://...' },
+    result: { id: '1', eventName: 'aggregator_link_required', target: 'http://...' },
     path: '/v1/subscriptions',
   });
 

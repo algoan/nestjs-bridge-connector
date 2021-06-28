@@ -16,11 +16,11 @@
   "targetUrl": "http://localhost:8080/hooks",
   "eventList": [
     "service_account_created",
-    "bankreader_required",
-    "bankreader_link_required"
+    "bank_details_required",
+    "aggregator_link_required"
   ],
   "restHooksSecret": "",
   "port": 8080,
-  "banksUserIdPassword": "",
+  "customerIdPassword": "",
   "activateBridgeRequestInterceptor": true
 }

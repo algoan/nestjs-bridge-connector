@@ -3,7 +3,6 @@ import { Allow, IsInt, IsNotEmpty, IsOptional, ValidateNested } from 'class-vali
 
 import { AggregatorLinkRequiredDTO } from './aggregator-link-required.dto';
 import { BanksDetailsRequiredDTO } from './bank-details-required.dto';
-import { BankreaderRequiredDTO } from './bankreader-required.dto';
 import { ServiceAccountCreatedDTO } from './service-account-created.dto';
 import { ServiceAccountDeletedDTO } from './service-account-deleted.dto';
 import { SubscriptionDTO } from './subscription.dto';
@@ -11,12 +10,7 @@ import { SubscriptionDTO } from './subscription.dto';
 /**
  * Events payload types
  */
-type Events =
-  | ServiceAccountCreatedDTO
-  | ServiceAccountDeletedDTO
-  | BankreaderRequiredDTO
-  | AggregatorLinkRequiredDTO
-  | BanksDetailsRequiredDTO;
+type Events = ServiceAccountCreatedDTO | ServiceAccountDeletedDTO | AggregatorLinkRequiredDTO | BanksDetailsRequiredDTO;
 
 /**
  * Event
