@@ -1,10 +1,13 @@
-import { AccountLoanType, AccountSavingType, AccountType, AccountUsage } from './analysis.enum';
+import { AccountLoanType, AccountSavingType, AccountType, AccountUsage, AnalysisStatus } from './analysis.enum';
+import { AnalysisError } from './analysis.objects';
 
 /**
  * Analysis Update Input
  */
 export interface AnalysisUpdateInput {
-  accounts: Account[];
+  accounts?: Account[];
+  status?: AnalysisStatus;
+  error?: AnalysisError;
 }
 
 /**

@@ -17,6 +17,7 @@ import {
   mapBridgeTransactions as mapBridgeTransactionsV2,
 } from '../../aggregator/services/bridge/bridge-v2.utils';
 import { ClientConfig } from '../../aggregator/services/bridge/bridge.client';
+import { AnalysisStatus, ErrorCodes } from '../../algoan/dto/analysis.enum';
 import {
   Account as AnalysisAccount,
   AccountTransaction as AnalysisTransaction,
@@ -177,113 +178,127 @@ export class HooksService {
     serviceAccount: ServiceAccount,
     payload: BanksDetailsRequiredDTO,
   ): Promise<void> {
-    const saConfig: ClientConfig = serviceAccount.config as ClientConfig;
-
-    // Authenticate to algoan
-    this.algoanHttpService.authenticate(serviceAccount.clientId, serviceAccount.clientSecret);
-
-    // Get customer information
-    const customer: Customer = await this.algoanCustomerService.getCustomerById(payload.customerId);
-    this.logger.debug({ customer, serviceAccount }, `Found Customer with id ${customer.id}`);
-
-    // Retrieves an access token from Bridge to access to the user accounts
-    const authenticationResponse: AuthenticationResponse = await this.aggregator.getAccessToken(customer.id, saConfig);
-    const accessToken: string = authenticationResponse.access_token;
-    const bridgeUserId: string = authenticationResponse.user.uuid;
-
-    if (customer.aggregationDetails.userId !== undefined) {
-      // Init refresh
-      await this.aggregator.refresh(customer.aggregationDetails.userId, accessToken, saConfig);
-
-      // Wait until refresh is finished
-      let refresh: BridgeRefreshStatus;
-      const timeoutRefresh: moment.Moment = moment().add(this.config.bridge.synchronizationTimeout);
-
-      do {
-        refresh = await this.aggregator.getRefreshStatus(customer.aggregationDetails.userId, accessToken, saConfig);
-      } while (
-        refresh?.status !== 'finished' &&
-        moment().isBefore(timeoutRefresh) &&
-        (await delay(this.config.bridge.synchronizationWaitingTime, { value: true }))
-      );
-    }
-
-    // Retrieves Bridge banks accounts
-    const accounts: BridgeAccount[] = await this.aggregator.getAccounts(accessToken, saConfig);
-    this.logger.debug({
-      message: `Bridge accounts retrieved for Customer "${customer.id}"`,
-      accounts,
-    });
-
-    // Get personal information
-    let userInfo: BridgeUserInformation[] = [];
     try {
-      userInfo = await this.aggregator.getUserPersonalInformation(accessToken, saConfig);
-    } catch (err) {
-      this.logger.warn({ message: `Unable to get user personal information`, error: err });
-    }
+      const saConfig: ClientConfig = serviceAccount.config as ClientConfig;
 
-    const algoanAccounts: AnalysisAccount[] = await mapBridgeAccountV2(
-      accounts,
-      userInfo,
-      accessToken,
-      this.aggregator,
-      saConfig,
-    );
+      // Authenticate to algoan
+      this.algoanHttpService.authenticate(serviceAccount.clientId, serviceAccount.clientSecret);
 
-    // Retrieves Bridge transactions
-    const timeout = moment().add(this.config.bridge.synchronizationTimeout, 'seconds');
-    let lastUpdatedAt: string | undefined;
-    let transactions: BridgeTransaction[] = [];
-    /* eslint-disable no-magic-numbers */
-    const nbOfMonths: number = saConfig.nbOfMonths ?? 3;
+      // Get customer information
+      const customer: Customer = await this.algoanCustomerService.getCustomerById(payload.customerId);
+      this.logger.debug({ customer, serviceAccount }, `Found Customer with id ${customer.id}`);
 
-    do {
-      const fetchedTransactions: BridgeTransaction[] = await this.aggregator.getTransactions(
-        accessToken,
-        lastUpdatedAt,
+      // Retrieves an access token from Bridge to access to the user accounts
+      const authenticationResponse: AuthenticationResponse = await this.aggregator.getAccessToken(
+        customer.id,
         saConfig,
       );
+      const accessToken: string = authenticationResponse.access_token;
+      const bridgeUserId: string = authenticationResponse.user.uuid;
 
-      transactions = transactions.concat(fetchedTransactions);
-      // Sort transactions by date
-      transactions = transactions.sort((tr1: BridgeTransaction, tr2: BridgeTransaction) =>
-        /* eslint-disable no-magic-numbers */
-        moment(tr1.date).isBefore(moment(tr2.date)) ? -1 : 1,
-      );
-    } while (
-      moment().diff(moment(transactions[0]?.date), 'months') <= nbOfMonths &&
-      moment().isBefore(timeout) &&
-      (await delay(this.config.bridge.synchronizationWaitingTime, { value: true }))
-    );
+      if (customer.aggregationDetails.userId !== undefined) {
+        // Init refresh
+        await this.aggregator.refresh(customer.aggregationDetails.userId, accessToken, saConfig);
 
-    for (const account of algoanAccounts) {
-      const algoanTransactions: AnalysisTransaction[] = await mapBridgeTransactionsV2(
-        transactions.filter(
-          (transaction: BridgeTransaction) => transaction.account.id === Number(account.aggregator?.id),
-        ),
+        // Wait until refresh is finished
+        let refresh: BridgeRefreshStatus;
+        const timeoutRefresh: moment.Moment = moment().add(this.config.bridge.synchronizationTimeout);
+
+        do {
+          refresh = await this.aggregator.getRefreshStatus(customer.aggregationDetails.userId, accessToken, saConfig);
+        } while (
+          refresh?.status !== 'finished' &&
+          moment().isBefore(timeoutRefresh) &&
+          (await delay(this.config.bridge.synchronizationWaitingTime, { value: true }))
+        );
+      }
+
+      // Retrieves Bridge banks accounts
+      const accounts: BridgeAccount[] = await this.aggregator.getAccounts(accessToken, saConfig);
+      this.logger.debug({
+        message: `Bridge accounts retrieved for Customer "${customer.id}"`,
+        accounts,
+      });
+
+      // Get personal information
+      let userInfo: BridgeUserInformation[] = [];
+      try {
+        userInfo = await this.aggregator.getUserPersonalInformation(accessToken, saConfig);
+      } catch (err) {
+        this.logger.warn({ message: `Unable to get user personal information`, error: err });
+      }
+
+      const algoanAccounts: AnalysisAccount[] = await mapBridgeAccountV2(
+        accounts,
+        userInfo,
         accessToken,
         this.aggregator,
         saConfig,
       );
-      if (!isEmpty(algoanTransactions)) {
-        account.transactions = algoanTransactions;
+
+      // Retrieves Bridge transactions
+      const timeout = moment().add(this.config.bridge.synchronizationTimeout, 'seconds');
+      let lastUpdatedAt: string | undefined;
+      let transactions: BridgeTransaction[] = [];
+      /* eslint-disable no-magic-numbers */
+      const nbOfMonths: number = saConfig.nbOfMonths ?? 3;
+
+      do {
+        const fetchedTransactions: BridgeTransaction[] = await this.aggregator.getTransactions(
+          accessToken,
+          lastUpdatedAt,
+          saConfig,
+        );
+
+        transactions = transactions.concat(fetchedTransactions);
+        // Sort transactions by date
+        transactions = transactions.sort((tr1: BridgeTransaction, tr2: BridgeTransaction) =>
+          /* eslint-disable no-magic-numbers */
+          moment(tr1.date).isBefore(moment(tr2.date)) ? -1 : 1,
+        );
+      } while (
+        moment().diff(moment(transactions[0]?.date), 'months') <= nbOfMonths &&
+        moment().isBefore(timeout) &&
+        (await delay(this.config.bridge.synchronizationWaitingTime, { value: true }))
+      );
+
+      for (const account of algoanAccounts) {
+        const algoanTransactions: AnalysisTransaction[] = await mapBridgeTransactionsV2(
+          transactions.filter(
+            (transaction: BridgeTransaction) => transaction.account.id === Number(account.aggregator?.id),
+          ),
+          accessToken,
+          this.aggregator,
+          saConfig,
+        );
+        if (!isEmpty(algoanTransactions)) {
+          account.transactions = algoanTransactions;
+        }
       }
+
+      // Update the analysis
+      await this.algoanAnalysisService.updateAnalysis(customer.id, payload.analysisId, {
+        accounts: algoanAccounts,
+      });
+
+      // Delete the user from Bridge
+      const user = {
+        bridgeUserId,
+        id: customer.id,
+        accessToken,
+      };
+      await this.aggregator.deleteUser(user, saConfig);
+
+      return;
+    } catch (err) {
+      // Update the analysis error
+      await this.algoanAnalysisService.updateAnalysis(payload.customerId, payload.analysisId, {
+        status: AnalysisStatus.ERROR,
+        error: {
+          code: ErrorCodes.INTERNAL_ERROR,
+          message: `An error occured when fetching data from the aggregator`,
+        },
+      });
     }
-
-    // Update the analysis
-    await this.algoanAnalysisService.updateAnalysis(customer.id, payload.analysisId, {
-      accounts: algoanAccounts,
-    });
-
-    // Delete the user from Bridge
-    const user = {
-      bridgeUserId,
-      id: customer.id,
-      accessToken,
-    };
-    await this.aggregator.deleteUser(user, saConfig);
-
-    return;
   }
 }
