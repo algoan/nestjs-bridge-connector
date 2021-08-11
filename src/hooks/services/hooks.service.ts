@@ -291,6 +291,11 @@ export class HooksService {
 
       return;
     } catch (err) {
+      this.logger.debug({
+        message: `An error occured when fetching data from the aggregator for analysis id ${payload.analysisId} and customer id ${payload.customerId}`,
+        error: err,
+      });
+
       // Update the analysis error
       await this.algoanAnalysisService.updateAnalysis(payload.customerId, payload.analysisId, {
         status: AnalysisStatus.ERROR,
@@ -299,6 +304,8 @@ export class HooksService {
           message: `An error occured when fetching data from the aggregator`,
         },
       });
+
+      throw err;
     }
   }
 }
