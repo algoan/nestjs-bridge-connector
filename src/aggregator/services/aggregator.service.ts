@@ -1,6 +1,7 @@
 import { createHmac } from 'crypto';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { config } from 'node-config-ts';
+import { AccountBank } from '../../algoan/dto/analysis.inputs';
 import {
   AuthenticationResponse,
   BridgeAccount,
@@ -118,6 +119,17 @@ export class AggregatorService {
    */
   public async getResourceName(accessToken: string, bridgeUri: string, clientConfig?: ClientConfig): Promise<string> {
     return this.bridgeClient.getResourceName(accessToken, bridgeUri, clientConfig);
+  }
+
+  /**
+   * Get a bridge bank information by uri
+   */
+  public async getBankInformation(
+    accessToken: string,
+    bridgeUri: string,
+    clientConfig?: ClientConfig,
+  ): Promise<AccountBank> {
+    return this.bridgeClient.getBankInformation(accessToken, bridgeUri, clientConfig);
   }
 
   /**
