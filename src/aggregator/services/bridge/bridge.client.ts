@@ -3,6 +3,7 @@ import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { Cache } from 'cache-manager';
 import { isNil } from 'lodash';
 import { config } from 'node-config-ts';
+import { AccountBank } from '../../../algoan/dto/analysis.inputs';
 import {
   AuthenticationResponse,
   BridgeAccount,
@@ -203,7 +204,7 @@ export class BridgeClient {
     }
 
     try {
-      const resp: AxiosResponse<BridgeBank | BridgeCategory> = await this.httpService
+      const resp: AxiosResponse<BridgeCategory> = await this.httpService
         .get(url, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -222,6 +223,48 @@ export class BridgeClient {
       });
 
       return 'UNKNOWN';
+    }
+  }
+
+  /**
+   * Get a bridge bank information resource by uri
+   */
+  public async getBankInformation(
+    accessToken: string,
+    bridgeUri: string,
+    clientConfig?: ClientConfig,
+  ): Promise<AccountBank> {
+    const url: string = `${config.bridge.baseUrl}${bridgeUri}`;
+
+    const cached: AccountBank | undefined = await this.cacheManager.get(url);
+    if (cached !== undefined) {
+      return cached;
+    }
+
+    try {
+      const resp: AxiosResponse<BridgeBank> = await this.httpService
+        .get(url, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            ...BridgeClient.getHeaders(clientConfig),
+          },
+        })
+        .toPromise();
+
+      const bankInfo: AccountBank = {
+        name: resp.data.name,
+        logoUrl: resp.data.logo_url,
+      };
+      await this.cacheManager.set(url, bankInfo, { ttl: 86400 });
+
+      return bankInfo;
+    } catch (err) {
+      this.logger.warn({
+        message: `An error occurred while retrieving ${bridgeUri}`,
+        err,
+      });
+
+      return { name: 'UNKNOWN' };
     }
   }
 

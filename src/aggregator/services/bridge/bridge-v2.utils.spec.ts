@@ -1,6 +1,5 @@
 import { HttpModule } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-
 import { AlgoanModule } from '../../../algoan/algoan.module';
 import { AccountLoanType, AccountType, AccountUsage } from '../../../algoan/dto/analysis.enum';
 import { Account, AccountTransaction } from '../../../algoan/dto/analysis.inputs';
@@ -12,14 +11,18 @@ import { mapBridgeAccount, mapBridgeTransactions } from './bridge-v2.utils';
 
 describe('Bridge Utils for Algoan v2 (Customer, Analysis)', () => {
   let aggregatorService: AggregatorService;
-  let aggregatorSpy;
+  let aggregatorSpyBank;
+  let aggregatorSpyCategory;
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [AppModule, HttpModule, AlgoanModule, AggregatorModule],
     }).compile();
 
     aggregatorService = module.get<AggregatorService>(AggregatorService);
-    aggregatorSpy = jest
+    aggregatorSpyBank = jest
+      .spyOn(aggregatorService, 'getBankInformation')
+      .mockReturnValue(Promise.resolve({ name: 'mockResourceName' }));
+    aggregatorSpyCategory = jest
       .spyOn(aggregatorService, 'getResourceName')
       .mockReturnValue(Promise.resolve('mockResourceName'));
   });
@@ -58,7 +61,7 @@ describe('Bridge Utils for Algoan v2 (Customer, Analysis)', () => {
       aggregatorService,
     );
 
-    expect(aggregatorSpy).toHaveBeenCalledWith('mockAccessToken', mockAccount.bank.resource_uri, undefined);
+    expect(aggregatorSpyBank).toHaveBeenCalledWith('mockAccessToken', mockAccount.bank.resource_uri, undefined);
     expect(mappedAccount).toEqual(expectedAccounts);
   });
 
@@ -77,6 +80,6 @@ describe('Bridge Utils for Algoan v2 (Customer, Analysis)', () => {
     const mappedTransaction = await mapBridgeTransactions([mockTransaction], 'mockAccessToken', aggregatorService);
 
     expect(mappedTransaction).toEqual(expectedTransaction);
-    expect(aggregatorSpy).toBeCalledWith('mockAccessToken', mockTransaction.category.resource_uri, undefined);
+    expect(aggregatorSpyCategory).toBeCalledWith('mockAccessToken', mockTransaction.category.resource_uri, undefined);
   });
 });

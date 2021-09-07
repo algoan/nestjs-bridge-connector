@@ -158,6 +158,7 @@ export interface BridgeBank {
   name: string;
   country_code: string;
   automatic_refresh: boolean;
+  logo_url: string;
 }
 
 /**

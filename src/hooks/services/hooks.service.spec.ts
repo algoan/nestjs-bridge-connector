@@ -188,6 +188,9 @@ describe('HooksService', () => {
         { ...mockTransaction, date, account: { ...mockTransaction.account, id: mockAccount.id } },
       ])
       .mockResolvedValue([{ ...mockTransaction, account: { ...mockTransaction.account, id: mockAccount.id } }]);
+    const bankInformationSpy = jest
+      .spyOn(aggregatorService, 'getBankInformation')
+      .mockResolvedValue({ name: 'mockBankName' });
     const resourceNameSpy = jest.spyOn(aggregatorService, 'getResourceName').mockResolvedValue('mockResourceName');
     const deleteUserSpy = jest.spyOn(aggregatorService, 'deleteUser').mockResolvedValue();
 
@@ -211,7 +214,7 @@ describe('HooksService', () => {
           balanceDate: '2019-04-06T13:53:12.000Z',
           bank: {
             id: '6',
-            name: 'mockResourceName',
+            name: 'mockBankName',
           },
           bic: undefined,
           currency: 'USD',
@@ -275,7 +278,7 @@ describe('HooksService', () => {
           balanceDate: '2019-04-06T13:53:12.000Z',
           bank: {
             id: '6',
-            name: 'mockResourceName',
+            name: 'mockBankName',
           },
           bic: undefined,
           currency: 'USD',
@@ -307,7 +310,8 @@ describe('HooksService', () => {
     expect(accessTokenSpy).toBeCalledWith(customerMock.id, mockServiceAccountConfig);
     expect(accountSpy).toBeCalledWith('mockPermToken', mockServiceAccountConfig);
     expect(userInfoSpy).toBeCalledWith('mockPermToken', mockServiceAccountConfig);
-    expect(resourceNameSpy).toBeCalledTimes(4);
+    expect(bankInformationSpy).toBeCalledTimes(2);
+    expect(resourceNameSpy).toBeCalledTimes(2);
     expect(transactionSpy).toBeCalledTimes(2);
     expect(transactionSpy).toBeCalledWith('mockPermToken', undefined, mockServiceAccountConfig);
     expect(deleteUserSpy).toHaveBeenNthCalledWith(
@@ -355,6 +359,9 @@ describe('HooksService', () => {
         { ...mockTransaction, date, account: { ...mockTransaction.account, id: mockAccount.id } },
       ])
       .mockResolvedValue([{ ...mockTransaction, account: { ...mockTransaction.account, id: mockAccount.id } }]);
+    const bankInformationSpy = jest
+      .spyOn(aggregatorService, 'getBankInformation')
+      .mockResolvedValue({ name: 'mockBankName', logoUrl: 'logo' });
     const resourceNameSpy = jest.spyOn(aggregatorService, 'getResourceName').mockResolvedValue('mockResourceName');
     const deleteUserSpy = jest.spyOn(aggregatorService, 'deleteUser').mockResolvedValue();
 
@@ -381,7 +388,8 @@ describe('HooksService', () => {
           balanceDate: '2019-04-06T13:53:12.000Z',
           bank: {
             id: '6',
-            name: 'mockResourceName',
+            name: 'mockBankName',
+            logoUrl: 'logo',
           },
           bic: undefined,
           currency: 'USD',
@@ -445,7 +453,8 @@ describe('HooksService', () => {
           balanceDate: '2019-04-06T13:53:12.000Z',
           bank: {
             id: '6',
-            name: 'mockResourceName',
+            name: 'mockBankName',
+            logoUrl: 'logo',
           },
           bic: undefined,
           currency: 'USD',
@@ -477,7 +486,8 @@ describe('HooksService', () => {
     expect(accessTokenSpy).toBeCalledWith(customerMock.id, mockServiceAccountConfig);
     expect(accountSpy).toBeCalledWith('mockPermToken', mockServiceAccountConfig);
     expect(userInfoSpy).toBeCalledWith('mockPermToken', mockServiceAccountConfig);
-    expect(resourceNameSpy).toBeCalledTimes(4);
+    expect(bankInformationSpy).toBeCalledTimes(2);
+    expect(resourceNameSpy).toBeCalledTimes(2);
     expect(transactionSpy).toBeCalledTimes(2);
     expect(transactionSpy).toBeCalledWith('mockPermToken', undefined, mockServiceAccountConfig);
     expect(deleteUserSpy).toHaveBeenNthCalledWith(

@@ -17,6 +17,7 @@ import {
   BridgeAccount,
   BridgeAccountType,
   BridgeBank,
+  BridgeCategory,
   BridgeTransaction,
   ConnectItemResponse,
   ListResponse,
@@ -327,13 +328,44 @@ describe('BridgeClient', () => {
   });
 
   it('can get a resources name by its uri', async () => {
-    const mockBank: BridgeBank = {
+    const mockCategory: BridgeCategory = {
       id: 10,
       resource_uri: '/v2/mockResourceUri',
+      resource_type: 'category',
+      name: 'mockBankCategory',
+    };
+    const result: AxiosResponse = {
+      data: mockCategory,
+      status: 200,
+      statusText: '',
+      headers: {},
+      config: {},
+    };
+
+    const spy = jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(result));
+
+    const resp = await service.getResourceName('mockAccessToken', mockCategory.resource_uri);
+    expect(resp).toBe('mockBankCategory');
+
+    expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/mockResourceUri', {
+      headers: {
+        Authorization: 'Bearer mockAccessToken',
+        'Client-Id': config.bridge.clientId,
+        'Client-Secret': config.bridge.clientSecret,
+        'Bankin-Version': config.bridge.bankinVersion,
+      },
+    });
+  });
+
+  it('can get a bank information by its uri', async () => {
+    const mockBank: BridgeBank = {
+      id: 10,
+      resource_uri: '/v2/banks/mockResourceUri',
       resource_type: 'bank',
       name: 'mockBankName',
       country_code: 'FR',
       automatic_refresh: false,
+      logo_url: 'logo',
     };
     const result: AxiosResponse = {
       data: mockBank,
@@ -345,10 +377,10 @@ describe('BridgeClient', () => {
 
     const spy = jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(result));
 
-    const resp = await service.getResourceName('mockAccessToken', mockBank.resource_uri);
-    expect(resp).toBe('mockBankName');
+    const resp = await service.getBankInformation('mockAccessToken', mockBank.resource_uri);
+    expect(resp).toEqual({ name: 'mockBankName', logoUrl: 'logo' });
 
-    expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/mockResourceUri', {
+    expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/banks/mockResourceUri', {
       headers: {
         Authorization: 'Bearer mockAccessToken',
         'Client-Id': config.bridge.clientId,

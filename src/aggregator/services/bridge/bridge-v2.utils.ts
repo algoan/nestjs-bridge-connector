@@ -1,5 +1,4 @@
 import * as moment from 'moment-timezone';
-
 import { AccountLoanType, AccountType, AccountUsage } from '../../../algoan/dto/analysis.enum';
 import { Account, AccountOwner, AccountTransaction } from '../../../algoan/dto/analysis.inputs';
 import {
@@ -53,8 +52,8 @@ const fromBridgeToAlgoanAccounts = async (
   bic: undefined,
   name: account.name,
   bank: {
+    ...(await aggregator.getBankInformation(accessToken, account.bank.resource_uri, clientConfig)),
     id: account.bank?.id?.toString(),
-    name: await aggregator.getResourceName(accessToken, account.bank.resource_uri, clientConfig),
   },
   details: {
     savings: mapAccountType(account.type) === AccountType.SAVINGS ? {} : undefined,
