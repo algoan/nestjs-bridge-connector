@@ -222,7 +222,7 @@ describe('HooksService', () => {
             loan: {
               amount: 140200,
               endDate: '2026-12-30T23:00:00.000Z',
-              interestRate: 1.25,
+              interestRate: 0.0125,
               payment: 1000,
               remainingCapital: 100000,
               startDate: '2013-01-09T23:00:00.000Z',
@@ -286,7 +286,7 @@ describe('HooksService', () => {
             loan: {
               amount: 140200,
               endDate: '2026-12-30T23:00:00.000Z',
-              interestRate: 1.25,
+              interestRate: 0.0125,
               payment: 1000,
               remainingCapital: 100000,
               startDate: '2013-01-09T23:00:00.000Z',
@@ -397,7 +397,7 @@ describe('HooksService', () => {
             loan: {
               amount: 140200,
               endDate: '2026-12-30T23:00:00.000Z',
-              interestRate: 1.25,
+              interestRate: 0.0125,
               payment: 1000,
               remainingCapital: 100000,
               startDate: '2013-01-09T23:00:00.000Z',
@@ -462,7 +462,7 @@ describe('HooksService', () => {
             loan: {
               amount: 140200,
               endDate: '2026-12-30T23:00:00.000Z',
-              interestRate: 1.25,
+              interestRate: 0.0125,
               payment: 1000,
               remainingCapital: 100000,
               startDate: '2013-01-09T23:00:00.000Z',

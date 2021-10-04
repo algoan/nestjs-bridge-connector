@@ -65,7 +65,8 @@ const fromBridgeToAlgoanAccounts = async (
             startDate: new Date(mapDate(account.loan_details.opening_date)).toISOString(),
             endDate: new Date(mapDate(account.loan_details.maturity_date)).toISOString(),
             payment: account.loan_details.next_payment_amount,
-            interestRate: account.loan_details.interest_rate,
+            // eslint-disable-next-line no-magic-numbers
+            interestRate: mapInterestRate(account.loan_details.interest_rate),
             remainingCapital: account.loan_details.remaining_capital,
             // ? QUESTION: Mapping of account.loan_details.type to AccountLoanType?
             type: AccountLoanType.OTHER,
@@ -161,3 +162,11 @@ export const mapBridgeTransactions = async (
       }),
     ),
   );
+
+/**
+ * Transform the interest rate provided by Bridge to Algoan format
+ * @param rate the interest rate in percentage given by Bridge
+ * @returns the interest rate in the Algoan format
+ */
+// eslint-disable-next-line no-magic-numbers
+const mapInterestRate = (rate: number): number => parseFloat((rate / 100).toFixed(4));

@@ -1,5 +1,6 @@
 import { HttpModule } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { BridgeAccount } from 'src/aggregator/interfaces/bridge.interface';
 import { AlgoanModule } from '../../../algoan/algoan.module';
 import { AccountLoanType, AccountType, AccountUsage } from '../../../algoan/dto/analysis.enum';
 import { Account, AccountTransaction } from '../../../algoan/dto/analysis.inputs';
@@ -45,7 +46,7 @@ describe('Bridge Utils for Algoan v2 (Customer, Analysis)', () => {
             startDate: '2013-01-09T23:00:00.000Z',
             endDate: '2026-12-30T23:00:00.000Z',
             payment: 1000,
-            interestRate: 1.25,
+            interestRate: 0.0125,
             remainingCapital: 100000,
             type: AccountLoanType.OTHER,
           },
@@ -81,5 +82,31 @@ describe('Bridge Utils for Algoan v2 (Customer, Analysis)', () => {
 
     expect(mappedTransaction).toEqual(expectedTransaction);
     expect(aggregatorSpyCategory).toBeCalledWith('mockAccessToken', mockTransaction.category.resource_uri, undefined);
+  });
+
+  it('should convert the interest rate with correct floating point', async () => {
+    const bridgeAccount: BridgeAccount = {
+      ...mockAccount,
+      loan_details: {
+        next_payment_date: '2019-04-30',
+        next_payment_amount: 1000,
+        maturity_date: '2026-12-31',
+        opening_date: '2013-01-10',
+        interest_rate: 1.3,
+        type: 'Prêtimmobilier',
+        borrowed_capital: 140200,
+        repaid_capital: 40200,
+        remaining_capital: 100000,
+      },
+    };
+
+    const mappedAccounts = await mapBridgeAccount(
+      [bridgeAccount],
+      mockPersonalInformation,
+      'mockAccessToken',
+      aggregatorService,
+    );
+
+    expect(mappedAccounts[0].details?.loan?.interestRate).toEqual(0.013);
   });
 });
