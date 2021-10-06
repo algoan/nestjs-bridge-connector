@@ -73,6 +73,9 @@ export interface BridgeAccount {
     next_payment_amount: number;
     maturity_date: string;
     opening_date: string;
+    /**
+     * Interest rate in percentage
+     */
     interest_rate: number;
     type: string; // improve with https://docs.bridgeapi.io/reference#account-resource
     borrowed_capital: number;
