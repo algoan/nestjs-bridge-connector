@@ -58,6 +58,7 @@ export class HooksService {
    * @param signature Signature headers, to check if the call is from Algoan
    */
   public async handleWebhook(event: EventDTO, signature: string): Promise<void> {
+    const aggregationStartDate: Date = new Date();
     const serviceAccount = this.algoanService.algoanClient.getServiceAccountBySubscriptionId(event.subscription.id);
 
     this.logger.debug(serviceAccount, `Found a service account for subscription "${event.subscription.id}"`);
@@ -80,7 +81,7 @@ export class HooksService {
     }
 
     // Handle the event asynchronously
-    void this.dispatchAndHandleWebhook(event, subscription, serviceAccount);
+    void this.dispatchAndHandleWebhook(event, subscription, serviceAccount, aggregationStartDate);
 
     return;
   }
@@ -94,6 +95,7 @@ export class HooksService {
     event: EventDTO,
     subscription: Subscription,
     serviceAccount: ServiceAccount,
+    aggregationStartDate: Date,
   ): Promise<void> {
     // ACKnowledge the subscription event
     const se: SubscriptionEvent = subscription.event(event.id);
@@ -105,7 +107,11 @@ export class HooksService {
           break;
 
         case EventName.BANK_DETAILS_REQUIRED:
-          await this.handleBankDetailsRequiredEvent(serviceAccount, event.payload as BanksDetailsRequiredDTO);
+          await this.handleBankDetailsRequiredEvent(
+            serviceAccount,
+            event.payload as BanksDetailsRequiredDTO,
+            aggregationStartDate,
+          );
           break;
 
         // The default case should never be reached, as the eventName is already checked in the DTO
@@ -177,6 +183,7 @@ export class HooksService {
   public async handleBankDetailsRequiredEvent(
     serviceAccount: ServiceAccount,
     payload: BanksDetailsRequiredDTO,
+    aggregationStartDate: Date,
   ): Promise<void> {
     try {
       const saConfig: ClientConfig = serviceAccount.config as ClientConfig;
@@ -275,6 +282,14 @@ export class HooksService {
           account.transactions = algoanTransactions;
         }
       }
+
+      const aggregationDuration: number = new Date().getTime() - aggregationStartDate.getTime();
+
+      this.logger.log({
+        message: `Account aggregation completed in ${aggregationDuration} milliseconds for Customer ${payload.customerId} and Analysis ${payload.analysisId}.`,
+        aggregator: 'BRIDGE',
+        duration: aggregationDuration,
+      });
 
       // Update the analysis
       await this.algoanAnalysisService.updateAnalysis(customer.id, payload.analysisId, {
