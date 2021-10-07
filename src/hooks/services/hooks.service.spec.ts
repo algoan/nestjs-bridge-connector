@@ -137,7 +137,7 @@ describe('HooksService', () => {
       const spy = jest.spyOn(hooksService, 'handleBankDetailsRequiredEvent').mockResolvedValue();
       await hooksService.handleWebhook(mockEvent as EventDTO, 'mockSignature');
 
-      expect(spy).toBeCalledWith(mockServiceAccount, mockEvent.payload);
+      expect(spy).toBeCalledWith(mockServiceAccount, mockEvent.payload, expect.any(Date));
     });
   });
 
@@ -200,7 +200,7 @@ describe('HooksService', () => {
       temporaryCode: 'mockTemporaryToken',
     };
 
-    await hooksService.handleBankDetailsRequiredEvent(mockServiceAccount, mockEventPayload);
+    await hooksService.handleBankDetailsRequiredEvent(mockServiceAccount, mockEventPayload, new Date());
 
     expect(algoanAuthenticateSpy).toBeCalledWith(mockServiceAccount.clientId, mockServiceAccount.clientSecret);
     expect(getCustomerSpy).toBeCalledWith(mockEventPayload.customerId);
@@ -371,7 +371,7 @@ describe('HooksService', () => {
       temporaryCode: 'mockTemporaryToken',
     };
 
-    await hooksService.handleBankDetailsRequiredEvent(mockServiceAccount, mockEventPayload);
+    await hooksService.handleBankDetailsRequiredEvent(mockServiceAccount, mockEventPayload, new Date());
 
     expect(algoanAuthenticateSpy).toBeCalledWith(mockServiceAccount.clientId, mockServiceAccount.clientSecret);
     expect(getCustomerSpy).toBeCalledWith(mockEventPayload.customerId);
