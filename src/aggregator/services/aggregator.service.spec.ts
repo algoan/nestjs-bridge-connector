@@ -185,6 +185,39 @@ describe('AggregatorService', () => {
     it('should not try to re-create an item when there is one already', async () => {
       // TODO
     });
+
+    it('should extract correct context when callbackUrl contains query params', async () => {
+      const registerSpy = jest.spyOn(client, 'register').mockResolvedValueOnce({
+        uuid: '79c8961c-bdf7-11e5-88a3-4f2c2aec0665',
+        resource_type: 'user',
+        resource_uri: '/v2/users/79c8961c-bdf7-11e5-88a3-4f2c2aec0665',
+        email: 'john.doe@email.com',
+      });
+      const authenticateSpy = jest.spyOn(client, 'authenticate').mockResolvedValueOnce({
+        access_token: 'access-token',
+        expires_at: '2019-05-06T11:08:25.040Z',
+        user: {
+          uuid: 'c2a26c9e-dc23-4f67-b887-bbae0f26c415',
+          resource_uri: '/v2/users/c2a26c9e-dc23-4f67-b887-bbae0f26c415',
+          resource_type: 'user',
+          email: 'john.doe@email.com',
+        },
+      });
+      const connectItemSpy = jest.spyOn(client, 'connectItem').mockResolvedValueOnce({
+        redirect_url: 'https://bridge/redirection-url',
+      });
+
+      await service.generateRedirectUrl(
+        customerMock.id,
+        'https://domain.com/callback?param=1',
+      );
+      expect(connectItemSpy).toHaveBeenCalledWith(
+        'access-token',
+        "callback",
+        undefined,
+        undefined,
+      );
+    });
   });
 
   it('should refresh an item', async () => {
