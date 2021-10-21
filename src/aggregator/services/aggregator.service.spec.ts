@@ -209,11 +209,11 @@ describe('AggregatorService', () => {
 
       await service.generateRedirectUrl(
         customerMock.id,
-        'https://domain.com/callback?param=1',
+        'https://domain.com/call-back?param=1',
       );
       expect(connectItemSpy).toHaveBeenCalledWith(
         'access-token',
-        "callback",
+        "callzback",
         undefined,
         undefined,
       );
