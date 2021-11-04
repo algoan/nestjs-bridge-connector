@@ -73,7 +73,10 @@ export class AggregatorService {
     if (splittedCbUrl === undefined) {
       throw new Error('No callbackUrl provided');
     }
-    const uuid: string = splittedCbUrl[splittedCbUrl.length - 1].replace(/-/g, 'z');
+
+    const lastUrlSegment: string = splittedCbUrl[splittedCbUrl.length - 1];
+    const lastUrlSegmentWithoutQueryParams: string = lastUrlSegment.split('?')[0];
+    const uuid: string = lastUrlSegmentWithoutQueryParams.replace(/-/g, 'z');
 
     const redirectResponse = await this.bridgeClient.connectItem(
       authenticationResponse.access_token,
