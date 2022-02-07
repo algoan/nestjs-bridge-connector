@@ -142,14 +142,21 @@ export const mapBridgeTransactions = async (
   bridgeTransactions: BridgeTransaction[],
   accessToken: string,
   aggregator: AggregatorService,
+  accountType: AccountType,
   clientConfig?: ClientConfig,
 ): Promise<AccountTransaction[]> =>
   Promise.all(
     bridgeTransactions.map(
       async (transaction: BridgeTransaction): Promise<AccountTransaction> => ({
         dates: {
-          debitedAt: !transaction.is_future ? moment.tz(transaction.date, 'Europe/Paris').toISOString() : undefined,
-          bookedAt: transaction.is_future ? moment.tz(transaction.date, 'Europe/Paris').toISOString() : undefined,
+          debitedAt:
+            accountType !== AccountType.CREDIT_CARD
+              ? moment.tz(transaction.date, 'Europe/Paris').toISOString()
+              : undefined,
+          bookedAt:
+            accountType === AccountType.CREDIT_CARD
+              ? moment.tz(transaction.date, 'Europe/Paris').toISOString()
+              : undefined,
         },
         description: transaction.raw_description,
         amount: transaction.amount,
