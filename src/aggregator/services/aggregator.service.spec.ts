@@ -34,8 +34,10 @@ describe('AggregatorService', () => {
 
   describe('generateRedirectUrl', () => {
     it('should not throw when the user already exists', async () => {
-      const errorConflict: Error & { code?: number } = new Error('user already exists');
-      errorConflict.code = HttpStatus.CONFLICT;
+      const errorConflict: Error & { response: { status: number } } = new Error('user already exists') as Error & {
+        response: { status: number };
+      };
+      errorConflict.response = { status: HttpStatus.CONFLICT };
       const registerSpy = jest.spyOn(client, 'register').mockResolvedValueOnce(Promise.reject(errorConflict));
       const authenticateSpy = jest.spyOn(client, 'authenticate').mockResolvedValueOnce({
         access_token: 'access-token',
@@ -207,16 +209,8 @@ describe('AggregatorService', () => {
         redirect_url: 'https://bridge/redirection-url',
       });
 
-      await service.generateRedirectUrl(
-        customerMock.id,
-        'https://domain.com/call-back?param=1',
-      );
-      expect(connectItemSpy).toHaveBeenCalledWith(
-        'access-token',
-        "callzback",
-        undefined,
-        undefined,
-      );
+      await service.generateRedirectUrl(customerMock.id, 'https://domain.com/call-back?param=1');
+      expect(connectItemSpy).toHaveBeenCalledWith('access-token', 'callzback', undefined, undefined);
     });
   });
 
