@@ -101,11 +101,15 @@ export class BridgeClient {
    */
   public async connectItem(
     accessToken: string,
-    context: string,
+    context?: string,
     email?: string,
     clientConfig?: ClientConfig,
   ): Promise<ConnectItemResponse> {
-    let url: string = `${config.bridge.baseUrl}/v2/connect/items/add/url?country=fr&context=${context}`;
+    let url: string = `${config.bridge.baseUrl}/v2/connect/items/add/url?country=fr`;
+
+    if (context !== undefined && context !== '') {
+      url += `&context=${context}`;
+    }
 
     if (email !== undefined) {
       url += `&prefill_email=${email}`;

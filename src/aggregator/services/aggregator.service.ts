@@ -57,9 +57,9 @@ export class AggregatorService {
     try {
       await this.bridgeClient.register(userAccount, clientConfig);
     } catch (err) {
-      const error: Error & { code?: number } = err as Error & { code?: number };
+      const error: { response: { status: number } } = err as Error & { response: { status: number } };
       // Ignore error conflict user already exists
-      if (error.code !== HttpStatus.CONFLICT) {
+      if (error.response.status !== HttpStatus.CONFLICT) {
         throw error;
       }
     }
@@ -73,7 +73,6 @@ export class AggregatorService {
     if (splittedCbUrl === undefined) {
       throw new Error('No callbackUrl provided');
     }
-
     const lastUrlSegment: string = splittedCbUrl[splittedCbUrl.length - 1];
     const lastUrlSegmentWithoutQueryParams: string = lastUrlSegment.split('?')[0];
     const uuid: string = lastUrlSegmentWithoutQueryParams.replace(/-/g, 'z');
