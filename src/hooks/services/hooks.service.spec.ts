@@ -12,6 +12,7 @@ import {
 import { ContextIdFactory } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import { config } from 'node-config-ts';
+import { AggregationDetailsMode } from '../../algoan/dto/customer.enums';
 import { AggregatorModule } from '../../aggregator/aggregator.module';
 import {
   mockAccount,
@@ -162,6 +163,34 @@ describe('HooksService', () => {
     );
     expect(updateCustomerSpy).toBeCalledWith(customerMock.id, {
       aggregationDetails: { aggregatorName: 'BRIDGE', redirectUrl: 'mockRedirectUrl' },
+    });
+  });
+
+  it('generates an iframe url on aggregator link required', async () => {
+    const customerIframeMock = {
+      ...customerMock,
+      aggregationDetails: { ...customerMock.aggregationDetails, mode: AggregationDetailsMode.IFRAME },
+    };
+    const mockEventPayload: AggregatorLinkRequiredDTO = { customerId: customerMock.id };
+    const algoanAuthenticateSpy = jest.spyOn(algoanHttpService, 'authenticate').mockReturnValue();
+    const getCustomerSpy = jest.spyOn(algoanCustomerService, 'getCustomerById').mockResolvedValue(customerIframeMock);
+    const updateCustomerSpy = jest.spyOn(algoanCustomerService, 'updateCustomer').mockResolvedValue(customerIframeMock);
+    const aggregatorSpy = jest
+      .spyOn(aggregatorService, 'generateRedirectUrl')
+      .mockReturnValue(Promise.resolve('mockRedirectUrl'));
+    mockServiceAccount.config = mockServiceAccountConfig;
+    await hooksService.handleAggregatorLinkRequired(mockServiceAccount, mockEventPayload);
+
+    expect(algoanAuthenticateSpy).toBeCalledWith(mockServiceAccount.clientId, mockServiceAccount.clientSecret);
+    expect(getCustomerSpy).toBeCalledWith(mockEventPayload.customerId);
+    expect(aggregatorSpy).toBeCalledWith(
+      customerMock.id,
+      customerMock.aggregationDetails?.callbackUrl,
+      customerMock.personalDetails?.contact?.email,
+      mockServiceAccountConfig,
+    );
+    expect(updateCustomerSpy).toBeCalledWith(customerMock.id, {
+      aggregationDetails: { aggregatorName: 'BRIDGE', iframeUrl: 'mockRedirectUrl' },
     });
   });
 
