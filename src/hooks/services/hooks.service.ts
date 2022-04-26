@@ -160,6 +160,15 @@ export class HooksService {
         );
         break;
 
+      case AggregationDetailsMode.IFRAME:
+        aggregationDetails.iframeUrl = await this.aggregator.generateRedirectUrl(
+          customer.id,
+          customer.aggregationDetails?.callbackUrl,
+          customer.personalDetails?.contact?.email,
+          serviceAccount.config as ClientConfig,
+        );
+        break;
+
       default:
         throw new Error(`Invalid bank connection mode ${customer.aggregationDetails?.mode}`);
     }
