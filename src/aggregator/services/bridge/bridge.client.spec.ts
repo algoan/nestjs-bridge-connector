@@ -57,7 +57,7 @@ describe('BridgeClient', () => {
 
     await service.refreshItem('mockItemId', 'secret-access-token');
 
-    expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/items/mockItemId/refresh', {
+    expect(spy).toHaveBeenCalledWith('https://api.bridgeapi.io/v2/items/mockItemId/refresh', {
       headers: {
         Authorization: 'Bearer secret-access-token',
         'Client-Id': config.bridge.clientId,
@@ -81,7 +81,7 @@ describe('BridgeClient', () => {
     const resp = await service.getRefreshStatus('mockItemId', 'secret-access-token');
     expect(resp).toBe(mockRefreshStatus);
 
-    expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/items/mockItemId/refresh/status', {
+    expect(spy).toHaveBeenCalledWith('https://api.bridgeapi.io/v2/items/mockItemId/refresh/status', {
       headers: {
         Authorization: 'Bearer secret-access-token',
         'Client-Id': config.bridge.clientId,
@@ -106,7 +106,7 @@ describe('BridgeClient', () => {
     expect(resp).toBe(mockUserResponse);
 
     expect(spy).toHaveBeenCalledWith(
-      'https://sync.bankin.com/v2/users',
+      'https://api.bridgeapi.io/v2/users',
       {
         email: 'mock@email.com',
         password: 'mockPassword',
@@ -136,7 +136,7 @@ describe('BridgeClient', () => {
     expect(resp).toBe(mockAuthResponse);
 
     expect(spy).toHaveBeenCalledWith(
-      'https://sync.bankin.com/v2/authenticate',
+      'https://api.bridgeapi.io/v2/authenticate',
       {
         email: 'mock@email.com',
         password: 'mockPassword',
@@ -168,7 +168,7 @@ describe('BridgeClient', () => {
     const resp = await service.connectItem('secret-access-token', uuid);
     expect(resp).toBe(connectItemResponse);
 
-    expect(spy).toHaveBeenCalledWith(`https://sync.bankin.com/v2/connect/items/add/url?country=fr&context=${uuid}`, {
+    expect(spy).toHaveBeenCalledWith(`https://api.bridgeapi.io/v2/connect/items/add/url?country=fr&context=${uuid}`, {
       headers: {
         Authorization: 'Bearer secret-access-token',
         'Client-Id': config.bridge.clientId,
@@ -197,7 +197,7 @@ describe('BridgeClient', () => {
     expect(resp).toBe(connectItemResponse);
 
     expect(spy).toHaveBeenCalledWith(
-      `https://sync.bankin.com/v2/connect/items/add/url?country=fr&context=${uuid}&prefill_email=${email}`,
+      `https://api.bridgeapi.io/v2/connect/items/add/url?country=fr&context=${uuid}&prefill_email=${email}`,
       {
         headers: {
           Authorization: 'Bearer secret-access-token',
@@ -265,7 +265,7 @@ describe('BridgeClient', () => {
     const resp = await service.getAccounts('secret-access-token');
     expect(resp).toBe(listAccountsResponse.resources);
 
-    expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/accounts', {
+    expect(spy).toHaveBeenCalledWith('https://api.bridgeapi.io/v2/accounts', {
       headers: {
         Authorization: 'Bearer secret-access-token',
         'Client-Id': config.bridge.clientId,
@@ -317,7 +317,7 @@ describe('BridgeClient', () => {
     const resp = await service.getTransactions('secret-access-token');
     expect(resp).toEqual(listAccountTransactionsResponse.resources);
 
-    expect(spy).toHaveBeenCalledWith(`https://sync.bankin.com/v2/transactions/updated?limit=100`, {
+    expect(spy).toHaveBeenCalledWith(`https://api.bridgeapi.io/v2/transactions/updated?limit=100`, {
       headers: {
         Authorization: 'Bearer secret-access-token',
         'Client-Id': config.bridge.clientId,
@@ -347,7 +347,7 @@ describe('BridgeClient', () => {
     const resp = await service.getResourceName('mockAccessToken', mockCategory.resource_uri);
     expect(resp).toBe('mockBankCategory');
 
-    expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/mockResourceUri', {
+    expect(spy).toHaveBeenCalledWith('https://api.bridgeapi.io/v2/mockResourceUri', {
       headers: {
         Authorization: 'Bearer mockAccessToken',
         'Client-Id': config.bridge.clientId,
@@ -380,7 +380,7 @@ describe('BridgeClient', () => {
     const resp = await service.getBankInformation('mockAccessToken', mockBank.resource_uri);
     expect(resp).toEqual({ name: 'mockBankName', logoUrl: 'logo' });
 
-    expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/banks/mockResourceUri', {
+    expect(spy).toHaveBeenCalledWith('https://api.bridgeapi.io/v2/banks/mockResourceUri', {
       headers: {
         Authorization: 'Bearer mockAccessToken',
         'Client-Id': config.bridge.clientId,
@@ -404,7 +404,7 @@ describe('BridgeClient', () => {
     const resp = await service.getUserPersonalInformation('mockAccessToken');
     expect(resp).toEqual(mockPersonalInformation);
 
-    expect(spy).toHaveBeenCalledWith('https://sync.bankin.com/v2/users/kyc', {
+    expect(spy).toHaveBeenCalledWith('https://api.bridgeapi.io/v2/users/kyc', {
       headers: {
         Authorization: 'Bearer mockAccessToken',
         'Client-Id': config.bridge.clientId,
