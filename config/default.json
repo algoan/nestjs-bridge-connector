@@ -7,7 +7,7 @@
   },
   "bridge":{
     "bankinVersion":"2019-02-18",
-    "baseUrl":"https://sync.bankin.com",
+    "baseUrl":"https://api.bridgeapi.io",
     "clientId":"a",
     "clientSecret": "b",
     "synchronizationTimeout": 300,
@@ -15,7 +15,6 @@
   },
   "targetUrl": "http://localhost:8080/hooks",
   "eventList": [
-    "service_account_created",
     "bank_details_required",
     "aggregator_link_required"
   ],
