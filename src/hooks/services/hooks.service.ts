@@ -306,14 +306,6 @@ export class HooksService {
         accounts: algoanAccounts,
       });
 
-      // Delete the user from Bridge
-      const user = {
-        bridgeUserId,
-        id: customer.id,
-        accessToken,
-      };
-      await this.aggregator.deleteUser(user, saConfig);
-
       return;
     } catch (err) {
       this.logger.debug({
