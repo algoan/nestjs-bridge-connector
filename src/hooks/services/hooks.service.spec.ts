@@ -343,15 +343,7 @@ describe('HooksService', () => {
     expect(resourceNameSpy).toBeCalledTimes(2);
     expect(transactionSpy).toBeCalledTimes(2);
     expect(transactionSpy).toBeCalledWith('mockPermToken', undefined, mockServiceAccountConfig);
-    expect(deleteUserSpy).toHaveBeenNthCalledWith(
-      1,
-      {
-        bridgeUserId: 'rrr',
-        id: customerMock.id,
-        accessToken: 'mockPermToken',
-      },
-      mockServiceAccountConfig,
-    );
+    expect(deleteUserSpy).toHaveBeenCalledTimes(0);
   });
 
   it('refresh when userId is defined and synchronizes the accounts on bank details required', async () => {
@@ -519,14 +511,6 @@ describe('HooksService', () => {
     expect(resourceNameSpy).toBeCalledTimes(2);
     expect(transactionSpy).toBeCalledTimes(2);
     expect(transactionSpy).toBeCalledWith('mockPermToken', undefined, mockServiceAccountConfig);
-    expect(deleteUserSpy).toHaveBeenNthCalledWith(
-      1,
-      {
-        bridgeUserId: 'rrr',
-        id: customerMock.id,
-        accessToken: 'mockPermToken',
-      },
-      mockServiceAccountConfig,
-    );
+    expect(deleteUserSpy).toHaveBeenCalledTimes(0);
   });
 });
