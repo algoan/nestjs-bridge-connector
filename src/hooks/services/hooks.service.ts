@@ -306,6 +306,21 @@ export class HooksService {
         accounts: algoanAccounts,
       });
 
+      // Delete the user from Bridge
+      const user = {
+        bridgeUserId,
+        id: customer.id,
+        accessToken,
+      };
+
+      if (
+        this.config.forceBridgeUsersDeletion ||
+        saConfig.deleteBridgeUsers === undefined ||
+        saConfig.deleteBridgeUsers
+      ) {
+        await this.aggregator.deleteUser(user, saConfig);
+      }
+
       return;
     } catch (err) {
       this.logger.debug({

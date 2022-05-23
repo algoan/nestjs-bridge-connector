@@ -21,5 +21,6 @@
   "restHooksSecret": "",
   "port": 8080,
   "customerIdPassword": "",
-  "activateBridgeRequestInterceptor": true
+  "activateBridgeRequestInterceptor": true,
+  "forceBridgeUsersDeletion": false
 }

@@ -60,6 +60,7 @@ describe('HooksService', () => {
     clientId: 'mockClientId',
     clientSecret: 'mockClientSecret',
     bankinVersion: 'mockBankinVersion',
+    deleteBridgeUsers: false,
   };
 
   const mockServiceAccount: ServiceAccount = new ServiceAccount('mockBaseURL', {

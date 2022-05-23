@@ -26,6 +26,7 @@ export interface ClientConfig {
   clientSecret: string;
   bankinVersion: string;
   nbOfMonths?: number;
+  deleteBridgeUsers?: boolean;
 }
 
 /**
