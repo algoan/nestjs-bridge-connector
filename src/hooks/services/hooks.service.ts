@@ -312,7 +312,14 @@ export class HooksService {
         id: customer.id,
         accessToken,
       };
-      await this.aggregator.deleteUser(user, saConfig);
+
+      if (
+        this.config.forceBridgeUsersDeletion ||
+        saConfig.deleteBridgeUsers === undefined ||
+        saConfig.deleteBridgeUsers
+      ) {
+        await this.aggregator.deleteUser(user, saConfig);
+      }
 
       return;
     } catch (err) {
