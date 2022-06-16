@@ -1,8 +1,10 @@
-import { CACHE_MANAGER, HttpService, Inject, Injectable, Logger } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import { CACHE_MANAGER, Inject, Injectable, Logger } from '@nestjs/common';
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { Cache } from 'cache-manager';
 import { isNil } from 'lodash';
 import { config } from 'node-config-ts';
+import { lastValueFrom, Observable } from 'rxjs';
 import { AccountBank } from '../../../algoan/dto/analysis.inputs';
 import {
   AuthenticationResponse,
@@ -41,16 +43,14 @@ export class BridgeClient {
 
   constructor(@Inject(CACHE_MANAGER) private readonly cacheManager: Cache, private readonly httpService: HttpService) {
     if (config.activateBridgeRequestInterceptor) {
-      this.httpService.axiosRef.interceptors.request.use(
-        (_config: AxiosRequestConfig): AxiosRequestConfig => {
-          this.logger.log({
-            config: _config,
-            message: `${_config.method} ${_config.url} - Request to Bridge`,
-          });
+      this.httpService.axiosRef.interceptors.request.use((_config: AxiosRequestConfig): AxiosRequestConfig => {
+        this.logger.log({
+          config: _config,
+          message: `${_config.method} ${_config.url} - Request to Bridge`,
+        });
 
-          return _config;
-        },
-      );
+        return _config;
+      });
       this.httpService.axiosRef.interceptors.response.use(
         async (response: AxiosResponse) => {
           this.logger.log({
@@ -76,9 +76,9 @@ export class BridgeClient {
   public async register(userAccount: UserAccount, clientConfig?: ClientConfig): Promise<UserResponse> {
     const url: string = `${config.bridge.baseUrl}/v2/users`;
 
-    const resp: AxiosResponse<UserResponse> = await this.httpService
-      .post(url, userAccount, { headers: { ...BridgeClient.getHeaders(clientConfig) } })
-      .toPromise();
+    const resp: AxiosResponse<UserResponse> = await BridgeClient.toPromise(
+      this.httpService.post(url, userAccount, { headers: { ...BridgeClient.getHeaders(clientConfig) } }),
+    );
     this.logger.debug(`User created with email ${userAccount.email}`);
 
     return resp.data;
@@ -89,9 +89,9 @@ export class BridgeClient {
    */
   public async authenticate(userAccount: UserAccount, clientConfig?: ClientConfig): Promise<AuthenticationResponse> {
     const url: string = `${config.bridge.baseUrl}/v2/authenticate`;
-    const resp: AxiosResponse<AuthenticationResponse> = await this.httpService
-      .post(url, userAccount, { headers: { ...BridgeClient.getHeaders(clientConfig) } })
-      .toPromise();
+    const resp: AxiosResponse<AuthenticationResponse> = await BridgeClient.toPromise(
+      this.httpService.post(url, userAccount, { headers: { ...BridgeClient.getHeaders(clientConfig) } }),
+    );
     this.logger.debug(`Authenticated user ${userAccount.email}`);
 
     return resp.data;
@@ -116,9 +116,11 @@ export class BridgeClient {
       url += `&prefill_email=${email}`;
     }
 
-    const resp: AxiosResponse<ConnectItemResponse> = await this.httpService
-      .get(url, { headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) } })
-      .toPromise();
+    const resp: AxiosResponse<ConnectItemResponse> = await BridgeClient.toPromise(
+      this.httpService.get(url, {
+        headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) },
+      }),
+    );
 
     return resp.data;
   }
@@ -128,9 +130,11 @@ export class BridgeClient {
    */
   public async refreshItem(id: string | number, accessToken: string, clientConfig?: ClientConfig): Promise<void> {
     const url: string = `${config.bridge.baseUrl}/v2/items/${id}/refresh`;
-    await this.httpService
-      .post(url, { headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) } })
-      .toPromise();
+    await BridgeClient.toPromise(
+      this.httpService.post(url, {
+        headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) },
+      }),
+    );
   }
 
   /**
@@ -142,9 +146,11 @@ export class BridgeClient {
     clientConfig?: ClientConfig,
   ): Promise<BridgeRefreshStatus> {
     const url: string = `${config.bridge.baseUrl}/v2/items/${id}/refresh/status`;
-    const resp: AxiosResponse<BridgeRefreshStatus> = await this.httpService
-      .get(url, { headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) } })
-      .toPromise();
+    const resp: AxiosResponse<BridgeRefreshStatus> = await BridgeClient.toPromise(
+      this.httpService.get(url, {
+        headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) },
+      }),
+    );
 
     return resp.data;
   }
@@ -155,9 +161,11 @@ export class BridgeClient {
   public async getAccounts(accessToken: string, clientConfig?: ClientConfig): Promise<BridgeAccount[]> {
     const url: string = `${config.bridge.baseUrl}/v2/accounts`;
 
-    const resp: AxiosResponse<ListResponse<BridgeAccount>> = await this.httpService
-      .get(url, { headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) } })
-      .toPromise();
+    const resp: AxiosResponse<ListResponse<BridgeAccount>> = await BridgeClient.toPromise(
+      this.httpService.get(url, {
+        headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) },
+      }),
+    );
 
     return resp.data.resources;
   }
@@ -176,11 +184,11 @@ export class BridgeClient {
       nextUri ?? `/v2/transactions/updated?limit=100${!isNil(lastUpdatedAt) ? `&since=${lastUpdatedAt}` : ''}`;
     const url: string = `${config.bridge.baseUrl}${uri}`;
 
-    const resp: AxiosResponse<ListResponse<BridgeTransaction>> = await this.httpService
-      .get(url, {
+    const resp: AxiosResponse<ListResponse<BridgeTransaction>> = await BridgeClient.toPromise(
+      this.httpService.get(url, {
         headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) },
-      })
-      .toPromise();
+      }),
+    );
 
     const mergedTransactions: BridgeTransaction[] = [...(transactions ?? []), ...resp.data.resources];
 
@@ -209,14 +217,14 @@ export class BridgeClient {
     }
 
     try {
-      const resp: AxiosResponse<BridgeCategory> = await this.httpService
-        .get(url, {
+      const resp: AxiosResponse<BridgeCategory> = await BridgeClient.toPromise(
+        this.httpService.get(url, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
             ...BridgeClient.getHeaders(clientConfig),
           },
-        })
-        .toPromise();
+        }),
+      );
       const { name } = resp.data;
       await this.cacheManager.set(url, name, { ttl: 86400 });
 
@@ -247,14 +255,14 @@ export class BridgeClient {
     }
 
     try {
-      const resp: AxiosResponse<BridgeBank> = await this.httpService
-        .get(url, {
+      const resp: AxiosResponse<BridgeBank> = await BridgeClient.toPromise(
+        this.httpService.get(url, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
             ...BridgeClient.getHeaders(clientConfig),
           },
-        })
-        .toPromise();
+        }),
+      );
 
       const bankInfo: AccountBank = {
         name: resp.data.name,
@@ -285,15 +293,15 @@ export class BridgeClient {
     const uri: string = `/v2/users/${params.userId}?password=${params.password}`;
     const url: string = `${config.bridge.baseUrl}${uri}`;
 
-    await this.httpService
-      .delete(url, {
+    await BridgeClient.toPromise(
+      this.httpService.delete(url, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
           ...BridgeClient.getHeaders(clientConfig),
           'Content-Type': 'application/json',
         },
-      })
-      .toPromise();
+      }),
+    );
   }
 
   /**
@@ -305,9 +313,11 @@ export class BridgeClient {
   ): Promise<BridgeUserInformation[]> {
     const url: string = `${config.bridge.baseUrl}/v2/users/kyc`;
 
-    const resp: AxiosResponse<BridgeUserInformation[]> = await this.httpService
-      .get(url, { headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) } })
-      .toPromise();
+    const resp: AxiosResponse<BridgeUserInformation[]> = await BridgeClient.toPromise(
+      this.httpService.get(url, {
+        headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) },
+      }),
+    );
 
     return resp.data;
   }
@@ -316,13 +326,24 @@ export class BridgeClient {
    * Build the headers from the serviceAccount or from the default values in the config.bridge
    * @param clientConfig: configs found in  serviceAccount.config
    */
-  private static getHeaders(
-    clientConfig?: ClientConfig,
-  ): { 'Client-Id': string; 'Client-Secret': string; 'Bankin-Version': string } {
+  private static getHeaders(clientConfig?: ClientConfig): {
+    'Client-Id': string;
+    'Client-Secret': string;
+    'Bankin-Version': string;
+  } {
     return {
       'Client-Id': clientConfig?.clientId ?? config.bridge.clientId,
       'Client-Secret': clientConfig?.clientSecret ?? config.bridge.clientSecret,
       'Bankin-Version': clientConfig?.bankinVersion ?? config.bridge.bankinVersion,
     };
+  }
+
+  /**
+   * Convert an Observable to a promise
+   * @param response Axios observable response
+   * @returns Promisify observable
+   */
+  private static async toPromise<T>(response: Observable<T>): Promise<T> {
+    return lastValueFrom(response);
   }
 }
