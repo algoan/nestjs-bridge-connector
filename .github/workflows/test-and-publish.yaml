@@ -30,6 +30,7 @@ jobs:
         with:
           node-version: 14
           cache: 'npm'
+      - run: npm i -g @nestjs/cli
       # Install dependencies
       - run: npm ci --prefer-offline
       # Build application

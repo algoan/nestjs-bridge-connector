@@ -12,6 +12,8 @@ COPY src ./src
 COPY tsconfig*.json ./
 COPY config ./config
 
+# Install nest CLI globally
+RUN npm i -g @nestjs/cli
 # Install dependencies
 RUN npm ci
 # Transpile Typescript code to ES6 code into dist folder

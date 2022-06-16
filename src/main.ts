@@ -1,4 +1,3 @@
-import { join } from 'path';
 import { HttpExceptionFilter } from '@algoan/nestjs-http-exception-filter';
 import { NestFactory, NestApplication } from '@nestjs/core';
 import { Logger, ValidationPipe } from '@nestjs/common';
@@ -53,11 +52,6 @@ const bootstrap = async (): Promise<void> => {
     }),
   );
   app.useGlobalFilters(new HttpExceptionFilter());
-
-  if (nodeEnv !== 'production') {
-    app.setBaseViewsDir(join(__dirname, '..', 'views'));
-    app.setViewEngine('hbs');
-  }
 
   await app.listen(port);
   logger.log(`Application is listening to port ${port}`);
