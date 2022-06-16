@@ -1,4 +1,5 @@
-import { CacheModule, CACHE_MANAGER, HttpModule, HttpService } from '@nestjs/common';
+import { HttpModule, HttpService } from '@nestjs/axios';
+import { CacheModule, CACHE_MANAGER } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AxiosResponse } from 'axios';
 import { config } from 'node-config-ts';
