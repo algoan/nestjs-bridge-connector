@@ -1,4 +1,5 @@
-import { CacheModule, HttpModule, HttpStatus } from '@nestjs/common';
+import { HttpModule } from '@nestjs/axios';
+import { CacheModule, HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { createHmac } from 'crypto';
 import { AlgoanModule } from '../../algoan/algoan.module';

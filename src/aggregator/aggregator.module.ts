@@ -1,4 +1,5 @@
-import { CacheModule, HttpModule, Module } from '@nestjs/common';
+import { HttpModule } from '@nestjs/axios';
+import { CacheModule, Module } from '@nestjs/common';
 import { AlgoanModule } from '../algoan/algoan.module';
 import { AggregatorService } from './services/aggregator.service';
 import { BridgeClient } from './services/bridge/bridge.client';

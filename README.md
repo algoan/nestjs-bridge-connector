@@ -91,8 +91,11 @@ $ git clone https://github.com/algoan/nestjs-bridge-connector.git --depth=1
 Install all dependencies running:
 
 ```bash
+$ npm i -g @nestjs/cli
 $ npm install
 ```
+
+> NestJS CLI must be installed globally because of a peer dependency conflict inclusing webpack versions and node-config-ts.
 
 ### Running the app
 
