@@ -30,11 +30,10 @@ export class AppController {
   public async root(): Promise<IRootResult> {
     const appUrl: string = `http://localhost:${config.port}`;
 
-    const subscription:
-      | Subscription
-      | undefined = this.algoanService.algoanClient.serviceAccounts[0].subscriptions.find(
-      (sub: Subscription) => sub.eventName === EventName.AGGREGATOR_LINK_REQUIRED,
-    );
+    const subscription: Subscription | undefined =
+      this.algoanService.algoanClient.serviceAccounts[0].subscriptions.find(
+        (sub: Subscription) => sub.eventName === EventName.AGGREGATOR_LINK_REQUIRED,
+      );
 
     return {
       subscription,
@@ -54,11 +53,10 @@ export class AppController {
   public async triggerEvent(
     @Query('user_uuid') code: string,
   ): Promise<IRootResult & { code: string; bankDetailsRequiredSubscription?: Subscription }> {
-    const bankDetailsRequiredSubscription:
-      | Subscription
-      | undefined = this.algoanService.algoanClient.serviceAccounts[0].subscriptions.find(
-      (sub: Subscription) => sub.eventName === EventName.BANK_DETAILS_REQUIRED,
-    );
+    const bankDetailsRequiredSubscription: Subscription | undefined =
+      this.algoanService.algoanClient.serviceAccounts[0].subscriptions.find(
+        (sub: Subscription) => sub.eventName === EventName.BANK_DETAILS_REQUIRED,
+      );
 
     return {
       ...(await this.root()),
