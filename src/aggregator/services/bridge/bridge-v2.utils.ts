@@ -46,14 +46,14 @@ const fromBridgeToAlgoanAccounts = async (
   currency: account.currency_code,
   type: mapAccountType(account.type),
   usage: mapUsageType(account.is_pro),
-  owners: mapUserInfo(account.item.id, userInfo),
+  owners: mapUserInfo(account.item_id, userInfo),
   // eslint-disable-next-line
   iban: account.iban !== null ? account.iban : undefined,
   bic: undefined,
   name: account.name,
   bank: {
-    ...(await aggregator.getBankInformation(accessToken, account.bank.resource_uri, clientConfig)),
-    id: account.bank?.id?.toString(),
+    ...(await aggregator.getBankInformation(accessToken, `/v2/banks/${account.bank_id}`, clientConfig)),
+    id: account.bank_id?.toString(),
   },
   details: {
     savings: mapAccountType(account.type) === AccountType.SAVINGS ? {} : undefined,
@@ -95,10 +95,10 @@ interface AccountTypeMapping {
 const ACCOUNT_TYPE_MAPPING: AccountTypeMapping = {
   [BridgeAccountType.CHECKING]: AccountType.CHECKING,
   [BridgeAccountType.SAVINGS]: AccountType.SAVINGS,
-  [BridgeAccountType.SECURITIES]: AccountType.SAVINGS,
+  [BridgeAccountType.BROKERAGE]: AccountType.SAVINGS,
   [BridgeAccountType.CARD]: AccountType.CREDIT_CARD,
   [BridgeAccountType.LOAN]: AccountType.LOAN,
-  [BridgeAccountType.SHARE_SAVINGS_PLAN]: AccountType.SAVINGS,
+  [BridgeAccountType.SHARED_SAVING_PLAN]: AccountType.SAVINGS,
   [BridgeAccountType.LIFE_INSURANCE]: AccountType.SAVINGS,
 };
 
@@ -158,13 +158,17 @@ export const mapBridgeTransactions = async (
               ? moment.tz(transaction.date, 'Europe/Paris').toISOString()
               : undefined,
         },
-        description: transaction.raw_description,
+        description: transaction.bank_description,
         amount: transaction.amount,
         currency: transaction.currency_code,
         isComing: transaction.is_future,
         aggregator: {
           id: transaction.id.toString(),
-          category: await aggregator.getResourceName(accessToken, transaction.category.resource_uri, clientConfig),
+          category: await aggregator.getResourceName(
+            accessToken,
+            `/v2/categories/${transaction.category_id}`,
+            clientConfig,
+          ),
         },
       }),
     ),

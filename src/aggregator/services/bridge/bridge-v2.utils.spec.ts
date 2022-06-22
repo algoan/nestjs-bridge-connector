@@ -1,4 +1,4 @@
-import { HttpModule } from '@nestjs/common';
+import { HttpModule } from '@nestjs/axios';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BridgeAccount } from 'src/aggregator/interfaces/bridge.interface';
 import { AlgoanModule } from '../../../algoan/algoan.module';
@@ -62,7 +62,7 @@ describe('Bridge Utils for Algoan v2 (Customer, Analysis)', () => {
       aggregatorService,
     );
 
-    expect(aggregatorSpyBank).toHaveBeenCalledWith('mockAccessToken', mockAccount.bank.resource_uri, undefined);
+    expect(aggregatorSpyBank).toHaveBeenCalledWith('mockAccessToken', `/v2/banks/${mockAccount.bank_id}`, undefined);
     expect(mappedAccount).toEqual(expectedAccounts);
   });
 
@@ -86,7 +86,11 @@ describe('Bridge Utils for Algoan v2 (Customer, Analysis)', () => {
     );
 
     expect(mappedTransaction).toEqual(expectedTransaction);
-    expect(aggregatorSpyCategory).toBeCalledWith('mockAccessToken', mockTransaction.category.resource_uri, undefined);
+    expect(aggregatorSpyCategory).toBeCalledWith(
+      'mockAccessToken',
+      `/v2/categories/${mockTransaction.category_id}`,
+      undefined,
+    );
   });
 
   it('should convert the interest rate with correct floating point', async () => {

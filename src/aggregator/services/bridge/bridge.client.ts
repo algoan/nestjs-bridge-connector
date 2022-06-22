@@ -8,6 +8,7 @@ import { lastValueFrom, Observable } from 'rxjs';
 import { AccountBank } from '../../../algoan/dto/analysis.inputs';
 import {
   AuthenticationResponse,
+  BrideConnectItemDTO,
   BridgeAccount,
   BridgeBank,
   BridgeCategory,
@@ -106,18 +107,14 @@ export class BridgeClient {
     email?: string,
     clientConfig?: ClientConfig,
   ): Promise<ConnectItemResponse> {
-    let url: string = `${config.bridge.baseUrl}/v2/connect/items/add/url?country=fr`;
-
-    if (context !== undefined && context !== '') {
-      url += `&context=${context}`;
-    }
-
-    if (email !== undefined) {
-      url += `&prefill_email=${email}`;
-    }
-
+    const url: string = `${config.bridge.baseUrl}/v2/connect/items/add`;
+    const data: BrideConnectItemDTO = {
+      country: 'fr',
+      context,
+      prefill_email: email,
+    };
     const resp: AxiosResponse<ConnectItemResponse> = await BridgeClient.toPromise(
-      this.httpService.get(url, {
+      this.httpService.post(url, data, {
         headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) },
       }),
     );
