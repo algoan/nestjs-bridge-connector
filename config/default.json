@@ -6,7 +6,7 @@
     "debug": false
   },
   "bridge":{
-    "bankinVersion":"2019-02-18",
+    "bankinVersion":"2021-06-01",
     "baseUrl":"https://api.bridgeapi.io",
     "clientId":"a",
     "clientSecret": "b",
