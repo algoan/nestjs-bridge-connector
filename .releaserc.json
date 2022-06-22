@@ -2,19 +2,19 @@
     "plugins": [
       "@semantic-release/commit-analyzer",
       "@semantic-release/release-notes-generator",
-      "@semantic-release/github",
       ["@semantic-release/npm", {
         "npmPublish": false
+      }],
+      ["@codedependant/semantic-release-docker", {
+        "dockerImage": "nestjs-bridge-connector",
+        "dockerLogin": true,
+        "dockerPublish": true
       }],
       ["@semantic-release/git", {
         "assets": ["package.json", "package-lock.json"],
         "message": "chore(release): bump app version to v${nextRelease.version} [skip ci]"
       }],
-      ["@codedependant/semantic-release-docker", {
-        "dockerImage": "algoan/nestjs-bridge-connectors",
-        "dockerLogin": true,
-        "dockerPublish": true
-      }]
+      "@semantic-release/github"
     ],
     "preset": "angular"
   }
