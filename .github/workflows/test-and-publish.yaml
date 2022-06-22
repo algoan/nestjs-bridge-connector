@@ -60,7 +60,7 @@ jobs:
           node-version: 14
       # Install dependencies
       - run: npm ci --prefer-offline
-      - run: npm run publish
+      - run: npx semantic-release
         env:
           DOCKER_REGISTRY_USER: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKER_REGISTRY_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
