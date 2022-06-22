@@ -164,19 +164,26 @@ describe('BridgeClient', () => {
       config: {},
     };
 
-    const spy = jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(result));
+    const spy = jest.spyOn(httpService, 'post').mockImplementationOnce(() => of(result));
     const uuid: string = uuidV4().replace(/-/g, 'z');
     const resp = await service.connectItem('secret-access-token', uuid);
     expect(resp).toBe(connectItemResponse);
 
-    expect(spy).toHaveBeenCalledWith(`https://api.bridgeapi.io/v2/connect/items/add/url?country=fr&context=${uuid}`, {
-      headers: {
-        Authorization: 'Bearer secret-access-token',
-        'Client-Id': config.bridge.clientId,
-        'Client-Secret': config.bridge.clientSecret,
-        'Bankin-Version': config.bridge.bankinVersion,
+    expect(spy).toHaveBeenCalledWith(
+      `https://api.bridgeapi.io/v2/connect/items/add`,
+      {
+        context: uuid,
+        country: 'fr',
       },
-    });
+      {
+        headers: {
+          Authorization: 'Bearer secret-access-token',
+          'Client-Id': config.bridge.clientId,
+          'Client-Secret': config.bridge.clientSecret,
+          'Bankin-Version': config.bridge.bankinVersion,
+        },
+      },
+    );
   });
 
   it('can connect a user to an item with a prefilled_email', async () => {
@@ -192,13 +199,18 @@ describe('BridgeClient', () => {
       config: {},
     };
 
-    const spy = jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(result));
+    const spy = jest.spyOn(httpService, 'post').mockImplementationOnce(() => of(result));
     const uuid: string = uuidV4().replace(/-/g, 'z');
     const resp = await service.connectItem('secret-access-token', uuid, email);
     expect(resp).toBe(connectItemResponse);
 
     expect(spy).toHaveBeenCalledWith(
-      `https://api.bridgeapi.io/v2/connect/items/add/url?country=fr&context=${uuid}&prefill_email=${email}`,
+      `https://api.bridgeapi.io/v2/connect/items/add`,
+      {
+        prefill_email: email,
+        context: uuid,
+        country: 'fr',
+      },
       {
         headers: {
           Authorization: 'Bearer secret-access-token',
@@ -215,8 +227,6 @@ describe('BridgeClient', () => {
       resources: [
         {
           id: 2341501,
-          resource_uri: '/v2/accounts/2341501',
-          resource_type: 'account',
           name: 'Compte Crédit Immobilier',
           balance: -140200,
           status: 0,
@@ -225,16 +235,8 @@ describe('BridgeClient', () => {
           updated_at: '2019-04-06T13:53:12Z',
           type: BridgeAccountType.CHECKING,
           currency_code: 'EUR',
-          item: {
-            id: 187746,
-            resource_uri: '/v2/items/187746',
-            resource_type: 'item',
-          },
-          bank: {
-            id: 408,
-            resource_uri: '/v2/banks/408',
-            resource_type: 'bank',
-          },
+          item_id: 187746,
+          bank_id: 408,
           loan_details: {
             next_payment_date: '2019-04-30',
             next_payment_amount: 1000,
@@ -281,26 +283,17 @@ describe('BridgeClient', () => {
       resources: [
         {
           id: 1000013123932,
-          resource_uri: '/v2/transactions/1000013123932',
-          resource_type: 'transaction',
-          description: 'Prelevement Spotify SA',
-          raw_description: 'Prlv 1512 Spotify SA',
+          clean_description: 'Prelevement Spotify SA',
+          bank_description: 'Prlv 1512 Spotify SA',
           amount: -4.99,
           date: '2019-04-06',
           updated_at: '2019-04-06T09:19:14Z',
           currency_code: 'EUR',
           is_deleted: false,
-          category: {
-            id: 1,
-            resource_uri: '/v2/categories/1',
-            resource_type: 'category',
-          },
-          account: {
-            id: 2341498,
-            resource_uri: '/v2/accounts/2341498',
-            resource_type: 'account',
-          },
+          category_id: 1,
+          account_id: 2341498,
           is_future: false,
+          show_client_side: true,
         },
       ],
       pagination: { next_uri: null, previous_uri: null },
@@ -331,9 +324,8 @@ describe('BridgeClient', () => {
   it('can get a resources name by its uri', async () => {
     const mockCategory: BridgeCategory = {
       id: 10,
-      resource_uri: '/v2/mockResourceUri',
-      resource_type: 'category',
       name: 'mockBankCategory',
+      parent_id: 9,
     };
     const result: AxiosResponse = {
       data: mockCategory,
@@ -345,10 +337,10 @@ describe('BridgeClient', () => {
 
     const spy = jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(result));
 
-    const resp = await service.getResourceName('mockAccessToken', mockCategory.resource_uri);
+    const resp = await service.getResourceName('mockAccessToken', `/v2/categories/${mockCategory.id}`);
     expect(resp).toBe('mockBankCategory');
 
-    expect(spy).toHaveBeenCalledWith('https://api.bridgeapi.io/v2/mockResourceUri', {
+    expect(spy).toHaveBeenCalledWith('https://api.bridgeapi.io/v2/categories/10', {
       headers: {
         Authorization: 'Bearer mockAccessToken',
         'Client-Id': config.bridge.clientId,
@@ -361,11 +353,8 @@ describe('BridgeClient', () => {
   it('can get a bank information by its uri', async () => {
     const mockBank: BridgeBank = {
       id: 10,
-      resource_uri: '/v2/banks/mockResourceUri',
-      resource_type: 'bank',
       name: 'mockBankName',
       country_code: 'FR',
-      automatic_refresh: false,
       logo_url: 'logo',
     };
     const result: AxiosResponse = {
@@ -378,10 +367,10 @@ describe('BridgeClient', () => {
 
     const spy = jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(result));
 
-    const resp = await service.getBankInformation('mockAccessToken', mockBank.resource_uri);
+    const resp = await service.getBankInformation('mockAccessToken', `/v2/banks/${mockBank.id}`);
     expect(resp).toEqual({ name: 'mockBankName', logoUrl: 'logo' });
 
-    expect(spy).toHaveBeenCalledWith('https://api.bridgeapi.io/v2/banks/mockResourceUri', {
+    expect(spy).toHaveBeenCalledWith('https://api.bridgeapi.io/v2/banks/10', {
       headers: {
         Authorization: 'Bearer mockAccessToken',
         'Client-Id': config.bridge.clientId,

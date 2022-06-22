@@ -1,10 +1,21 @@
 /**
+ * DTO interface for the POST /items/add API
+ * Refer to https://docs.bridgeapi.io/reference/connect-an-item
+ */
+export interface BrideConnectItemDTO {
+  country?: string;
+  prefill_email?: string;
+  redirect_url?: string;
+  context?: string;
+  bank_id?: number;
+  capabilities?: string;
+}
+
+/**
  * Base response for all bridge requests
  */
 export interface UserResponse {
   uuid: string;
-  resource_type: string;
-  resource_uri: string;
   email: string;
 }
 
@@ -48,8 +59,6 @@ export interface ListResponse<T> {
  */
 export interface BridgeAccount {
   id: number;
-  resource_uri: string;
-  resource_type: 'account';
   name: string;
   balance: number;
   status: BridgeAccountStatus;
@@ -58,16 +67,8 @@ export interface BridgeAccount {
   updated_at: string;
   type: BridgeAccountType;
   currency_code: string; // do we have an enum for this?
-  item: {
-    id: number;
-    resource_uri: string;
-    resource_type: 'item';
-  };
-  bank: {
-    id: number;
-    resource_uri: string;
-    resource_type: 'bank';
-  };
+  item_id: number;
+  bank_id: number;
   loan_details: {
     next_payment_date: string;
     next_payment_amount: number;
@@ -93,10 +94,10 @@ export interface BridgeAccount {
 export enum BridgeAccountType {
   CHECKING = 'checking',
   SAVINGS = 'savings',
-  SECURITIES = 'securities',
+  BROKERAGE = 'brokerage',
   CARD = 'card',
   LOAN = 'loan',
-  SHARE_SAVINGS_PLAN = 'share_savings_plan',
+  SHARED_SAVING_PLAN = 'shared_saving_plan',
   PENDING = 'pending',
   LIFE_INSURANCE = 'life_insurance',
   SPECIAL = 'special',
@@ -129,26 +130,17 @@ export enum BridgeAccountStatus {
  */
 export interface BridgeTransaction {
   id: number;
-  resource_uri: string;
-  resource_type: 'transaction';
-  description: string;
-  raw_description: string;
+  clean_description: string;
+  bank_description: string;
   amount: number;
   date: string;
   updated_at: string;
   currency_code: string; // @TODO: do we have an enum for that?
   is_deleted: boolean;
-  category: {
-    id: number;
-    resource_uri: string;
-    resource_type: 'category';
-  };
-  account: {
-    id: number;
-    resource_uri: string;
-    resource_type: 'account';
-  };
+  category_id: number;
+  account_id: number;
   is_future: boolean;
+  show_client_side?: boolean;
 }
 
 /**
@@ -156,12 +148,26 @@ export interface BridgeTransaction {
  */
 export interface BridgeBank {
   id: number;
-  resource_uri: string;
-  resource_type: 'bank';
   name: string;
-  country_code: string;
-  automatic_refresh: boolean;
+  parent_name?: string;
+  country_code?: string;
+  primary_color?: string;
+  secondary_color?: string;
   logo_url: string;
+  deeplink_ios?: string;
+  deeplink_android?: string;
+  form?: {
+    label: string;
+    type: string;
+    isNum: string;
+    maxLength: number;
+  }[];
+  // Parameters below are not detailed because Algoan does not need this.
+  // Refer to https://docs.bridgeapi.io/reference/bank-resource
+  capabilities?: string[];
+  transfer?: object;
+  payment?: object;
+  channel_type?: string[];
 }
 
 /**
@@ -169,14 +175,8 @@ export interface BridgeBank {
  */
 export interface BridgeCategory {
   id: number;
-  resource_uri: string;
-  resource_type: 'category';
   name: string;
-  parent?: {
-    id: number;
-    resource_uri: string;
-    resource_type: string;
-  };
+  parent_id: number;
 }
 
 /**

@@ -45,8 +45,6 @@ describe('AggregatorService', () => {
         expires_at: '2019-05-06T11:08:25.040Z',
         user: {
           uuid: 'c2a26c9e-dc23-4f67-b887-bbae0f26c415',
-          resource_uri: '/v2/users/c2a26c9e-dc23-4f67-b887-bbae0f26c415',
-          resource_type: 'user',
           email: 'john.doe@email.com',
         },
       });
@@ -84,8 +82,6 @@ describe('AggregatorService', () => {
     it('should create and setup an account and return the redirect link', async () => {
       const registerSpy = jest.spyOn(client, 'register').mockResolvedValueOnce({
         uuid: '79c8961c-bdf7-11e5-88a3-4f2c2aec0665',
-        resource_type: 'user',
-        resource_uri: '/v2/users/79c8961c-bdf7-11e5-88a3-4f2c2aec0665',
         email: 'john.doe@email.com',
       });
       const authenticateSpy = jest.spyOn(client, 'authenticate').mockResolvedValueOnce({
@@ -93,8 +89,6 @@ describe('AggregatorService', () => {
         expires_at: '2019-05-06T11:08:25.040Z',
         user: {
           uuid: 'c2a26c9e-dc23-4f67-b887-bbae0f26c415',
-          resource_uri: '/v2/users/c2a26c9e-dc23-4f67-b887-bbae0f26c415',
-          resource_type: 'user',
           email: 'john.doe@email.com',
         },
       });
@@ -134,8 +128,6 @@ describe('AggregatorService', () => {
       const email: string = 'test@test.com';
       const registerSpy = jest.spyOn(client, 'register').mockResolvedValueOnce({
         uuid: '79c8961c-bdf7-11e5-88a3-4f2c2aec0665',
-        resource_type: 'user',
-        resource_uri: '/v2/users/79c8961c-bdf7-11e5-88a3-4f2c2aec0665',
         email: 'john.doe@email.com',
       });
       const authenticateSpy = jest.spyOn(client, 'authenticate').mockResolvedValueOnce({
@@ -143,8 +135,6 @@ describe('AggregatorService', () => {
         expires_at: '2019-05-06T11:08:25.040Z',
         user: {
           uuid: 'c2a26c9e-dc23-4f67-b887-bbae0f26c415',
-          resource_uri: '/v2/users/c2a26c9e-dc23-4f67-b887-bbae0f26c415',
-          resource_type: 'user',
           email: 'john.doe@email.com',
         },
       });
@@ -192,8 +182,6 @@ describe('AggregatorService', () => {
     it('should extract correct context when callbackUrl contains query params', async () => {
       const registerSpy = jest.spyOn(client, 'register').mockResolvedValueOnce({
         uuid: '79c8961c-bdf7-11e5-88a3-4f2c2aec0665',
-        resource_type: 'user',
-        resource_uri: '/v2/users/79c8961c-bdf7-11e5-88a3-4f2c2aec0665',
         email: 'john.doe@email.com',
       });
       const authenticateSpy = jest.spyOn(client, 'authenticate').mockResolvedValueOnce({
@@ -201,8 +189,6 @@ describe('AggregatorService', () => {
         expires_at: '2019-05-06T11:08:25.040Z',
         user: {
           uuid: 'c2a26c9e-dc23-4f67-b887-bbae0f26c415',
-          resource_uri: '/v2/users/c2a26c9e-dc23-4f67-b887-bbae0f26c415',
-          resource_type: 'user',
           email: 'john.doe@email.com',
         },
       });

@@ -281,7 +281,7 @@ export class HooksService {
       for (const account of algoanAccounts) {
         const algoanTransactions: AnalysisTransaction[] = await mapBridgeTransactionsV2(
           transactions.filter(
-            (transaction: BridgeTransaction) => transaction.account.id === Number(account.aggregator?.id),
+            (transaction: BridgeTransaction) => transaction.account_id === Number(account.aggregator?.id),
           ),
           accessToken,
           this.aggregator,

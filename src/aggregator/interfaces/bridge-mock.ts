@@ -11,8 +11,6 @@ import {
 
 export const mockAccount: BridgeAccount = {
   id: 1234,
-  resource_uri: 'mockResourceUri',
-  resource_type: 'account',
   name: 'mockBridgeAccountName',
   balance: 100,
   status: BridgeAccountStatus.OK,
@@ -21,16 +19,8 @@ export const mockAccount: BridgeAccount = {
   updated_at: '2019-04-06T13:53:12Z',
   type: BridgeAccountType.CARD,
   currency_code: 'USD',
-  item: {
-    id: 5,
-    resource_uri: 'mockItemUri',
-    resource_type: 'item',
-  },
-  bank: {
-    id: 6,
-    resource_uri: 'mockBankUri',
-    resource_type: 'bank',
-  },
+  item_id: 5,
+  bank_id: 6,
   loan_details: {
     next_payment_date: '2019-04-30',
     next_payment_amount: 1000,
@@ -50,32 +40,20 @@ export const mockAccount: BridgeAccount = {
 };
 export const mockTransaction: BridgeTransaction = {
   id: 23,
-  resource_uri: 'mockResourceUri',
-  resource_type: 'transaction',
-  description: 'mockDescription',
-  raw_description: 'mockRawDescription',
+  clean_description: 'mockDescription',
+  bank_description: 'mockRawDescription',
   amount: 30,
   date: '2019-04-06T13:53:12Z',
   updated_at: 'mockUpdatedAt',
   currency_code: 'USD',
   is_deleted: false,
-  category: {
-    id: 78,
-    resource_uri: 'mockCategoryUri',
-    resource_type: 'category',
-  },
-  account: {
-    id: 56,
-    resource_uri: 'mockResourceUri',
-    resource_type: 'account',
-  },
+  category_id: 78,
+  account_id: 56,
   is_future: false,
 };
 
 export const mockUserResponse: UserResponse = {
   uuid: 'mockUuid',
-  resource_type: 'user',
-  resource_uri: 'mockUri',
   email: 'mock@email.com',
 };
 

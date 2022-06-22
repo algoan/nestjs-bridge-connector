@@ -203,7 +203,7 @@ describe('HooksService', () => {
     const accessTokenSpy = jest.spyOn(aggregatorService, 'getAccessToken').mockResolvedValue({
       access_token: 'mockPermToken',
       expires_at: '323423423423',
-      user: { email: 'test@test.com', uuid: 'rrr', resource_type: 's', resource_uri: '/..' },
+      user: { email: 'test@test.com', uuid: 'rrr' },
     });
     const accountSpy = jest
       .spyOn(aggregatorService, 'getAccounts')
@@ -214,10 +214,8 @@ describe('HooksService', () => {
     const date = new Date().toISOString();
     const transactionSpy = jest
       .spyOn(aggregatorService, 'getTransactions')
-      .mockResolvedValueOnce([
-        { ...mockTransaction, date, account: { ...mockTransaction.account, id: mockAccount.id } },
-      ])
-      .mockResolvedValue([{ ...mockTransaction, account: { ...mockTransaction.account, id: mockAccount.id } }]);
+      .mockResolvedValueOnce([{ ...mockTransaction, date, account_id: mockAccount.id }])
+      .mockResolvedValue([{ ...mockTransaction, account_id: mockAccount.id }]);
     const bankInformationSpy = jest
       .spyOn(aggregatorService, 'getBankInformation')
       .mockResolvedValue({ name: 'mockBankName' });
@@ -361,7 +359,7 @@ describe('HooksService', () => {
     const accessTokenSpy = jest.spyOn(aggregatorService, 'getAccessToken').mockResolvedValue({
       access_token: 'mockPermToken',
       expires_at: '323423423423',
-      user: { email: 'test@test.com', uuid: 'rrr', resource_type: 's', resource_uri: '/..' },
+      user: { email: 'test@test.com', uuid: 'rrr' },
     });
     const refreshSpy = jest.spyOn(aggregatorService, 'refresh').mockResolvedValue();
     const refreshStatusSpy = jest
@@ -377,10 +375,8 @@ describe('HooksService', () => {
     const date = new Date().toISOString();
     const transactionSpy = jest
       .spyOn(aggregatorService, 'getTransactions')
-      .mockResolvedValueOnce([
-        { ...mockTransaction, date, account: { ...mockTransaction.account, id: mockAccount.id } },
-      ])
-      .mockResolvedValue([{ ...mockTransaction, account: { ...mockTransaction.account, id: mockAccount.id } }]);
+      .mockResolvedValueOnce([{ ...mockTransaction, date, account_id: mockAccount.id }])
+      .mockResolvedValue([{ ...mockTransaction, account_id: mockAccount.id }]);
     const bankInformationSpy = jest
       .spyOn(aggregatorService, 'getBankInformation')
       .mockResolvedValue({ name: 'mockBankName', logoUrl: 'logo' });
