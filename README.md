@@ -103,7 +103,7 @@ $ npm install
 # development
 $ npm run start
 
-# watch mode
+# watch mode: will also run the fake-server app
 $ npm run start:dev
 
 # production mode
@@ -128,8 +128,8 @@ $ npm run test:cov
 To test locally the Bridge process, a simple `index.html` file is rendered. To use it:
 
 - Create a `config/user/{process.env.USER}.json` file to override app configurations. _NOTE_: This application uses [node-config-ts](https://github.com/tusharmath/node-config-ts). See the [How to configure](#how-to-configure) section for further information.
-- Run `npm start`
-- Go to your favorite browser and navigate to http://localhost:8080. It should display a web page: 
+- Run `npm run start:dev`
+- Go to your favorite browser and navigate to http://localhost:4000. It should display a web page: 
 
 ![index_page](assets/index-page.png)
 
