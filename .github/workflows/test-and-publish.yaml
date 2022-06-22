@@ -64,4 +64,4 @@ jobs:
         env:
           DOCKER_REGISTRY_USER: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKER_REGISTRY_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
-          GITHUB_TOKEN: ${{ secrets.GH_PAT_SEMANTIC_RELEASE }}
+          GITHUB_TOKEN: ${{ secrets.PUBLIC_REPO_GHA_PAT }}
