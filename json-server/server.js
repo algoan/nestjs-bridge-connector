@@ -91,6 +91,8 @@ server.get('/redirect', async (req, res) => {
     res.status(404).send({
       message: 'Redirect url not found',
     });
+
+    return;
   }
 
   res.redirect(redirectUrl);
@@ -106,6 +108,15 @@ server.get('/callback', async (req, res) => {
     customerId: db.customers[0].id,
     analysisId: db.analyses[0].id,
     temporaryCode: tempCode,
+  }
+
+  if (req.query.success !== 'true') {
+    res.status(200).send({
+      message: 'Unsuccessful aggregation',
+      queryParam: req.query,
+    });
+
+    return;
   }
   // Simulate a webhook call
   await axios.post(
