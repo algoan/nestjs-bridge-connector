@@ -23,7 +23,7 @@ import {
   ConnectItemResponse,
   ListResponse,
 } from '../../interfaces/bridge.interface';
-import { BridgeClient } from './bridge.client';
+import { BridgeClient, ClientConfig } from './bridge.client';
 
 describe('BridgeClient', () => {
   let service: BridgeClient;
@@ -210,6 +210,48 @@ describe('BridgeClient', () => {
         prefill_email: email,
         context: uuid,
         country: 'fr',
+      },
+      {
+        headers: {
+          Authorization: 'Bearer secret-access-token',
+          'Client-Id': config.bridge.clientId,
+          'Client-Secret': config.bridge.clientSecret,
+          'Bankin-Version': config.bridge.bankinVersion,
+        },
+      },
+    );
+  });
+
+  it('can connect a user to an item with a parent url', async () => {
+    const email: string = 'test@test.com';
+    const connectItemResponse: ConnectItemResponse = {
+      redirect_url: 'the-redirect-url',
+    };
+    const result: AxiosResponse = {
+      data: connectItemResponse,
+      status: 200,
+      statusText: '',
+      headers: {},
+      config: {},
+    };
+    const clientConfig: ClientConfig = {
+      clientId: config.bridge.clientId,
+      clientSecret: config.bridge.clientSecret,
+      bankinVersion: config.bridge.bankinVersion,
+      parentUrl: 'https://fake-url.fake',
+    };
+    const spy = jest.spyOn(httpService, 'post').mockImplementationOnce(() => of(result));
+    const uuid: string = uuidV4().replace(/-/g, 'z');
+    const resp = await service.connectItem('secret-access-token', uuid, email, clientConfig);
+    expect(resp).toBe(connectItemResponse);
+
+    expect(spy).toHaveBeenCalledWith(
+      `https://api.bridgeapi.io/v2/connect/items/add`,
+      {
+        prefill_email: email,
+        context: uuid,
+        country: 'fr',
+        parent_url: clientConfig.parentUrl,
       },
       {
         headers: {
