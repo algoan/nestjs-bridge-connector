@@ -9,6 +9,7 @@ export interface BrideConnectItemDTO {
   context?: string;
   bank_id?: number;
   capabilities?: string;
+  parent_url?: string;
 }
 
 /**

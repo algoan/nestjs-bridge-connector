@@ -30,6 +30,7 @@ export interface ClientConfig {
   bankinVersion: string;
   nbOfMonths?: number;
   deleteBridgeUsers?: boolean;
+  parentUrl?: string;
 }
 
 /**
@@ -112,6 +113,7 @@ export class BridgeClient {
       country: 'fr',
       context,
       prefill_email: email,
+      parent_url: clientConfig?.parentUrl,
     };
     const resp: AxiosResponse<ConnectItemResponse> = await BridgeClient.toPromise(
       this.httpService.post(url, data, {
