@@ -264,6 +264,89 @@ describe('BridgeClient', () => {
     );
   });
 
+  it('can connect a user to an item with a an empty context', async () => {
+    const email: string = 'test@test.com';
+    const connectItemResponse: ConnectItemResponse = {
+      redirect_url: 'the-redirect-url',
+    };
+    const result: AxiosResponse = {
+      data: connectItemResponse,
+      status: 200,
+      statusText: '',
+      headers: {},
+      config: {},
+    };
+    const clientConfig: ClientConfig = {
+      clientId: config.bridge.clientId,
+      clientSecret: config.bridge.clientSecret,
+      bankinVersion: config.bridge.bankinVersion,
+      parentUrl: 'https://fake-url.fake',
+    };
+    const spy = jest.spyOn(httpService, 'post').mockImplementationOnce(() => of(result));
+    const resp = await service.connectItem('secret-access-token', '', email, clientConfig);
+    expect(resp).toBe(connectItemResponse);
+
+    expect(spy).toHaveBeenCalledWith(
+      `https://api.bridgeapi.io/v2/connect/items/add`,
+      {
+        prefill_email: email,
+        country: 'fr',
+        parent_url: clientConfig.parentUrl,
+      },
+      {
+        headers: {
+          Authorization: 'Bearer secret-access-token',
+          'Client-Id': config.bridge.clientId,
+          'Client-Secret': config.bridge.clientSecret,
+          'Bankin-Version': config.bridge.bankinVersion,
+        },
+      },
+    );
+  });
+
+  it('can connect a user to an item an remove special characters from context', async () => {
+    const email: string = 'test@test.com';
+    const connectItemResponse: ConnectItemResponse = {
+      redirect_url: 'the-redirect-url',
+    };
+    const result: AxiosResponse = {
+      data: connectItemResponse,
+      status: 200,
+      statusText: '',
+      headers: {},
+      config: {},
+    };
+    const clientConfig: ClientConfig = {
+      clientId: config.bridge.clientId,
+      clientSecret: config.bridge.clientSecret,
+      bankinVersion: config.bridge.bankinVersion,
+      parentUrl: 'https://fake-url.fake',
+    };
+    const spy = jest.spyOn(httpService, 'post').mockImplementationOnce(() => of(result));
+    const uuid: string = 'tesT5-7&/é';
+    const cleanUuid: string = 'tesT57';
+    const resp = await service.connectItem('secret-access-token', uuid, email, clientConfig);
+    expect(resp).toBe(connectItemResponse);
+
+    expect(spy).toHaveBeenCalledWith(
+      `https://api.bridgeapi.io/v2/connect/items/add`,
+      {
+        prefill_email: email,
+        country: 'fr',
+        parent_url: clientConfig.parentUrl,
+        context: cleanUuid,
+      },
+      {
+        headers: {
+          Authorization: 'Bearer secret-access-token',
+          'Client-Id': config.bridge.clientId,
+          'Client-Secret': config.bridge.clientSecret,
+          'Bankin-Version': config.bridge.bankinVersion,
+        },
+      },
+    );
+  });
+
   it('can get a list of accounts', async () => {
     const listAccountsResponse: ListResponse<BridgeAccount> = {
       resources: [
