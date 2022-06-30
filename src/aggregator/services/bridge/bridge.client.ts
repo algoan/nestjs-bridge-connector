@@ -111,10 +111,17 @@ export class BridgeClient {
     const url: string = `${config.bridge.baseUrl}/v2/connect/items/add`;
     const data: BrideConnectItemDTO = {
       country: 'fr',
-      context,
       prefill_email: email,
       parent_url: clientConfig?.parentUrl,
     };
+
+    if (context !== undefined) {
+      const cleanContext = context.replace(/[^a-zA-Z0-9]/g, '');
+      if (cleanContext !== '') {
+        data.context = cleanContext;
+      }
+    }
+
     const resp: AxiosResponse<ConnectItemResponse> = await BridgeClient.toPromise(
       this.httpService.post(url, data, {
         headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) },
