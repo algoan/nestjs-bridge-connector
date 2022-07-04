@@ -296,17 +296,22 @@ export class BridgeClient {
     params: { userId: string; password: string },
     clientConfig?: ClientConfig,
   ): Promise<void> {
-    const uri: string = `/v2/users/${params.userId}?password=${params.password}`;
+    const uri: string = `/v2/users/${params.userId}/delete`;
     const url: string = `${config.bridge.baseUrl}${uri}`;
 
     await BridgeClient.toPromise(
-      this.httpService.delete(url, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          ...BridgeClient.getHeaders(clientConfig),
-          'Content-Type': 'application/json',
+      this.httpService.post(
+        url,
+        {
+          password: params.password,
         },
-      }),
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            ...BridgeClient.getHeaders(clientConfig),
+          },
+        },
+      ),
     );
   }
 

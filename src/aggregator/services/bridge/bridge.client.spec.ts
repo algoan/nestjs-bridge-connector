@@ -528,4 +528,37 @@ describe('BridgeClient', () => {
       },
     });
   });
+
+  it('delete a user', async () => {
+    const result: AxiosResponse = {
+      data: {},
+      status: 204,
+      statusText: '',
+      headers: {},
+      config: {},
+    };
+
+    const spy = jest.spyOn(httpService, 'post').mockImplementationOnce(() => of(result));
+
+    const resp = await service.deleteUser('mockAccessToken', {
+      userId: 'userId',
+      password: 'password',
+    });
+    expect(resp).toBeUndefined();
+
+    expect(spy).toHaveBeenCalledWith(
+      'https://api.bridgeapi.io/v2/users/userId/delete',
+      {
+        password: 'password',
+      },
+      {
+        headers: {
+          Authorization: 'Bearer mockAccessToken',
+          'Client-Id': config.bridge.clientId,
+          'Client-Secret': config.bridge.clientSecret,
+          'Bankin-Version': config.bridge.bankinVersion,
+        },
+      },
+    );
+  });
 });
