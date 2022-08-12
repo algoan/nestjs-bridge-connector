@@ -267,6 +267,13 @@ export class HooksService {
         );
 
         transactions = transactions.concat(fetchedTransactions);
+        lastUpdatedAt = fetchedTransactions[0]?.updated_at ?? lastUpdatedAt;
+        for (const transaction of fetchedTransactions) {
+          if (moment(transaction.updated_at).isAfter(lastUpdatedAt)) {
+            lastUpdatedAt = transaction.updated_at;
+          }
+        }
+
         // Sort transactions by date
         transactions = transactions.sort((tr1: BridgeTransaction, tr2: BridgeTransaction) =>
           /* eslint-disable no-magic-numbers */
