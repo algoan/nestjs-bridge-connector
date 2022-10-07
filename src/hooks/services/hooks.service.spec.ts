@@ -33,6 +33,7 @@ import { CONFIG, ConfigModule } from '../../config/config.module';
 import { AggregatorLinkRequiredDTO } from '../dto/aggregator-link-required.dto';
 import { EventDTO } from '../dto/event.dto';
 import { HooksService } from './hooks.service';
+import { BridgeAccountType } from '../../aggregator/interfaces/bridge.interface';
 
 describe('HooksService', () => {
   let hooksService: HooksService;
@@ -205,9 +206,10 @@ describe('HooksService', () => {
       expires_at: '323423423423',
       user: { email: 'test@test.com', uuid: 'rrr' },
     });
-    const accountSpy = jest
-      .spyOn(aggregatorService, 'getAccounts')
-      .mockResolvedValue([mockAccount, { ...mockAccount, id: 0 }]);
+    const accountSpy = jest.spyOn(aggregatorService, 'getAccounts').mockResolvedValue([
+      { ...mockAccount, type: BridgeAccountType.CHECKING },
+      { ...mockAccount, id: 0 },
+    ]);
     const userInfoSpy = jest
       .spyOn(aggregatorService, 'getUserPersonalInformation')
       .mockResolvedValue(mockPersonalInformation);
@@ -265,7 +267,7 @@ describe('HooksService', () => {
               name: ' DUPONT',
             },
           ],
-          type: 'CREDIT_CARD',
+          type: 'CHECKING',
           usage: 'PERSONAL',
           transactions: [
             {
@@ -441,8 +443,8 @@ describe('HooksService', () => {
               amount: 30,
               currency: 'USD',
               dates: {
-                bookedAt: undefined,
-                debitedAt: '2019-04-06T13:53:12.000Z',
+                debitedAt: undefined,
+                bookedAt: '2019-04-06T13:53:12.000Z',
               },
               description: 'mockRawDescription',
               isComing: false,
@@ -455,8 +457,8 @@ describe('HooksService', () => {
               amount: 30,
               currency: 'USD',
               dates: {
-                bookedAt: undefined,
-                debitedAt: date,
+                debitedAt: undefined,
+                bookedAt: date,
               },
               description: 'mockRawDescription',
               isComing: false,
