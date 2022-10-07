@@ -1,6 +1,6 @@
 {
   "name": "@algoan/nestjs-bridge-connector",
-  "version": "1.15.3",
+  "version": "1.15.4",
   "description": "Bridge connector for Algoan",
   "author": "",
   "license": "UNLICENSED",
@@ -38,7 +38,7 @@
     "lodash": "^4.17.21",
     "moment": "^2.29.3",
     "moment-timezone": "^0.5.34",
-    "nest-winston": "^1.6.2",
+    "nest-winston": "^1.7.1",
     "node-config-ts": "^3.1.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
