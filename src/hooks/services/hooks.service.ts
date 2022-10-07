@@ -292,7 +292,7 @@ export class HooksService {
           ),
           accessToken,
           this.aggregator,
-          AccountType.CHECKING,
+          account.type,
           saConfig,
         );
         if (!isEmpty(algoanTransactions)) {
