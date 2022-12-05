@@ -107,7 +107,8 @@ const ACCOUNT_TYPE_MAPPING: AccountTypeMapping = {
  * @param accountType bridge type
  */
 // eslint-disable-next-line no-null/no-null
-const mapAccountType = (accountType: BridgeAccountType): AccountType => ACCOUNT_TYPE_MAPPING[accountType] || null;
+const mapAccountType = (accountType: BridgeAccountType): AccountType =>
+  ACCOUNT_TYPE_MAPPING[accountType] || AccountType.UNKNOWN;
 
 /**
  * mapUsageType map the algoan v2 usage from the bridge type
