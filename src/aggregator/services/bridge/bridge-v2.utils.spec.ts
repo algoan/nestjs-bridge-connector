@@ -1,6 +1,6 @@
 import { HttpModule } from '@nestjs/axios';
 import { Test, TestingModule } from '@nestjs/testing';
-import { BridgeAccount } from 'src/aggregator/interfaces/bridge.interface';
+import { BridgeAccount, BridgeAccountType } from '../../interfaces/bridge.interface';
 import { AlgoanModule } from '../../../algoan/algoan.module';
 import { AccountLoanType, AccountType, AccountUsage } from '../../../algoan/dto/analysis.enum';
 import { Account, AccountTransaction } from '../../../algoan/dto/analysis.inputs';
@@ -57,6 +57,44 @@ describe('Bridge Utils for Algoan v2 (Customer, Analysis)', () => {
 
     const mappedAccount = await mapBridgeAccount(
       [mockAccount],
+      mockPersonalInformation,
+      'mockAccessToken',
+      aggregatorService,
+    );
+
+    expect(aggregatorSpyBank).toHaveBeenCalledWith('mockAccessToken', `/v2/banks/${mockAccount.bank_id}`, undefined);
+    expect(mappedAccount).toEqual(expectedAccounts);
+  });
+
+  it("should map the bridge account to algoan customer's account (unknown type)", async () => {
+    const expectedAccounts: Account[] = [
+      {
+        balance: 100,
+        balanceDate: '2019-04-06T13:53:12.000Z',
+        currency: 'USD',
+        type: AccountType.UNKNOWN,
+        usage: AccountUsage.PERSONAL,
+        owners: [{ name: ' DUPONT' }],
+        iban: 'mockIban',
+        name: 'mockBridgeAccountName',
+        bank: { id: '6', name: 'mockResourceName' },
+        details: {
+          loan: {
+            amount: 140200,
+            startDate: '2013-01-09T23:00:00.000Z',
+            endDate: '2026-12-30T23:00:00.000Z',
+            payment: 1000,
+            interestRate: 0.0125,
+            remainingCapital: 100000,
+            type: AccountLoanType.OTHER,
+          },
+        },
+        aggregator: { id: '1234' },
+      },
+    ];
+
+    const mappedAccount = await mapBridgeAccount(
+      [{ ...mockAccount, type: BridgeAccountType.SPECIAL }],
       mockPersonalInformation,
       'mockAccessToken',
       aggregatorService,
