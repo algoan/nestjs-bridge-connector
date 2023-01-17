@@ -157,6 +157,7 @@ export class HooksService {
           customer.aggregationDetails?.callbackUrl,
           customer.personalDetails?.contact?.email,
           serviceAccount.config as ClientConfig,
+          customer.customIdentifier,
         );
         break;
 
@@ -166,6 +167,7 @@ export class HooksService {
           customer.aggregationDetails?.callbackUrl,
           customer.personalDetails?.contact?.email,
           serviceAccount.config as ClientConfig,
+          customer.customIdentifier,
         );
         break;
 

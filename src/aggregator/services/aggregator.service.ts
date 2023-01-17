@@ -52,6 +52,7 @@ export class AggregatorService {
     callbackUrl?: string,
     email?: string,
     clientConfig?: ClientConfig,
+    customIdentifier?: string,
   ): Promise<string> {
     const userAccount: UserAccount = AggregatorService.buildCredentials(id);
     try {
@@ -82,6 +83,7 @@ export class AggregatorService {
       uuid,
       email,
       clientConfig,
+      customIdentifier,
     );
 
     return redirectResponse.redirect_url;

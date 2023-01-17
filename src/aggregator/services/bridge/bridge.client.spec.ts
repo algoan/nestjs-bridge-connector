@@ -172,7 +172,6 @@ describe('BridgeClient', () => {
     expect(spy).toHaveBeenCalledWith(
       `https://api.bridgeapi.io/v2/connect/items/add`,
       {
-        context: uuid,
         country: 'fr',
       },
       {
@@ -208,7 +207,6 @@ describe('BridgeClient', () => {
       `https://api.bridgeapi.io/v2/connect/items/add`,
       {
         prefill_email: email,
-        context: uuid,
         country: 'fr',
       },
       {
@@ -249,7 +247,6 @@ describe('BridgeClient', () => {
       `https://api.bridgeapi.io/v2/connect/items/add`,
       {
         prefill_email: email,
-        context: uuid,
         country: 'fr',
         parent_url: clientConfig.parentUrl,
       },
@@ -304,7 +301,7 @@ describe('BridgeClient', () => {
     );
   });
 
-  it('can connect a user to an item an remove special characters from context', async () => {
+  it('can connect a user to an item with customIdentifier', async () => {
     const email: string = 'test@test.com';
     const connectItemResponse: ConnectItemResponse = {
       redirect_url: 'the-redirect-url',
@@ -323,18 +320,17 @@ describe('BridgeClient', () => {
       parentUrl: 'https://fake-url.fake',
     };
     const spy = jest.spyOn(httpService, 'post').mockImplementationOnce(() => of(result));
-    const uuid: string = 'tesT5-7&/é';
-    const cleanUuid: string = 'tesT57';
-    const resp = await service.connectItem('secret-access-token', uuid, email, clientConfig);
+    const uuid: string = uuidV4().replace(/-/g, 'z');
+    const resp = await service.connectItem('secret-access-token', uuid, email, clientConfig, 'customIdentifier');
     expect(resp).toBe(connectItemResponse);
 
     expect(spy).toHaveBeenCalledWith(
       `https://api.bridgeapi.io/v2/connect/items/add`,
       {
+        context: 'customIdentifier',
         prefill_email: email,
         country: 'fr',
         parent_url: clientConfig.parentUrl,
-        context: cleanUuid,
       },
       {
         headers: {

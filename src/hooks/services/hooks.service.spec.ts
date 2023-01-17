@@ -162,6 +162,7 @@ describe('HooksService', () => {
       customerMock.aggregationDetails?.callbackUrl,
       customerMock.personalDetails?.contact?.email,
       mockServiceAccountConfig,
+      customerMock.customIdentifier,
     );
     expect(updateCustomerSpy).toBeCalledWith(customerMock.id, {
       aggregationDetails: { aggregatorName: 'BRIDGE', redirectUrl: 'mockRedirectUrl' },
@@ -190,6 +191,7 @@ describe('HooksService', () => {
       customerMock.aggregationDetails?.callbackUrl,
       customerMock.personalDetails?.contact?.email,
       mockServiceAccountConfig,
+      customerMock.customIdentifier,
     );
     expect(updateCustomerSpy).toBeCalledWith(customerMock.id, {
       aggregationDetails: { aggregatorName: 'BRIDGE', iframeUrl: 'mockRedirectUrl' },
