@@ -154,7 +154,6 @@ export class HooksService {
         // Generates a redirect URL
         aggregationDetails.redirectUrl = await this.aggregator.generateRedirectUrl(
           customer.id,
-          customer.aggregationDetails?.callbackUrl,
           customer.personalDetails?.contact?.email,
           serviceAccount.config as ClientConfig,
           customer.customIdentifier,
@@ -164,7 +163,6 @@ export class HooksService {
       case AggregationDetailsMode.IFRAME:
         aggregationDetails.iframeUrl = await this.aggregator.generateRedirectUrl(
           customer.id,
-          customer.aggregationDetails?.callbackUrl,
           customer.personalDetails?.contact?.email,
           serviceAccount.config as ClientConfig,
           customer.customIdentifier,

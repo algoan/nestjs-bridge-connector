@@ -165,8 +165,7 @@ describe('BridgeClient', () => {
     };
 
     const spy = jest.spyOn(httpService, 'post').mockImplementationOnce(() => of(result));
-    const uuid: string = uuidV4().replace(/-/g, 'z');
-    const resp = await service.connectItem('secret-access-token', uuid);
+    const resp = await service.connectItem('secret-access-token');
     expect(resp).toBe(connectItemResponse);
 
     expect(spy).toHaveBeenCalledWith(
@@ -199,8 +198,7 @@ describe('BridgeClient', () => {
     };
 
     const spy = jest.spyOn(httpService, 'post').mockImplementationOnce(() => of(result));
-    const uuid: string = uuidV4().replace(/-/g, 'z');
-    const resp = await service.connectItem('secret-access-token', uuid, email);
+    const resp = await service.connectItem('secret-access-token', email);
     expect(resp).toBe(connectItemResponse);
 
     expect(spy).toHaveBeenCalledWith(
@@ -239,8 +237,7 @@ describe('BridgeClient', () => {
       parentUrl: 'https://fake-url.fake',
     };
     const spy = jest.spyOn(httpService, 'post').mockImplementationOnce(() => of(result));
-    const uuid: string = uuidV4().replace(/-/g, 'z');
-    const resp = await service.connectItem('secret-access-token', uuid, email, clientConfig);
+    const resp = await service.connectItem('secret-access-token', email, clientConfig);
     expect(resp).toBe(connectItemResponse);
 
     expect(spy).toHaveBeenCalledWith(
@@ -280,7 +277,7 @@ describe('BridgeClient', () => {
       parentUrl: 'https://fake-url.fake',
     };
     const spy = jest.spyOn(httpService, 'post').mockImplementationOnce(() => of(result));
-    const resp = await service.connectItem('secret-access-token', '', email, clientConfig);
+    const resp = await service.connectItem('secret-access-token', email, clientConfig);
     expect(resp).toBe(connectItemResponse);
 
     expect(spy).toHaveBeenCalledWith(
@@ -321,7 +318,7 @@ describe('BridgeClient', () => {
     };
     const spy = jest.spyOn(httpService, 'post').mockImplementationOnce(() => of(result));
     const uuid: string = uuidV4().replace(/-/g, 'z');
-    const resp = await service.connectItem('secret-access-token', uuid, email, clientConfig, 'customIdentifier');
+    const resp = await service.connectItem('secret-access-token', email, clientConfig, 'customIdentifier');
     expect(resp).toBe(connectItemResponse);
 
     expect(spy).toHaveBeenCalledWith(

@@ -159,7 +159,6 @@ describe('HooksService', () => {
     expect(getCustomerSpy).toBeCalledWith(mockEventPayload.customerId);
     expect(aggregatorSpy).toBeCalledWith(
       customerMock.id,
-      customerMock.aggregationDetails?.callbackUrl,
       customerMock.personalDetails?.contact?.email,
       mockServiceAccountConfig,
       customerMock.customIdentifier,
@@ -188,7 +187,6 @@ describe('HooksService', () => {
     expect(getCustomerSpy).toBeCalledWith(mockEventPayload.customerId);
     expect(aggregatorSpy).toBeCalledWith(
       customerMock.id,
-      customerMock.aggregationDetails?.callbackUrl,
       customerMock.personalDetails?.contact?.email,
       mockServiceAccountConfig,
       customerMock.customIdentifier,

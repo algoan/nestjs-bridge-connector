@@ -104,7 +104,6 @@ export class BridgeClient {
    */
   public async connectItem(
     accessToken: string,
-    context?: string,
     email?: string,
     clientConfig?: ClientConfig,
     customIdentifier?: string,
