@@ -159,9 +159,9 @@ describe('HooksService', () => {
     expect(getCustomerSpy).toBeCalledWith(mockEventPayload.customerId);
     expect(aggregatorSpy).toBeCalledWith(
       customerMock.id,
-      customerMock.aggregationDetails?.callbackUrl,
       customerMock.personalDetails?.contact?.email,
       mockServiceAccountConfig,
+      customerMock.customIdentifier,
     );
     expect(updateCustomerSpy).toBeCalledWith(customerMock.id, {
       aggregationDetails: { aggregatorName: 'BRIDGE', redirectUrl: 'mockRedirectUrl' },
@@ -187,9 +187,9 @@ describe('HooksService', () => {
     expect(getCustomerSpy).toBeCalledWith(mockEventPayload.customerId);
     expect(aggregatorSpy).toBeCalledWith(
       customerMock.id,
-      customerMock.aggregationDetails?.callbackUrl,
       customerMock.personalDetails?.contact?.email,
       mockServiceAccountConfig,
+      customerMock.customIdentifier,
     );
     expect(updateCustomerSpy).toBeCalledWith(customerMock.id, {
       aggregationDetails: { aggregatorName: 'BRIDGE', iframeUrl: 'mockRedirectUrl' },

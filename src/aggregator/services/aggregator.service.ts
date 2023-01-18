@@ -49,9 +49,9 @@ export class AggregatorService {
    */
   public async generateRedirectUrl(
     id: string,
-    callbackUrl?: string,
     email?: string,
     clientConfig?: ClientConfig,
+    customIdentifier?: string,
   ): Promise<string> {
     const userAccount: UserAccount = AggregatorService.buildCredentials(id);
     try {
@@ -65,23 +65,11 @@ export class AggregatorService {
     }
     const authenticationResponse = await this.bridgeClient.authenticate(userAccount, clientConfig);
 
-    /**
-     * Extract the uuid from the callback URL
-     * As Bridge accepts only letters and numbers, replace "-" by a "z"
-     */
-    const splittedCbUrl: string[] | undefined = callbackUrl?.split('/');
-    if (splittedCbUrl === undefined) {
-      throw new Error('No callbackUrl provided');
-    }
-    const lastUrlSegment: string = splittedCbUrl[splittedCbUrl.length - 1];
-    const lastUrlSegmentWithoutQueryParams: string = lastUrlSegment.split('?')[0];
-    const uuid: string = lastUrlSegmentWithoutQueryParams.replace(/-/g, 'z');
-
     const redirectResponse = await this.bridgeClient.connectItem(
       authenticationResponse.access_token,
-      uuid,
       email,
       clientConfig,
+      customIdentifier,
     );
 
     return redirectResponse.redirect_url;

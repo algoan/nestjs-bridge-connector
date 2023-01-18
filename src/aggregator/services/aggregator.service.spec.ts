@@ -52,10 +52,7 @@ describe('AggregatorService', () => {
         redirect_url: 'https://bridge/redirection-url',
       });
 
-      const redirectUrl = await service.generateRedirectUrl(
-        customerMock.id,
-        customerMock.aggregationDetails.callbackUrl,
-      );
+      const redirectUrl = await service.generateRedirectUrl(customerMock.id);
       const expectedPassword: string = createHmac('sha256', 'random_pass').update(customerMock.id).digest('hex');
       expect(registerSpy).toHaveBeenCalledWith(
         {
@@ -71,12 +68,7 @@ describe('AggregatorService', () => {
         },
         undefined,
       );
-      expect(connectItemSpy).toHaveBeenCalledWith(
-        'access-token',
-        customerMock.aggregationDetails.callbackUrl,
-        undefined,
-        undefined,
-      );
+      expect(connectItemSpy).toHaveBeenCalledWith('access-token', undefined, undefined, undefined);
       expect(redirectUrl).toBe('https://bridge/redirection-url');
     });
     it('should create and setup an account and return the redirect link', async () => {
@@ -96,10 +88,7 @@ describe('AggregatorService', () => {
         redirect_url: 'https://bridge/redirection-url',
       });
 
-      const redirectUrl = await service.generateRedirectUrl(
-        customerMock.id,
-        customerMock.aggregationDetails.callbackUrl,
-      );
+      const redirectUrl = await service.generateRedirectUrl(customerMock.id);
       const expectedPassword: string = createHmac('sha256', 'random_pass').update(customerMock.id).digest('hex');
       expect(registerSpy).toHaveBeenCalledWith(
         {
@@ -115,12 +104,7 @@ describe('AggregatorService', () => {
         },
         undefined,
       );
-      expect(connectItemSpy).toHaveBeenCalledWith(
-        'access-token',
-        customerMock.aggregationDetails.callbackUrl,
-        undefined,
-        undefined,
-      );
+      expect(connectItemSpy).toHaveBeenCalledWith('access-token', undefined, undefined, undefined);
       expect(redirectUrl).toBe('https://bridge/redirection-url');
     });
 
@@ -142,11 +126,7 @@ describe('AggregatorService', () => {
         redirect_url: 'https://bridge/redirection-url',
       });
 
-      const redirectUrl = await service.generateRedirectUrl(
-        customerMock.id,
-        customerMock.aggregationDetails.callbackUrl,
-        email,
-      );
+      const redirectUrl = await service.generateRedirectUrl(customerMock.id, email);
       const expectedPassword: string = createHmac('sha256', 'random_pass').update(customerMock.id).digest('hex');
       expect(registerSpy).toHaveBeenCalledWith(
         {
@@ -162,12 +142,7 @@ describe('AggregatorService', () => {
         },
         undefined,
       );
-      expect(connectItemSpy).toHaveBeenCalledWith(
-        'access-token',
-        customerMock.aggregationDetails.callbackUrl,
-        email,
-        undefined,
-      );
+      expect(connectItemSpy).toHaveBeenCalledWith('access-token', email, undefined, undefined);
       expect(redirectUrl).toBe('https://bridge/redirection-url');
     });
 
@@ -179,7 +154,8 @@ describe('AggregatorService', () => {
       // TODO
     });
 
-    it('should extract correct context when callbackUrl contains query params', async () => {
+    it('should create and setup an account and return the redirect link with a context containg the customIdentifier', async () => {
+      const email: string = 'test@test.com';
       const registerSpy = jest.spyOn(client, 'register').mockResolvedValueOnce({
         uuid: '79c8961c-bdf7-11e5-88a3-4f2c2aec0665',
         email: 'john.doe@email.com',
@@ -196,8 +172,29 @@ describe('AggregatorService', () => {
         redirect_url: 'https://bridge/redirection-url',
       });
 
-      await service.generateRedirectUrl(customerMock.id, 'https://domain.com/call-back?param=1');
-      expect(connectItemSpy).toHaveBeenCalledWith('access-token', 'callzback', undefined, undefined);
+      const redirectUrl = await service.generateRedirectUrl(
+        customerMock.id,
+        email,
+        undefined,
+        customerMock.customIdentifier,
+      );
+      const expectedPassword: string = createHmac('sha256', 'random_pass').update(customerMock.id).digest('hex');
+      expect(registerSpy).toHaveBeenCalledWith(
+        {
+          email: `${customerMock.id}@algoan-bridge.com`,
+          password: expectedPassword,
+        },
+        undefined,
+      );
+      expect(authenticateSpy).toHaveBeenCalledWith(
+        {
+          email: `${customerMock.id}@algoan-bridge.com`,
+          password: expectedPassword,
+        },
+        undefined,
+      );
+      expect(connectItemSpy).toHaveBeenCalledWith('access-token', email, undefined, customerMock.customIdentifier);
+      expect(redirectUrl).toBe('https://bridge/redirection-url');
     });
   });
 

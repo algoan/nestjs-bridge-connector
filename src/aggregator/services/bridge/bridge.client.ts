@@ -104,9 +104,9 @@ export class BridgeClient {
    */
   public async connectItem(
     accessToken: string,
-    context?: string,
     email?: string,
     clientConfig?: ClientConfig,
+    customIdentifier?: string,
   ): Promise<ConnectItemResponse> {
     const url: string = `${config.bridge.baseUrl}/v2/connect/items/add`;
     const data: BrideConnectItemDTO = {
@@ -115,11 +115,8 @@ export class BridgeClient {
       parent_url: clientConfig?.parentUrl,
     };
 
-    if (context !== undefined) {
-      const cleanContext = context.replace(/[^a-zA-Z0-9]/g, '');
-      if (cleanContext !== '') {
-        data.context = cleanContext;
-      }
+    if (customIdentifier !== undefined) {
+      data.context = customIdentifier;
     }
 
     const resp: AxiosResponse<ConnectItemResponse> = await BridgeClient.toPromise(
