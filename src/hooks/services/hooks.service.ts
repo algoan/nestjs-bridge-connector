@@ -266,6 +266,10 @@ export class HooksService {
           saConfig,
         );
 
+        if (fetchedTransactions.length === 0) {
+          break;
+        }
+
         transactions = transactions.concat(fetchedTransactions);
         lastUpdatedAt = fetchedTransactions[0]?.updated_at ?? lastUpdatedAt;
         for (const transaction of fetchedTransactions) {
