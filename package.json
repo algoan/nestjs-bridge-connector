@@ -1,6 +1,6 @@
 {
   "name": "@algoan/nestjs-bridge-connector",
-  "version": "1.15.5",
+  "version": "1.16.0",
   "description": "Bridge connector for Algoan",
   "author": "",
   "license": "UNLICENSED",
