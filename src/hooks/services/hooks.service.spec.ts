@@ -484,6 +484,197 @@ describe('HooksService', () => {
     expect(deleteUserSpy).toHaveBeenCalledTimes(0);
   });
 
+  it('Patch analysis with an algoan error on bank details required and exit ', async () => {
+    const algoanAuthenticateSpy = jest.spyOn(algoanHttpService, 'authenticate').mockReturnValue();
+    const getCustomerSpy = jest.spyOn(algoanCustomerService, 'getCustomerById').mockResolvedValue(customerMock);
+    const updateAnalysisSpy = jest
+      .spyOn(algoanAnalysisService, 'updateAnalysis')
+      .mockRejectedValueOnce({
+        request: {
+          host: 'api.algoan.com',
+        },
+      })
+      .mockResolvedValue(analysisMock);
+    mockServiceAccount.config = mockServiceAccountConfig;
+    const accessTokenSpy = jest.spyOn(aggregatorService, 'getAccessToken').mockResolvedValue({
+      access_token: 'mockPermToken',
+      expires_at: '323423423423',
+      user: { email: 'test@test.com', uuid: 'rrr' },
+    });
+    const accountSpy = jest.spyOn(aggregatorService, 'getAccounts').mockResolvedValue([
+      { ...mockAccount, type: BridgeAccountType.CHECKING },
+      { ...mockAccount, id: 0 },
+    ]);
+    const userInfoSpy = jest
+      .spyOn(aggregatorService, 'getUserPersonalInformation')
+      .mockResolvedValue(mockPersonalInformation);
+    const date = new Date().toISOString();
+    const transactionSpy = jest
+      .spyOn(aggregatorService, 'getTransactions')
+      .mockResolvedValueOnce([{ ...mockTransaction, date, account_id: mockAccount.id }])
+      .mockResolvedValue([]);
+    const bankInformationSpy = jest
+      .spyOn(aggregatorService, 'getBankInformation')
+      .mockResolvedValue({ name: 'mockBankName' });
+    const resourceNameSpy = jest.spyOn(aggregatorService, 'getResourceName').mockResolvedValue('mockResourceName');
+    const deleteUserSpy = jest.spyOn(aggregatorService, 'deleteUser').mockResolvedValue();
+
+    const mockEventPayload = {
+      customerId: customerMock.id,
+      analysisId: analysisMock.id,
+      temporaryCode: 'mockTemporaryToken',
+    };
+
+    try {
+      await hooksService.handleBankDetailsRequiredEvent(mockServiceAccount, mockEventPayload, new Date());
+    } catch (err) {
+      expect(err).toEqual({ request: { host: 'api.algoan.com' } });
+    }
+
+    expect(algoanAuthenticateSpy).toBeCalledWith(mockServiceAccount.clientId, mockServiceAccount.clientSecret);
+    expect(getCustomerSpy).toBeCalledWith(mockEventPayload.customerId);
+    expect(accessTokenSpy).toBeCalledWith(customerMock.id, mockServiceAccountConfig);
+    expect(accountSpy).toBeCalledWith('mockPermToken', mockServiceAccountConfig);
+    expect(userInfoSpy).toBeCalledWith('mockPermToken', mockServiceAccountConfig);
+    expect(bankInformationSpy).toBeCalledTimes(2);
+    expect(resourceNameSpy).toBeCalledTimes(1);
+    expect(transactionSpy).toBeCalledTimes(2);
+    expect(transactionSpy).toBeCalledWith('mockPermToken', undefined, mockServiceAccountConfig);
+    expect(deleteUserSpy).toHaveBeenCalledTimes(0);
+    expect(updateAnalysisSpy).toHaveBeenCalledTimes(2);
+    expect(updateAnalysisSpy).toBeCalledWith(customerMock.id, mockEventPayload.analysisId, {
+      accounts: [
+        {
+          aggregator: {
+            id: '1234',
+          },
+          balance: 100,
+          balanceDate: '2019-04-06T13:53:12.000Z',
+          bank: {
+            id: '6',
+            name: 'mockBankName',
+          },
+          bic: undefined,
+          currency: 'USD',
+          details: {
+            loan: {
+              amount: 140200,
+              endDate: '2026-12-30T23:00:00.000Z',
+              interestRate: 0.0125,
+              payment: 1000,
+              remainingCapital: 100000,
+              startDate: '2013-01-09T23:00:00.000Z',
+              type: 'OTHER',
+            },
+            savings: undefined,
+          },
+          iban: 'mockIban',
+          name: 'mockBridgeAccountName',
+          owners: [
+            {
+              name: ' DUPONT',
+            },
+          ],
+          type: 'CHECKING',
+          usage: 'PERSONAL',
+          transactions: [
+            {
+              aggregator: {
+                category: 'mockResourceName',
+                id: '23',
+              },
+              amount: 30,
+              currency: 'USD',
+              dates: {
+                bookedAt: undefined,
+                debitedAt: date,
+              },
+              description: 'mockRawDescription',
+              isComing: false,
+            },
+          ],
+        },
+        {
+          aggregator: {
+            id: '0',
+          },
+          balance: 100,
+          balanceDate: '2019-04-06T13:53:12.000Z',
+          bank: {
+            id: '6',
+            name: 'mockBankName',
+          },
+          bic: undefined,
+          currency: 'USD',
+          details: {
+            loan: {
+              amount: 140200,
+              endDate: '2026-12-30T23:00:00.000Z',
+              interestRate: 0.0125,
+              payment: 1000,
+              remainingCapital: 100000,
+              startDate: '2013-01-09T23:00:00.000Z',
+              type: 'OTHER',
+            },
+            savings: undefined,
+          },
+          iban: 'mockIban',
+          name: 'mockBridgeAccountName',
+          owners: [
+            {
+              name: ' DUPONT',
+            },
+          ],
+          type: 'CREDIT_CARD',
+          usage: 'PERSONAL',
+        },
+      ],
+    });
+    expect(updateAnalysisSpy).toBeCalledWith(customerMock.id, mockEventPayload.analysisId, {
+      error: { code: 'INTERNAL_ERROR', message: 'An error occurred on calling Algoan API' },
+      status: 'ERROR',
+    });
+  });
+
+  it('Patch analysis with an aggregator error on bank details required and exit ', async () => {
+    const algoanAuthenticateSpy = jest.spyOn(algoanHttpService, 'authenticate').mockReturnValue();
+    const getCustomerSpy = jest.spyOn(algoanCustomerService, 'getCustomerById').mockResolvedValue(customerMock);
+    const updateAnalysisSpy = jest.spyOn(algoanAnalysisService, 'updateAnalysis').mockResolvedValue(analysisMock);
+    mockServiceAccount.config = mockServiceAccountConfig;
+    const accessTokenSpy = jest.spyOn(aggregatorService, 'getAccessToken').mockResolvedValue({
+      access_token: 'mockPermToken',
+      expires_at: '323423423423',
+      user: { email: 'test@test.com', uuid: 'rrr' },
+    });
+    const accountSpy = jest.spyOn(aggregatorService, 'getAccounts').mockRejectedValue({
+      request: {
+        host: 'api.bridge.com',
+      },
+    });
+
+    const mockEventPayload = {
+      customerId: customerMock.id,
+      analysisId: analysisMock.id,
+      temporaryCode: 'mockTemporaryToken',
+    };
+
+    try {
+      await hooksService.handleBankDetailsRequiredEvent(mockServiceAccount, mockEventPayload, new Date());
+    } catch (err) {
+      expect(err).toEqual({ request: { host: 'api.bridge.com' } });
+    }
+
+    expect(algoanAuthenticateSpy).toBeCalledWith(mockServiceAccount.clientId, mockServiceAccount.clientSecret);
+    expect(getCustomerSpy).toBeCalledWith(mockEventPayload.customerId);
+    expect(accessTokenSpy).toBeCalledWith(customerMock.id, mockServiceAccountConfig);
+    expect(accountSpy).toBeCalledWith('mockPermToken', mockServiceAccountConfig);
+    expect(updateAnalysisSpy).toHaveBeenCalledTimes(1);
+    expect(updateAnalysisSpy).toBeCalledWith(customerMock.id, mockEventPayload.analysisId, {
+      error: { code: 'INTERNAL_ERROR', message: 'An error occurred when fetching data from the aggregator' },
+      status: 'ERROR',
+    });
+  });
+
   it('refresh when userId is defined and synchronizes the accounts on bank details required', async () => {
     const algoanAuthenticateSpy = jest.spyOn(algoanHttpService, 'authenticate').mockReturnValue();
     const getCustomerSpy = jest.spyOn(algoanCustomerService, 'getCustomerById').mockResolvedValue({

@@ -189,6 +189,7 @@ export class HooksService {
    * @param serviceAccount Concerned Algoan service account attached to the subscription
    * @param payload Payload sent, containing the customer id
    */
+  /* eslint-disable-next-line */
   public async handleBankDetailsRequiredEvent(
     serviceAccount: ServiceAccount,
     payload: BanksDetailsRequiredDTO,
@@ -333,7 +334,15 @@ export class HooksService {
       }
 
       return;
-    } catch (err) {
+    } catch (err: unknown) {
+      const host = (err as { request?: { host: string } }).request?.host;
+      let message = 'An error occurred on the aggregator connector';
+      if (host !== undefined) {
+        message = host.includes('algoan')
+          ? 'An error occurred on calling Algoan API'
+          : 'An error occurred when fetching data from the aggregator';
+      }
+
       this.logger.debug({
         message: `An error occured when fetching data from the aggregator for analysis id ${payload.analysisId} and customer id ${payload.customerId}`,
         error: err,
@@ -344,7 +353,7 @@ export class HooksService {
         status: AnalysisStatus.ERROR,
         error: {
           code: ErrorCodes.INTERNAL_ERROR,
-          message: `An error occured when fetching data from the aggregator`,
+          message,
         },
       });
 
