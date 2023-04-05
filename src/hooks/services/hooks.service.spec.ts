@@ -631,7 +631,7 @@ describe('HooksService', () => {
       ],
     });
     expect(updateAnalysisSpy).toBeCalledWith(customerMock.id, mockEventPayload.analysisId, {
-      error: { code: 'INTERNAL_ERROR', message: 'An error occurred on calling Algoan API' },
+      error: { code: 'INTERNAL_ERROR', message: 'An error occurred while calling Algoan APIs' },
       status: 'ERROR',
     });
   });
@@ -670,7 +670,7 @@ describe('HooksService', () => {
     expect(accountSpy).toBeCalledWith('mockPermToken', mockServiceAccountConfig);
     expect(updateAnalysisSpy).toHaveBeenCalledTimes(1);
     expect(updateAnalysisSpy).toBeCalledWith(customerMock.id, mockEventPayload.analysisId, {
-      error: { code: 'INTERNAL_ERROR', message: 'An error occurred when fetching data from the aggregator' },
+      error: { code: 'INTERNAL_ERROR', message: 'An error occurred while fetching data from the aggregator' },
       status: 'ERROR',
     });
   });

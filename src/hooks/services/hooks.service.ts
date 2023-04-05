@@ -339,12 +339,12 @@ export class HooksService {
       let message = 'An error occurred on the aggregator connector';
       if (host !== undefined) {
         message = host.includes('algoan')
-          ? 'An error occurred on calling Algoan API'
-          : 'An error occurred when fetching data from the aggregator';
+          ? 'An error occurred while calling Algoan APIs'
+          : 'An error occurred while fetching data from the aggregator';
       }
 
       this.logger.debug({
-        message: `An error occured when fetching data from the aggregator for analysis id ${payload.analysisId} and customer id ${payload.customerId}`,
+        message: `An error occured while fetching data from the aggregator for analysis id ${payload.analysisId} and customer id ${payload.customerId}`,
         error: err,
       });
 
