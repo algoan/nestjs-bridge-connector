@@ -158,7 +158,6 @@ export const getAccountIndexInAccountInformation = (
   accountsInformation: AccountInformation[],
 ): number => {
   const NOT_FOUND: number = -1;
-  const foundIndex = -1;
 
   for (let i = 0; i < accountsInformation.length; i++) {
     const accountIndex = accountsInformation[i].accounts?.findIndex((account) => account.id === accountItemId);
@@ -168,7 +167,7 @@ export const getAccountIndexInAccountInformation = (
     }
   }
 
-  return foundIndex;
+  return NOT_FOUND;
 };
 
 /**
