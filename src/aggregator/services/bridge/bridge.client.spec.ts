@@ -9,6 +9,7 @@ import { AlgoanModule } from '../../../algoan/algoan.module';
 import { AppModule } from '../../../app.module';
 import { ConfigModule } from '../../../config/config.module';
 import {
+  mockAccountInformation,
   mockAuthResponse,
   mockPersonalInformation,
   mockRefreshStatus,
@@ -513,6 +514,30 @@ describe('BridgeClient', () => {
     expect(resp).toEqual(mockPersonalInformation);
 
     expect(spy).toHaveBeenCalledWith('https://api.bridgeapi.io/v2/users/kyc', {
+      headers: {
+        Authorization: 'Bearer mockAccessToken',
+        'Client-Id': config.bridge.clientId,
+        'Client-Secret': config.bridge.clientSecret,
+        'Bankin-Version': config.bridge.bankinVersion,
+      },
+    });
+  });
+
+  it('can get the account information', async () => {
+    const result: AxiosResponse = {
+      data: mockAccountInformation,
+      status: 200,
+      statusText: '',
+      headers: {},
+      config: {},
+    };
+
+    const spy = jest.spyOn(httpService, 'get').mockImplementation(() => of(result));
+
+    const resp = await service.getAccountInformation('mockAccessToken');
+    expect(resp).toEqual(mockAccountInformation);
+
+    expect(spy).toHaveBeenCalledWith('https://api.bridgeapi.io/v2/accounts-information', {
       headers: {
         Authorization: 'Bearer mockAccessToken',
         'Client-Id': config.bridge.clientId,

@@ -1,4 +1,5 @@
 import {
+  AccountInformation,
   AuthenticationResponse,
   BridgeAccount,
   BridgeAccountStatus,
@@ -93,6 +94,39 @@ export const mockPersonalInformation: BridgeUserInformation[] = [
     is_married: null, // eslint-disable-line no-null/no-null
     is_owner: null, // eslint-disable-line no-null/no-null
     nb_kids: null, // eslint-disable-line no-null/no-null
+  },
+];
+
+export const mockAccountInformation: AccountInformation[] = [
+  {
+    item_id: 5869768,
+    first_name: 'JEAN',
+    last_name: 'DUPONT',
+    accounts: [
+      {
+        id: 27341559,
+        name: 'Compte Courant de MR DUPONT',
+        type: 'checking',
+        currency_code: 'EUR',
+        bank_id: 6,
+        iban: 'FR3312739000309854725191G90',
+      },
+    ],
+  },
+  {
+    item_id: 5869769,
+    first_name: 'JANE',
+    last_name: 'DOE',
+    accounts: [
+      {
+        id: 27341560,
+        name: 'Compte Courant de MME DOE',
+        type: 'checking',
+        currency_code: 'EUR',
+        bank_id: 6,
+        iban: 'FR3312739000309854725191G91',
+      },
+    ],
   },
 ];
 

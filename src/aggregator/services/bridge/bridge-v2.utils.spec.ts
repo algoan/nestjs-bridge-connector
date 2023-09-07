@@ -6,9 +6,14 @@ import { AccountLoanType, AccountType, AccountUsage } from '../../../algoan/dto/
 import { Account, AccountTransaction } from '../../../algoan/dto/analysis.inputs';
 import { AppModule } from '../../../app.module';
 import { AggregatorModule } from '../../aggregator.module';
-import { mockAccount, mockPersonalInformation, mockTransaction } from '../../interfaces/bridge-mock';
+import {
+  mockAccount,
+  mockAccountInformation,
+  mockPersonalInformation,
+  mockTransaction,
+} from '../../interfaces/bridge-mock';
 import { AggregatorService } from '../aggregator.service';
-import { mapBridgeAccount, mapBridgeTransactions } from './bridge-v2.utils';
+import { getAccountIndexInAccountInformation, mapBridgeAccount, mapBridgeTransactions } from './bridge-v2.utils';
 
 describe('Bridge Utils for Algoan v2 (Customer, Analysis)', () => {
   let aggregatorService: AggregatorService;
@@ -58,6 +63,7 @@ describe('Bridge Utils for Algoan v2 (Customer, Analysis)', () => {
     const mappedAccount = await mapBridgeAccount(
       [mockAccount],
       mockPersonalInformation,
+      mockAccountInformation,
       'mockAccessToken',
       aggregatorService,
     );
@@ -96,6 +102,7 @@ describe('Bridge Utils for Algoan v2 (Customer, Analysis)', () => {
     const mappedAccount = await mapBridgeAccount(
       [{ ...mockAccount, type: BridgeAccountType.SPECIAL }],
       mockPersonalInformation,
+      mockAccountInformation,
       'mockAccessToken',
       aggregatorService,
     );
@@ -150,10 +157,17 @@ describe('Bridge Utils for Algoan v2 (Customer, Analysis)', () => {
     const mappedAccounts = await mapBridgeAccount(
       [bridgeAccount],
       mockPersonalInformation,
+      mockAccountInformation,
       'mockAccessToken',
       aggregatorService,
     );
 
     expect(mappedAccounts[0].details?.loan?.interestRate).toEqual(0.013);
+  });
+
+  it('should find the right account in the account information account array', async () => {
+    const accountId = 27341560;
+    const accountIndex: number = getAccountIndexInAccountInformation(accountId, mockAccountInformation);
+    expect(accountIndex).toEqual(1);
   });
 });

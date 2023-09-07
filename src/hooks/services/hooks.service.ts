@@ -5,6 +5,7 @@ import { isEmpty } from 'lodash';
 import * as moment from 'moment';
 import { Config } from 'node-config-ts';
 import {
+  AccountInformation,
   AuthenticationResponse,
   BridgeAccount,
   BridgeRefreshStatus,
@@ -245,9 +246,18 @@ export class HooksService {
         this.logger.warn({ message: `Unable to get user personal information`, error: err });
       }
 
+      // Get account information
+      let accountInfo: AccountInformation[] = [];
+      try {
+        accountInfo = await this.aggregator.getAccountInformation(accessToken, saConfig);
+      } catch (err) {
+        this.logger.warn({ message: `Unable to get the account information`, error: err });
+      }
+
       const algoanAccounts: AnalysisAccount[] = await mapBridgeAccountV2(
         accounts,
         userInfo,
+        accountInfo,
         accessToken,
         this.aggregator,
         saConfig,

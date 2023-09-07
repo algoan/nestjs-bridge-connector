@@ -7,6 +7,7 @@ import { config } from 'node-config-ts';
 import { lastValueFrom, Observable } from 'rxjs';
 import { AccountBank } from '../../../algoan/dto/analysis.inputs';
 import {
+  AccountInformation,
   AuthenticationResponse,
   BrideConnectItemDTO,
   BridgeAccount,
@@ -322,6 +323,21 @@ export class BridgeClient {
     const url: string = `${config.bridge.baseUrl}/v2/users/kyc`;
 
     const resp: AxiosResponse<BridgeUserInformation[]> = await BridgeClient.toPromise(
+      this.httpService.get(url, {
+        headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) },
+      }),
+    );
+
+    return resp.data;
+  }
+
+  /**
+   * Get account information
+   */
+  public async getAccountInformation(accessToken: string, clientConfig?: ClientConfig): Promise<AccountInformation[]> {
+    const url: string = `${config.bridge.baseUrl}/v2/accounts-information`;
+
+    const resp: AxiosResponse<AccountInformation[]> = await BridgeClient.toPromise(
       this.httpService.get(url, {
         headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) },
       }),

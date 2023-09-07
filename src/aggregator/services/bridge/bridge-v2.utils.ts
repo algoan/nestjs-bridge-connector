@@ -2,8 +2,10 @@ import * as moment from 'moment-timezone';
 import { AccountLoanType, AccountType, AccountUsage } from '../../../algoan/dto/analysis.enum';
 import { Account, AccountOwner, AccountTransaction } from '../../../algoan/dto/analysis.inputs';
 import {
+  AccountInformation,
   BridgeAccount,
   BridgeAccountType,
+  BridgeSimpleAccount,
   BridgeTransaction,
   BridgeUserInformation,
 } from '../../interfaces/bridge.interface';
@@ -19,13 +21,14 @@ import { ClientConfig } from './bridge.client';
 export const mapBridgeAccount = async (
   accounts: BridgeAccount[],
   userInfo: BridgeUserInformation[],
+  accountInfo: AccountInformation[],
   accessToken: string,
   aggregator: AggregatorService,
   clientConfig?: ClientConfig,
 ): Promise<Account[]> =>
   Promise.all(
     accounts.map(async (account) =>
-      fromBridgeToAlgoanAccounts(account, userInfo, accessToken, aggregator, clientConfig),
+      fromBridgeToAlgoanAccounts(account, userInfo, accountInfo, accessToken, aggregator, clientConfig),
     ),
   );
 
@@ -37,6 +40,7 @@ export const mapBridgeAccount = async (
 const fromBridgeToAlgoanAccounts = async (
   account: BridgeAccount,
   userInfo: BridgeUserInformation[],
+  accountInfo: AccountInformation[],
   accessToken: string,
   aggregator: AggregatorService,
   clientConfig?: ClientConfig,
@@ -46,7 +50,7 @@ const fromBridgeToAlgoanAccounts = async (
   currency: account.currency_code,
   type: mapAccountType(account.type),
   usage: mapUsageType(account.is_pro),
-  owners: mapUserInfo(account.item_id, userInfo),
+  owners: mapUserInfo(account.item_id, userInfo, accountInfo),
   // eslint-disable-next-line
   iban: account.iban !== null ? account.iban : undefined,
   bic: undefined,
@@ -119,17 +123,53 @@ const mapUsageType = (isPro: boolean): AccountUsage => (isPro ? AccountUsage.PRO
 /**
  * mapUserInfo map the user personal information with the account
  */
-const mapUserInfo = (itemId: number, userInfo: BridgeUserInformation[]): AccountOwner[] | undefined => {
+const mapUserInfo = (
+  itemId: number,
+  userInfo: BridgeUserInformation[],
+  accountInfo: AccountInformation[],
+): AccountOwner[] | undefined => {
   const NOT_FOUND: number = -1;
-  const index: number = userInfo.findIndex(({ item_id }): boolean => item_id === itemId);
+  const indexUser: number = userInfo.findIndex(({ item_id }): boolean => item_id === itemId);
+  const indexAccount: number = getAccountIndexInAccountInformation(itemId, accountInfo);
 
-  return index !== NOT_FOUND
+  return indexUser !== NOT_FOUND
     ? [
         {
-          name: [userInfo[index].first_name, userInfo[index].last_name].join(' '),
+          name: [userInfo[indexUser].first_name, userInfo[indexUser].last_name].join(' '),
+        },
+      ]
+    : indexAccount !== NOT_FOUND
+    ? [
+        {
+          name: [accountInfo[indexAccount].first_name, accountInfo[indexAccount].last_name].join(' '),
         },
       ]
     : undefined;
+};
+
+/**
+ * Find the account index in the account array of Account information
+ * @param accountItemId the account id
+ * @param accountsInformation account information array
+ * @returns
+ */
+export const getAccountIndexInAccountInformation = (
+  accountItemId: number,
+  accountsInformation: AccountInformation[],
+): number => {
+  const NOT_FOUND: number = -1;
+  let foundIndex = -1;
+
+  for (let i = 0; i < accountsInformation.length; i++) {
+    const accountIndex = accountsInformation[i].accounts?.findIndex((account) => account.id === accountItemId);
+
+    if (accountIndex !== NOT_FOUND) {
+      foundIndex = i;
+      break;
+    }
+  }
+
+  return foundIndex;
 };
 
 /**

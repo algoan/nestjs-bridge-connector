@@ -3,6 +3,7 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { config } from 'node-config-ts';
 import { AccountBank } from '../../algoan/dto/analysis.inputs';
 import {
+  AccountInformation,
   AuthenticationResponse,
   BridgeAccount,
   BridgeRefreshStatus,
@@ -130,6 +131,13 @@ export class AggregatorService {
     clientConfig?: ClientConfig,
   ): Promise<BridgeUserInformation[]> {
     return this.bridgeClient.getUserPersonalInformation(accessToken, clientConfig);
+  }
+
+  /**
+   * Returns the Bridge account information
+   */
+  public async getAccountInformation(accessToken: string, clientConfig?: ClientConfig): Promise<AccountInformation[]> {
+    return this.bridgeClient.getAccountInformation(accessToken, clientConfig);
   }
 
   /**
