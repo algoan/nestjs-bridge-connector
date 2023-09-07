@@ -200,6 +200,28 @@ export interface BridgeUserInformation {
 }
 
 /**
+ * Bridge Account Information
+ */
+export interface AccountInformation {
+  item_id: number;
+  first_name?: string | null;
+  last_name?: string | null;
+  accounts?: BridgeSimpleAccount[];
+}
+
+/**
+ * Bridge Account Simplified
+ */
+export interface BridgeSimpleAccount {
+  id: number;
+  name: string;
+  type: string;
+  currency_code: string;
+  bank_id: number;
+  iban: string;
+}
+
+/**
  * Status of a refresh
  * https://docs.bridgeapi.io/reference#get-a-refresh-status
  */

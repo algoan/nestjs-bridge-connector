@@ -7,6 +7,7 @@ import { customerMock } from '../../algoan/dto/customer.objects.mock';
 import { AppModule } from '../../app.module';
 import {
   mockAccount,
+  mockAccountInformation,
   mockAuthResponse,
   mockPersonalInformation,
   mockRefreshStatus,
@@ -262,6 +263,14 @@ describe('AggregatorService', () => {
       .mockReturnValue(Promise.resolve(mockPersonalInformation));
     const token = 'token';
     await service.getUserPersonalInformation(token);
+
+    expect(spy).toBeCalledWith(token, undefined);
+  });
+
+  it('should get the account information from the user', async () => {
+    const spy = jest.spyOn(client, 'getAccountInformation').mockReturnValue(Promise.resolve(mockAccountInformation));
+    const token = 'token';
+    await service.getAccountInformation(token);
 
     expect(spy).toBeCalledWith(token, undefined);
   });
