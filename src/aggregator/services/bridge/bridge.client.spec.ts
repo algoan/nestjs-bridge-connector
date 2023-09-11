@@ -525,7 +525,7 @@ describe('BridgeClient', () => {
 
   it('can get the account information', async () => {
     const result: AxiosResponse = {
-      data: mockAccountInformation,
+      data: { resources: mockAccountInformation },
       status: 200,
       statusText: '',
       headers: {},

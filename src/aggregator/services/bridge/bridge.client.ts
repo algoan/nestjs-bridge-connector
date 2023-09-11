@@ -337,13 +337,13 @@ export class BridgeClient {
   public async getAccountInformation(accessToken: string, clientConfig?: ClientConfig): Promise<AccountInformation[]> {
     const url: string = `${config.bridge.baseUrl}/v2/accounts-information`;
 
-    const resp: AxiosResponse<AccountInformation[]> = await BridgeClient.toPromise(
+    const resp: AxiosResponse<{ resources: AccountInformation[] }> = await BridgeClient.toPromise(
       this.httpService.get(url, {
         headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) },
       }),
     );
 
-    return resp.data;
+    return resp.data.resources;
   }
 
   /**
