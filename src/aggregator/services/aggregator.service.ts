@@ -124,16 +124,6 @@ export class AggregatorService {
   }
 
   /**
-   * Returns the Bridge Personal information for a user
-   */
-  public async getUserPersonalInformation(
-    accessToken: string,
-    clientConfig?: ClientConfig,
-  ): Promise<BridgeUserInformation[]> {
-    return this.bridgeClient.getUserPersonalInformation(accessToken, clientConfig);
-  }
-
-  /**
    * Returns the Bridge account information
    */
   public async getAccountInformation(accessToken: string, clientConfig?: ClientConfig): Promise<AccountInformation[]> {

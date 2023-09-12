@@ -9,7 +9,6 @@ import {
   mockAccount,
   mockAccountInformation,
   mockAuthResponse,
-  mockPersonalInformation,
   mockRefreshStatus,
   mockTransaction,
 } from '../interfaces/bridge-mock';
@@ -255,16 +254,6 @@ describe('AggregatorService', () => {
     await service.getResourceName(token, resourceUri);
 
     expect(spy).toBeCalledWith(token, resourceUri, undefined);
-  });
-
-  it('should get the personal information from the user', async () => {
-    const spy = jest
-      .spyOn(client, 'getUserPersonalInformation')
-      .mockReturnValue(Promise.resolve(mockPersonalInformation));
-    const token = 'token';
-    await service.getUserPersonalInformation(token);
-
-    expect(spy).toBeCalledWith(token, undefined);
   });
 
   it('should get the account information from the user', async () => {

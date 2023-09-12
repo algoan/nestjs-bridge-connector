@@ -11,7 +11,6 @@ import { ConfigModule } from '../../../config/config.module';
 import {
   mockAccountInformation,
   mockAuthResponse,
-  mockPersonalInformation,
   mockRefreshStatus,
   mockUserResponse,
 } from '../../interfaces/bridge-mock';
@@ -499,30 +498,6 @@ describe('BridgeClient', () => {
     });
   });
 
-  it('can get user information', async () => {
-    const result: AxiosResponse = {
-      data: mockPersonalInformation,
-      status: 200,
-      statusText: '',
-      headers: {},
-      config: {},
-    };
-
-    const spy = jest.spyOn(httpService, 'get').mockImplementationOnce(() => of(result));
-
-    const resp = await service.getUserPersonalInformation('mockAccessToken');
-    expect(resp).toEqual(mockPersonalInformation);
-
-    expect(spy).toHaveBeenCalledWith('https://api.bridgeapi.io/v2/users/kyc', {
-      headers: {
-        Authorization: 'Bearer mockAccessToken',
-        'Client-Id': config.bridge.clientId,
-        'Client-Secret': config.bridge.clientSecret,
-        'Bankin-Version': config.bridge.bankinVersion,
-      },
-    });
-  });
-
   it('can get the account information', async () => {
     const result: AxiosResponse = {
       data: { resources: mockAccountInformation },
@@ -535,6 +510,7 @@ describe('BridgeClient', () => {
     const spy = jest.spyOn(httpService, 'get').mockImplementation(() => of(result));
 
     const resp = await service.getAccountInformation('mockAccessToken');
+    const mockAccountInformationClone = { ...mockAccountInformation };
     expect(resp).toEqual(mockAccountInformation);
 
     expect(spy).toHaveBeenCalledWith('https://api.bridgeapi.io/v2/accounts-information', {

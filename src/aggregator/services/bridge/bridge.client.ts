@@ -314,24 +314,6 @@ export class BridgeClient {
   }
 
   /**
-   * Get user personal information
-   */
-  public async getUserPersonalInformation(
-    accessToken: string,
-    clientConfig?: ClientConfig,
-  ): Promise<BridgeUserInformation[]> {
-    const url: string = `${config.bridge.baseUrl}/v2/users/kyc`;
-
-    const resp: AxiosResponse<BridgeUserInformation[]> = await BridgeClient.toPromise(
-      this.httpService.get(url, {
-        headers: { Authorization: `Bearer ${accessToken}`, ...BridgeClient.getHeaders(clientConfig) },
-      }),
-    );
-
-    return resp.data;
-  }
-
-  /**
    * Get account information
    */
   public async getAccountInformation(accessToken: string, clientConfig?: ClientConfig): Promise<AccountInformation[]> {

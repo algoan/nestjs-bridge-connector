@@ -16,7 +16,7 @@ import { AggregationDetailsMode } from '../../algoan/dto/customer.enums';
 import { AggregatorModule } from '../../aggregator/aggregator.module';
 import {
   mockAccount,
-  mockPersonalInformation,
+  mockAccountInformation,
   mockRefreshStatus,
   mockTransaction,
 } from '../../aggregator/interfaces/bridge-mock';
@@ -211,8 +211,8 @@ describe('HooksService', () => {
       { ...mockAccount, id: 0 },
     ]);
     const userInfoSpy = jest
-      .spyOn(aggregatorService, 'getUserPersonalInformation')
-      .mockResolvedValue(mockPersonalInformation);
+      .spyOn(aggregatorService, 'getAccountInformation')
+      .mockResolvedValue(mockAccountInformation);
     const date = new Date().toISOString();
     const transactionSpy = jest
       .spyOn(aggregatorService, 'getTransactions')
@@ -264,7 +264,7 @@ describe('HooksService', () => {
           name: 'mockBridgeAccountName',
           owners: [
             {
-              name: ' DUPONT',
+              name: 'JEAN DUPONT',
             },
           ],
           type: 'CHECKING',
@@ -326,11 +326,6 @@ describe('HooksService', () => {
           },
           iban: 'mockIban',
           name: 'mockBridgeAccountName',
-          owners: [
-            {
-              name: ' DUPONT',
-            },
-          ],
           type: 'CREDIT_CARD',
           usage: 'PERSONAL',
         },
@@ -362,8 +357,8 @@ describe('HooksService', () => {
       { ...mockAccount, id: 0 },
     ]);
     const userInfoSpy = jest
-      .spyOn(aggregatorService, 'getUserPersonalInformation')
-      .mockResolvedValue(mockPersonalInformation);
+      .spyOn(aggregatorService, 'getAccountInformation')
+      .mockResolvedValue(mockAccountInformation);
     const date = new Date().toISOString();
     const transactionSpy = jest
       .spyOn(aggregatorService, 'getTransactions')
@@ -415,7 +410,7 @@ describe('HooksService', () => {
           name: 'mockBridgeAccountName',
           owners: [
             {
-              name: ' DUPONT',
+              name: 'JEAN DUPONT',
             },
           ],
           type: 'CHECKING',
@@ -463,11 +458,6 @@ describe('HooksService', () => {
           },
           iban: 'mockIban',
           name: 'mockBridgeAccountName',
-          owners: [
-            {
-              name: ' DUPONT',
-            },
-          ],
           type: 'CREDIT_CARD',
           usage: 'PERSONAL',
         },
@@ -506,8 +496,8 @@ describe('HooksService', () => {
       { ...mockAccount, id: 0 },
     ]);
     const userInfoSpy = jest
-      .spyOn(aggregatorService, 'getUserPersonalInformation')
-      .mockResolvedValue(mockPersonalInformation);
+      .spyOn(aggregatorService, 'getAccountInformation')
+      .mockResolvedValue(mockAccountInformation);
     const date = new Date().toISOString();
     const transactionSpy = jest
       .spyOn(aggregatorService, 'getTransactions')
@@ -572,7 +562,7 @@ describe('HooksService', () => {
           name: 'mockBridgeAccountName',
           owners: [
             {
-              name: ' DUPONT',
+              name: 'JEAN DUPONT',
             },
           ],
           type: 'CHECKING',
@@ -620,11 +610,6 @@ describe('HooksService', () => {
           },
           iban: 'mockIban',
           name: 'mockBridgeAccountName',
-          owners: [
-            {
-              name: ' DUPONT',
-            },
-          ],
           type: 'CREDIT_CARD',
           usage: 'PERSONAL',
         },
@@ -700,8 +685,8 @@ describe('HooksService', () => {
       .spyOn(aggregatorService, 'getAccounts')
       .mockResolvedValue([mockAccount, { ...mockAccount, id: 0 }]);
     const userInfoSpy = jest
-      .spyOn(aggregatorService, 'getUserPersonalInformation')
-      .mockResolvedValue(mockPersonalInformation);
+      .spyOn(aggregatorService, 'getAccountInformation')
+      .mockResolvedValue(mockAccountInformation);
     const date = new Date().toISOString();
     const transactionSpy = jest
       .spyOn(aggregatorService, 'getTransactions')
@@ -757,7 +742,7 @@ describe('HooksService', () => {
           name: 'mockBridgeAccountName',
           owners: [
             {
-              name: ' DUPONT',
+              name: 'JEAN DUPONT',
             },
           ],
           type: 'CREDIT_CARD',
@@ -820,11 +805,6 @@ describe('HooksService', () => {
           },
           iban: 'mockIban',
           name: 'mockBridgeAccountName',
-          owners: [
-            {
-              name: ' DUPONT',
-            },
-          ],
           type: 'CREDIT_CARD',
           usage: 'PERSONAL',
         },
