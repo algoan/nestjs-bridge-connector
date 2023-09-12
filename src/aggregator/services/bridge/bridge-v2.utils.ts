@@ -20,7 +20,6 @@ import { ClientConfig } from './bridge.client';
  */
 export const mapBridgeAccount = async (
   accounts: BridgeAccount[],
-  userInfo: BridgeUserInformation[],
   accountInfo: AccountInformation[],
   accessToken: string,
   aggregator: AggregatorService,
@@ -28,7 +27,7 @@ export const mapBridgeAccount = async (
 ): Promise<Account[]> =>
   Promise.all(
     accounts.map(async (account) =>
-      fromBridgeToAlgoanAccounts(account, userInfo, accountInfo, accessToken, aggregator, clientConfig),
+      fromBridgeToAlgoanAccounts(account, accountInfo, accessToken, aggregator, clientConfig),
     ),
   );
 
@@ -39,7 +38,6 @@ export const mapBridgeAccount = async (
  */
 const fromBridgeToAlgoanAccounts = async (
   account: BridgeAccount,
-  userInfo: BridgeUserInformation[],
   accountInfo: AccountInformation[],
   accessToken: string,
   aggregator: AggregatorService,
@@ -50,7 +48,7 @@ const fromBridgeToAlgoanAccounts = async (
   currency: account.currency_code,
   type: mapAccountType(account.type),
   usage: mapUsageType(account.is_pro),
-  owners: mapUserInfo(account.item_id, userInfo, accountInfo),
+  owners: mapAccountInfo(account.id, accountInfo),
   // eslint-disable-next-line
   iban: account.iban !== null ? account.iban : undefined,
   bic: undefined,
@@ -121,24 +119,13 @@ const mapAccountType = (accountType: BridgeAccountType): AccountType =>
 const mapUsageType = (isPro: boolean): AccountUsage => (isPro ? AccountUsage.PROFESSIONAL : AccountUsage.PERSONAL);
 
 /**
- * mapUserInfo map the user personal information with the account
+ * mapAccountInfo map the account information
  */
-const mapUserInfo = (
-  itemId: number,
-  userInfo: BridgeUserInformation[],
-  accountInfo: AccountInformation[],
-): AccountOwner[] | undefined => {
+const mapAccountInfo = (accountId: number, accountInfo: AccountInformation[]): AccountOwner[] | undefined => {
   const NOT_FOUND: number = -1;
-  const indexUser: number = userInfo.findIndex(({ item_id }): boolean => item_id === itemId);
-  const indexAccount: number = getAccountIndexInAccountInformation(itemId, accountInfo);
+  const indexAccount: number = getAccountIndexInAccountInformation(accountId, accountInfo);
 
-  return indexUser !== NOT_FOUND
-    ? [
-        {
-          name: [userInfo[indexUser].first_name, userInfo[indexUser].last_name].join(' '),
-        },
-      ]
-    : indexAccount !== NOT_FOUND
+  return indexAccount !== NOT_FOUND
     ? [
         {
           name: [accountInfo[indexAccount].first_name, accountInfo[indexAccount].last_name].join(' '),
@@ -154,14 +141,14 @@ const mapUserInfo = (
  * @returns
  */
 export const getAccountIndexInAccountInformation = (
-  accountItemId: number,
+  accountId: number,
   accountsInformation: AccountInformation[],
 ): number => {
   const NOT_FOUND: number = -1;
   let foundIndex = -1;
 
   for (let i = 0; i < accountsInformation.length; i++) {
-    const accountIndex = accountsInformation[i].accounts?.findIndex((account) => account.id === accountItemId);
+    const accountIndex = accountsInformation[i].accounts?.findIndex((account) => account.id === accountId);
 
     if (accountIndex !== NOT_FOUND) {
       foundIndex = i;

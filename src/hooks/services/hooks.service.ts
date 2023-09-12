@@ -238,14 +238,6 @@ export class HooksService {
         accounts,
       });
 
-      // Get personal information
-      let userInfo: BridgeUserInformation[] = [];
-      try {
-        userInfo = await this.aggregator.getUserPersonalInformation(accessToken, saConfig);
-      } catch (err) {
-        this.logger.warn({ message: `Unable to get user personal information`, error: err });
-      }
-
       // Get account information
       let accountInfo: AccountInformation[] = [];
       try {
@@ -256,7 +248,6 @@ export class HooksService {
 
       const algoanAccounts: AnalysisAccount[] = await mapBridgeAccountV2(
         accounts,
-        userInfo,
         accountInfo,
         accessToken,
         this.aggregator,

@@ -6,12 +6,7 @@ import { AccountLoanType, AccountType, AccountUsage } from '../../../algoan/dto/
 import { Account, AccountTransaction } from '../../../algoan/dto/analysis.inputs';
 import { AppModule } from '../../../app.module';
 import { AggregatorModule } from '../../aggregator.module';
-import {
-  mockAccount,
-  mockAccountInformation,
-  mockPersonalInformation,
-  mockTransaction,
-} from '../../interfaces/bridge-mock';
+import { mockAccount, mockAccountInformation, mockTransaction } from '../../interfaces/bridge-mock';
 import { AggregatorService } from '../aggregator.service';
 import { getAccountIndexInAccountInformation, mapBridgeAccount, mapBridgeTransactions } from './bridge-v2.utils';
 
@@ -41,7 +36,7 @@ describe('Bridge Utils for Algoan v2 (Customer, Analysis)', () => {
         currency: 'USD',
         type: AccountType.CREDIT_CARD,
         usage: AccountUsage.PERSONAL,
-        owners: [{ name: ' DUPONT' }],
+        owners: [{ name: 'JEAN DUPONT' }],
         iban: 'mockIban',
         name: 'mockBridgeAccountName',
         bank: { id: '6', name: 'mockResourceName' },
@@ -62,7 +57,6 @@ describe('Bridge Utils for Algoan v2 (Customer, Analysis)', () => {
 
     const mappedAccount = await mapBridgeAccount(
       [mockAccount],
-      mockPersonalInformation,
       mockAccountInformation,
       'mockAccessToken',
       aggregatorService,
@@ -80,7 +74,7 @@ describe('Bridge Utils for Algoan v2 (Customer, Analysis)', () => {
         currency: 'USD',
         type: AccountType.UNKNOWN,
         usage: AccountUsage.PERSONAL,
-        owners: [{ name: ' DUPONT' }],
+        owners: [{ name: 'JEAN DUPONT' }],
         iban: 'mockIban',
         name: 'mockBridgeAccountName',
         bank: { id: '6', name: 'mockResourceName' },
@@ -101,7 +95,6 @@ describe('Bridge Utils for Algoan v2 (Customer, Analysis)', () => {
 
     const mappedAccount = await mapBridgeAccount(
       [{ ...mockAccount, type: BridgeAccountType.SPECIAL }],
-      mockPersonalInformation,
       mockAccountInformation,
       'mockAccessToken',
       aggregatorService,
@@ -156,7 +149,6 @@ describe('Bridge Utils for Algoan v2 (Customer, Analysis)', () => {
 
     const mappedAccounts = await mapBridgeAccount(
       [bridgeAccount],
-      mockPersonalInformation,
       mockAccountInformation,
       'mockAccessToken',
       aggregatorService,
