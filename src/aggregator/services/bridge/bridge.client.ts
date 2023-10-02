@@ -65,7 +65,17 @@ export class BridgeClient {
           return Promise.resolve(response);
         },
         async (error: AxiosError) => {
-          this.logger.error({ message: error.message, data: error.response?.data }, error.stack, error.message);
+          this.logger.error(
+            {
+              message: `${error.config.method} ${error.config.url}  - responded with error: ${error.message}`,
+              data: error.response?.data,
+              status: error.response?.status,
+              statusText: error.response?.statusText,
+              headers: error.response?.headers,
+            },
+            error.stack,
+            error.message,
+          );
 
           return Promise.reject(error);
         },
