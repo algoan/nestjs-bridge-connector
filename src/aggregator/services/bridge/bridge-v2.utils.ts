@@ -177,14 +177,11 @@ export const mapBridgeTransactions = async (
     bridgeTransactions.map(
       async (transaction: BridgeTransaction): Promise<AccountTransaction> => ({
         dates: {
-          debitedAt:
-            accountType !== AccountType.CREDIT_CARD
-              ? moment.tz(transaction.date, 'Europe/Paris').toISOString()
-              : undefined,
+          debitedAt: toISOString(transaction.date),
           bookedAt:
-            accountType === AccountType.CREDIT_CARD
-              ? moment.tz(transaction.date, 'Europe/Paris').toISOString()
-              : undefined,
+            transaction.booking_date !== undefined
+              ? toISOString(transaction.booking_date)
+              : toISOString(transaction.date),
         },
         description: transaction.bank_description,
         amount: transaction.amount,
@@ -201,6 +198,11 @@ export const mapBridgeTransactions = async (
       }),
     ),
   );
+
+/**
+ * Convert a date to an ISO string
+ */
+const toISOString = (date: string): string => moment.tz(date, 'Europe/Paris').toISOString();
 
 /**
  * Transform the interest rate provided by Bridge to Algoan format

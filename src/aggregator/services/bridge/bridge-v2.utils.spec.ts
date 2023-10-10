@@ -107,7 +107,7 @@ describe('Bridge Utils for Algoan v2 (Customer, Analysis)', () => {
   it("should map the bridge transactions to algoan customer's transactions", async () => {
     const expectedTransaction: AccountTransaction[] = [
       {
-        dates: { debitedAt: '2019-04-06T13:53:12.000Z' },
+        dates: { bookedAt: '2019-04-06T13:53:12.000Z', debitedAt: '2019-04-06T13:53:12.000Z' },
         description: 'mockRawDescription',
         amount: 30,
         currency: 'USD',
