@@ -17,7 +17,7 @@ import {
   mapBridgeTransactions as mapBridgeTransactionsV2,
 } from '../../aggregator/services/bridge/bridge-v2.utils';
 import { ClientConfig } from '../../aggregator/services/bridge/bridge.client';
-import { AccountType, AnalysisStatus, ErrorCodes } from '../../algoan/dto/analysis.enum';
+import { AnalysisStatus, ErrorCodes } from '../../algoan/dto/analysis.enum';
 import {
   Account as AnalysisAccount,
   AccountTransaction as AnalysisTransaction,
@@ -297,7 +297,6 @@ export class HooksService {
           ),
           accessToken,
           this.aggregator,
-          account.type,
           saConfig,
         );
         if (!isEmpty(algoanTransactions)) {

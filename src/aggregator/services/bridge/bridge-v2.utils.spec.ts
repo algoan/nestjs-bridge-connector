@@ -116,12 +116,7 @@ describe('Bridge Utils for Algoan v2 (Customer, Analysis)', () => {
       },
     ];
 
-    const mappedTransaction = await mapBridgeTransactions(
-      [mockTransaction],
-      'mockAccessToken',
-      aggregatorService,
-      AccountType.CHECKING,
-    );
+    const mappedTransaction = await mapBridgeTransactions([mockTransaction], 'mockAccessToken', aggregatorService);
 
     expect(mappedTransaction).toEqual(expectedTransaction);
     expect(aggregatorSpyCategory).toBeCalledWith(

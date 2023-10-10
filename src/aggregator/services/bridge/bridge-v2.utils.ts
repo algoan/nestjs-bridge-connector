@@ -170,7 +170,6 @@ export const mapBridgeTransactions = async (
   bridgeTransactions: BridgeTransaction[],
   accessToken: string,
   aggregator: AggregatorService,
-  accountType: AccountType,
   clientConfig?: ClientConfig,
 ): Promise<AccountTransaction[]> =>
   Promise.all(
