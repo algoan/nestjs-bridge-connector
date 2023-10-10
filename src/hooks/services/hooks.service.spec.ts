@@ -326,6 +326,7 @@ describe('HooksService', () => {
           },
           iban: 'mockIban',
           name: 'mockBridgeAccountName',
+          owners: undefined,
           type: 'CREDIT_CARD',
           usage: 'PERSONAL',
         },
@@ -342,7 +343,7 @@ describe('HooksService', () => {
     expect(deleteUserSpy).toHaveBeenCalledTimes(0);
   });
 
-  it('synchronizes the accounts on bank details required and exit ', async () => {
+  it('synchronizes the accounts on bank details required and exit', async () => {
     const algoanAuthenticateSpy = jest.spyOn(algoanHttpService, 'authenticate').mockReturnValue();
     const getCustomerSpy = jest.spyOn(algoanCustomerService, 'getCustomerById').mockResolvedValue(customerMock);
     const updateAnalysisSpy = jest.spyOn(algoanAnalysisService, 'updateAnalysis').mockResolvedValue(analysisMock);
@@ -474,7 +475,7 @@ describe('HooksService', () => {
     expect(deleteUserSpy).toHaveBeenCalledTimes(0);
   });
 
-  it('Patch analysis with an algoan error on bank details required and exit ', async () => {
+  it('Patch analysis with an algoan error on bank details required and exit', async () => {
     const algoanAuthenticateSpy = jest.spyOn(algoanHttpService, 'authenticate').mockReturnValue();
     const getCustomerSpy = jest.spyOn(algoanCustomerService, 'getCustomerById').mockResolvedValue(customerMock);
     const updateAnalysisSpy = jest

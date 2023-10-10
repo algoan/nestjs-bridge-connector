@@ -10,7 +10,6 @@ import {
   BridgeAccount,
   BridgeRefreshStatus,
   BridgeTransaction,
-  BridgeUserInformation,
 } from '../../aggregator/interfaces/bridge.interface';
 import { AggregatorService } from '../../aggregator/services/aggregator.service';
 import {
@@ -345,7 +344,7 @@ export class HooksService {
       }
 
       this.logger.debug({
-        message: `An error occured while fetching data from the aggregator for analysis id ${payload.analysisId} and customer id ${payload.customerId}`,
+        message: `An error occurred while fetching data from the aggregator for analysis id ${payload.analysisId} and customer id ${payload.customerId}`,
         error: err,
       });
 
