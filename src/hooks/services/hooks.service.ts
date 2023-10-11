@@ -240,10 +240,12 @@ export class HooksService {
 
       // Get account information
       let accountInfo: AccountInformation[] = [];
+      let deleteUserAfterProcess = true;
       try {
         accountInfo = await this.aggregator.getAccountInformation(accessToken, saConfig);
       } catch (err) {
         this.logger.warn({ message: `Unable to get the account information`, error: err });
+        deleteUserAfterProcess = false;
       }
 
       const algoanAccounts: AnalysisAccount[] = await mapBridgeAccountV2(
@@ -327,9 +329,10 @@ export class HooksService {
       };
 
       if (
-        this.config.forceBridgeUsersDeletion ||
-        saConfig.deleteBridgeUsers === undefined ||
-        saConfig.deleteBridgeUsers
+        (this.config.forceBridgeUsersDeletion ||
+          saConfig.deleteBridgeUsers === undefined ||
+          saConfig.deleteBridgeUsers) &&
+        deleteUserAfterProcess
       ) {
         await this.aggregator.deleteUser(user, saConfig);
       }
