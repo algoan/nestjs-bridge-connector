@@ -10,7 +10,6 @@ import {
   BridgeAccount,
   BridgeRefreshStatus,
   BridgeTransaction,
-  BridgeUserInformation,
 } from '../../aggregator/interfaces/bridge.interface';
 import { AggregatorService } from '../../aggregator/services/aggregator.service';
 import {
@@ -18,7 +17,7 @@ import {
   mapBridgeTransactions as mapBridgeTransactionsV2,
 } from '../../aggregator/services/bridge/bridge-v2.utils';
 import { ClientConfig } from '../../aggregator/services/bridge/bridge.client';
-import { AccountType, AnalysisStatus, ErrorCodes } from '../../algoan/dto/analysis.enum';
+import { AnalysisStatus, ErrorCodes } from '../../algoan/dto/analysis.enum';
 import {
   Account as AnalysisAccount,
   AccountTransaction as AnalysisTransaction,
@@ -300,7 +299,6 @@ export class HooksService {
           ),
           accessToken,
           this.aggregator,
-          account.type,
           saConfig,
         );
         if (!isEmpty(algoanTransactions)) {
@@ -348,7 +346,7 @@ export class HooksService {
       }
 
       this.logger.debug({
-        message: `An error occured while fetching data from the aggregator for analysis id ${payload.analysisId} and customer id ${payload.customerId}`,
+        message: `An error occurred while fetching data from the aggregator for analysis id ${payload.analysisId} and customer id ${payload.customerId}`,
         error: err,
       });
 

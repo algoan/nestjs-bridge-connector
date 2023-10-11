@@ -135,6 +135,7 @@ export interface BridgeTransaction {
   bank_description: string;
   amount: number;
   date: string;
+  booking_date?: string;
   updated_at: string;
   currency_code: string; // @TODO: do we have an enum for that?
   is_deleted: boolean;

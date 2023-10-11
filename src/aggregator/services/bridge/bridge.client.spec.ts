@@ -405,6 +405,7 @@ describe('BridgeClient', () => {
           bank_description: 'Prlv 1512 Spotify SA',
           amount: -4.99,
           date: '2019-04-06',
+          booking_date: '2019-04-06',
           updated_at: '2019-04-06T09:19:14Z',
           currency_code: 'EUR',
           is_deleted: false,

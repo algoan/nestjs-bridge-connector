@@ -213,11 +213,18 @@ describe('HooksService', () => {
     const userInfoSpy = jest
       .spyOn(aggregatorService, 'getAccountInformation')
       .mockResolvedValue(mockAccountInformation);
+
+    const getTransaction = (dates: { date: string; booking_date?: string }) => ({
+      ...mockTransaction,
+      ...dates,
+      account_id: mockAccount.id,
+    });
+
     const date = new Date().toISOString();
     const transactionSpy = jest
       .spyOn(aggregatorService, 'getTransactions')
-      .mockResolvedValueOnce([{ ...mockTransaction, date, account_id: mockAccount.id }])
-      .mockResolvedValue([{ ...mockTransaction, account_id: mockAccount.id }]);
+      .mockResolvedValueOnce([getTransaction({ date, booking_date: date })])
+      .mockResolvedValue([getTransaction({ date: '2019-04-06T13:53:12.000Z', booking_date: undefined })]);
     const bankInformationSpy = jest
       .spyOn(aggregatorService, 'getBankInformation')
       .mockResolvedValue({ name: 'mockBankName' });
@@ -278,7 +285,7 @@ describe('HooksService', () => {
               amount: 30,
               currency: 'USD',
               dates: {
-                bookedAt: undefined,
+                bookedAt: '2019-04-06T13:53:12.000Z',
                 debitedAt: '2019-04-06T13:53:12.000Z',
               },
               description: 'mockRawDescription',
@@ -292,7 +299,7 @@ describe('HooksService', () => {
               amount: 30,
               currency: 'USD',
               dates: {
-                bookedAt: undefined,
+                bookedAt: date,
                 debitedAt: date,
               },
               description: 'mockRawDescription',
@@ -326,6 +333,7 @@ describe('HooksService', () => {
           },
           iban: 'mockIban',
           name: 'mockBridgeAccountName',
+          owners: undefined,
           type: 'CREDIT_CARD',
           usage: 'PERSONAL',
         },
@@ -342,7 +350,7 @@ describe('HooksService', () => {
     expect(deleteUserSpy).toHaveBeenCalledTimes(0);
   });
 
-  it('synchronizes the accounts on bank details required and exit ', async () => {
+  it('synchronizes the accounts on bank details required and exit', async () => {
     const algoanAuthenticateSpy = jest.spyOn(algoanHttpService, 'authenticate').mockReturnValue();
     const getCustomerSpy = jest.spyOn(algoanCustomerService, 'getCustomerById').mockResolvedValue(customerMock);
     const updateAnalysisSpy = jest.spyOn(algoanAnalysisService, 'updateAnalysis').mockResolvedValue(analysisMock);
@@ -424,7 +432,7 @@ describe('HooksService', () => {
               amount: 30,
               currency: 'USD',
               dates: {
-                bookedAt: undefined,
+                bookedAt: '2019-04-06T13:53:12.000Z',
                 debitedAt: date,
               },
               description: 'mockRawDescription',
@@ -474,7 +482,7 @@ describe('HooksService', () => {
     expect(deleteUserSpy).toHaveBeenCalledTimes(0);
   });
 
-  it('Patch analysis with an algoan error on bank details required and exit ', async () => {
+  it('Patch analysis with an algoan error on bank details required and exit', async () => {
     const algoanAuthenticateSpy = jest.spyOn(algoanHttpService, 'authenticate').mockReturnValue();
     const getCustomerSpy = jest.spyOn(algoanCustomerService, 'getCustomerById').mockResolvedValue(customerMock);
     const updateAnalysisSpy = jest
@@ -532,7 +540,7 @@ describe('HooksService', () => {
     expect(transactionSpy).toBeCalledWith('mockPermToken', undefined, mockServiceAccountConfig);
     expect(deleteUserSpy).toHaveBeenCalledTimes(0);
     expect(updateAnalysisSpy).toHaveBeenCalledTimes(2);
-    expect(updateAnalysisSpy).toBeCalledWith(customerMock.id, mockEventPayload.analysisId, {
+    expect(updateAnalysisSpy).toHaveBeenCalledWith(customerMock.id, mockEventPayload.analysisId, {
       accounts: [
         {
           aggregator: {
@@ -576,7 +584,7 @@ describe('HooksService', () => {
               amount: 30,
               currency: 'USD',
               dates: {
-                bookedAt: undefined,
+                bookedAt: '2019-04-06T13:53:12.000Z',
                 debitedAt: date,
               },
               description: 'mockRawDescription',
@@ -756,7 +764,7 @@ describe('HooksService', () => {
               amount: 30,
               currency: 'USD',
               dates: {
-                debitedAt: undefined,
+                debitedAt: '2019-04-06T13:53:12.000Z',
                 bookedAt: '2019-04-06T13:53:12.000Z',
               },
               description: 'mockRawDescription',
@@ -770,8 +778,8 @@ describe('HooksService', () => {
               amount: 30,
               currency: 'USD',
               dates: {
-                debitedAt: undefined,
-                bookedAt: date,
+                bookedAt: '2019-04-06T13:53:12.000Z',
+                debitedAt: date,
               },
               description: 'mockRawDescription',
               isComing: false,

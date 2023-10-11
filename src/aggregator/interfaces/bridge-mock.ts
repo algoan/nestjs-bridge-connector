@@ -45,6 +45,7 @@ export const mockTransaction: BridgeTransaction = {
   bank_description: 'mockRawDescription',
   amount: 30,
   date: '2019-04-06T13:53:12Z',
+  booking_date: '2019-04-06T13:53:12Z',
   updated_at: 'mockUpdatedAt',
   currency_code: 'USD',
   is_deleted: false,
