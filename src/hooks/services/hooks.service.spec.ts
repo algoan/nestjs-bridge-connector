@@ -214,7 +214,7 @@ describe('HooksService', () => {
       .spyOn(aggregatorService, 'getAccountInformation')
       .mockResolvedValue(mockAccountInformation);
 
-    const getTransaction = (dates: { date: string; booking_date?: string }) => ({
+    const getTransaction = (dates: { date: string; booking_date?: string; id?: number }) => ({
       ...mockTransaction,
       ...dates,
       account_id: mockAccount.id,
@@ -224,7 +224,7 @@ describe('HooksService', () => {
     const transactionSpy = jest
       .spyOn(aggregatorService, 'getTransactions')
       .mockResolvedValueOnce([getTransaction({ date, booking_date: date })])
-      .mockResolvedValue([getTransaction({ date: '2019-04-06T13:53:12.000Z', booking_date: undefined })]);
+      .mockResolvedValue([getTransaction({ date: '2019-04-06T13:53:12.000Z', booking_date: undefined, id: 1 })]);
     const bankInformationSpy = jest
       .spyOn(aggregatorService, 'getBankInformation')
       .mockResolvedValue({ name: 'mockBankName' });
@@ -280,7 +280,7 @@ describe('HooksService', () => {
             {
               aggregator: {
                 category: 'mockResourceName',
-                id: '23',
+                id: '1',
               },
               amount: 30,
               currency: 'USD',
@@ -699,7 +699,7 @@ describe('HooksService', () => {
     const transactionSpy = jest
       .spyOn(aggregatorService, 'getTransactions')
       .mockResolvedValueOnce([{ ...mockTransaction, date, account_id: mockAccount.id }])
-      .mockResolvedValue([{ ...mockTransaction, account_id: mockAccount.id }]);
+      .mockResolvedValue([{ ...mockTransaction, account_id: mockAccount.id, id: 1 }]);
     const bankInformationSpy = jest
       .spyOn(aggregatorService, 'getBankInformation')
       .mockResolvedValue({ name: 'mockBankName', logoUrl: 'logo' });
@@ -759,7 +759,7 @@ describe('HooksService', () => {
             {
               aggregator: {
                 category: 'mockResourceName',
-                id: '23',
+                id: '1',
               },
               amount: 30,
               currency: 'USD',
