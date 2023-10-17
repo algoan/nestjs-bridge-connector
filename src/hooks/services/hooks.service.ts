@@ -256,41 +256,7 @@ export class HooksService {
       );
 
       // Retrieves Bridge transactions
-      const timeout = moment().add(this.config.bridge.synchronizationTimeout, 'seconds');
-      let lastUpdatedAt: string | undefined;
-      let transactions: BridgeTransaction[] = [];
-      /* eslint-disable no-magic-numbers */
-      const nbOfMonths: number = saConfig.nbOfMonths ?? 3;
-
-      do {
-        const fetchedTransactions: BridgeTransaction[] = await this.aggregator.getTransactions(
-          accessToken,
-          lastUpdatedAt,
-          saConfig,
-        );
-
-        if (fetchedTransactions.length === 0) {
-          break;
-        }
-
-        transactions = transactions.concat(fetchedTransactions);
-        lastUpdatedAt = fetchedTransactions[0]?.updated_at ?? lastUpdatedAt;
-        for (const transaction of fetchedTransactions) {
-          if (moment(transaction.updated_at).isAfter(lastUpdatedAt)) {
-            lastUpdatedAt = transaction.updated_at;
-          }
-        }
-
-        // Sort transactions by date
-        transactions = transactions.sort((tr1: BridgeTransaction, tr2: BridgeTransaction) =>
-          /* eslint-disable no-magic-numbers */
-          moment(tr1.date).isBefore(moment(tr2.date)) ? -1 : 1,
-        );
-      } while (
-        moment().diff(moment(transactions[0]?.date), 'months') <= nbOfMonths &&
-        moment().isBefore(timeout) &&
-        (await delay(this.config.bridge.synchronizationWaitingTime, { value: true }))
-      );
+      const transactions: BridgeTransaction[] = await this.getTransactions(saConfig, accessToken);
 
       for (const account of algoanAccounts) {
         const algoanTransactions: AnalysisTransaction[] = await mapBridgeTransactionsV2(
@@ -361,5 +327,62 @@ export class HooksService {
 
       throw err;
     }
+  }
+
+  /**
+   * Get transactions
+   *
+   * Ensure that the transactions are sorted by date
+   * And that there is no duplicates
+   */
+  private async getTransactions(saConfig: ClientConfig, accessToken: string) {
+    const timeout = moment().add(this.config.bridge.synchronizationTimeout, 'seconds');
+    /* eslint-disable no-magic-numbers */
+    const nbOfMonths: number = saConfig.nbOfMonths ?? 3;
+
+    let lastUpdatedAt: string | undefined;
+    let firstTransactionDate: moment.Moment = moment();
+    const transactionByAggregatorId: Map<string, BridgeTransaction> = new Map<string, BridgeTransaction>();
+    const getUniqueKey = (transaction: BridgeTransaction): string => `${transaction.account_id}_${transaction.id}`;
+
+    do {
+      const fetchedTransactions: BridgeTransaction[] = await this.aggregator.getTransactions(
+        accessToken,
+        lastUpdatedAt,
+        saConfig,
+      );
+
+      if (fetchedTransactions.length === 0) {
+        break;
+      }
+
+      lastUpdatedAt = fetchedTransactions[0]?.updated_at ?? lastUpdatedAt;
+      for (const transaction of fetchedTransactions) {
+        if (transactionByAggregatorId.has(getUniqueKey(transaction))) {
+          this.logger.debug(
+            `Transaction ${transaction.id} of account ${transaction.account_id} duplicated. Updating the existing one.`,
+          );
+        }
+
+        transactionByAggregatorId.set(getUniqueKey(transaction), transaction);
+
+        if (moment(transaction.updated_at).isAfter(lastUpdatedAt)) {
+          lastUpdatedAt = transaction.updated_at;
+        }
+
+        if (firstTransactionDate.isAfter(transaction.date)) {
+          firstTransactionDate = moment(transaction.date);
+        }
+      }
+    } while (
+      moment().diff(firstTransactionDate, 'months') <= nbOfMonths &&
+      moment().isBefore(timeout) &&
+      (await delay(this.config.bridge.synchronizationWaitingTime, { value: true }))
+    );
+
+    // Sort transactions by date
+    return [...transactionByAggregatorId.values()].sort((tr1: BridgeTransaction, tr2: BridgeTransaction) =>
+      moment(tr1.date).isBefore(moment(tr2.date)) ? -1 : 1,
+    );
   }
 }
