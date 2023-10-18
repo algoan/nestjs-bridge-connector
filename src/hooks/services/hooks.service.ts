@@ -342,10 +342,13 @@ export class HooksService {
 
     let lastUpdatedAt: string | undefined;
     let firstTransactionDate: moment.Moment = moment();
+    let nbOfTransactions: number = 0;
     const transactionByAggregatorId: Map<string, BridgeTransaction> = new Map<string, BridgeTransaction>();
     const getUniqueKey = (transaction: BridgeTransaction): string => `${transaction.account_id}_${transaction.id}`;
 
     do {
+      nbOfTransactions = transactionByAggregatorId.size;
+
       const fetchedTransactions: BridgeTransaction[] = await this.aggregator.getTransactions(
         accessToken,
         lastUpdatedAt,
@@ -375,6 +378,7 @@ export class HooksService {
         }
       }
     } while (
+      nbOfTransactions < transactionByAggregatorId.size &&
       moment().diff(firstTransactionDate, 'months') <= nbOfMonths &&
       moment().isBefore(timeout) &&
       (await delay(this.config.bridge.synchronizationWaitingTime, { value: true }))
