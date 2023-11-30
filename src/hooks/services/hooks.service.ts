@@ -61,7 +61,7 @@ export class HooksService {
     const aggregationStartDate: Date = new Date();
     const serviceAccount = this.algoanService.algoanClient.getServiceAccountBySubscriptionId(event.subscription.id);
 
-    this.logger.debug(serviceAccount, `Found a service account for subscription "${event.subscription.id}"`);
+    this.logger.debug(`Found a service account for subscription "${event.subscription.id}"`);
 
     if (serviceAccount === undefined) {
       throw new UnauthorizedException(`No service account found for subscription ${event.subscription.id}`);
@@ -144,7 +144,7 @@ export class HooksService {
 
     // Get user information and client config
     const customer: Customer = await this.algoanCustomerService.getCustomerById(payload.customerId);
-    this.logger.debug({ customer, serviceAccount }, `Found Customer with id ${customer.id}`);
+    this.logger.debug(`Found Customer with id ${customer.id}`);
 
     const aggregationDetails: AggregationDetails = {
       aggregatorName: AggregationDetailsAggregatorName.BRIDGE,
@@ -203,7 +203,7 @@ export class HooksService {
 
       // Get customer information
       const customer: Customer = await this.algoanCustomerService.getCustomerById(payload.customerId);
-      this.logger.debug({ customer, serviceAccount }, `Found Customer with id ${customer.id}`);
+      this.logger.debug(`Found Customer with id ${customer.id}`);
 
       // Retrieves an access token from Bridge to access to the user accounts
       const authenticationResponse: AuthenticationResponse = await this.aggregator.getAccessToken(
@@ -232,10 +232,7 @@ export class HooksService {
 
       // Retrieves Bridge banks accounts
       const accounts: BridgeAccount[] = await this.aggregator.getAccounts(accessToken, saConfig);
-      this.logger.debug({
-        message: `Bridge accounts retrieved for Customer "${customer.id}"`,
-        accounts,
-      });
+      this.logger.debug(`Bridge accounts retrieved for Customer "${customer.id}"`);
 
       // Get account information
       let accountInfo: AccountInformation[] = [];

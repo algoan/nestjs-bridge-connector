@@ -47,20 +47,13 @@ export class BridgeClient {
   constructor(@Inject(CACHE_MANAGER) private readonly cacheManager: Cache, private readonly httpService: HttpService) {
     if (config.activateBridgeRequestInterceptor) {
       this.httpService.axiosRef.interceptors.request.use((_config: AxiosRequestConfig): AxiosRequestConfig => {
-        this.logger.log({
-          config: _config,
-          message: `${_config.method} ${_config.url} - Request to Bridge`,
-        });
+        this.logger.log(`${_config.method} ${_config.url} - Request to Bridge`);
 
         return _config;
       });
       this.httpService.axiosRef.interceptors.response.use(
         async (response: AxiosResponse) => {
-          this.logger.log({
-            message: `${response.config.method} ${response.config.url} - successfully responded`,
-            body: response.data,
-            headers: response.headers,
-          });
+          this.logger.log(`${response.config.method} ${response.config.url} - successfully responded`);
 
           return Promise.resolve(response);
         },
