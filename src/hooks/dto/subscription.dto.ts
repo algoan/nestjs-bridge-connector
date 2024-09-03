@@ -1,5 +1,6 @@
 import { IsNotEmpty } from 'class-validator';
-import { EventName, SubscriptionStatus } from '@algoan/rest';
+import { SubscriptionStatus } from '@algoan/rest';
+import { EventName } from '../enums/event-name.enum';
 
 /**
  * Subscription

@@ -31,20 +31,22 @@ export const buildFakeApp = async (): Promise<INestApplication> => {
       expires_in: 3000,
       refresh_expires_in: 10000,
     },
-    path: '/v1/oauth/token',
+    path: '/v2/oauth/token',
     nbOfCalls: 2,
   });
   const fakeServiceAccounts: nock.Scope = fakeAPI({
     baseUrl: fakeAlgoanBaseUrl,
     method: 'get',
-    result: [
-      {
-        clientId: 'client1',
-        clientSecret: 'secret',
-        id: 'id1',
-      },
-    ],
-    path: '/v1/service-accounts',
+    result: {
+      resources: [
+        {
+          clientId: 'client1',
+          clientSecret: 'secret',
+          id: 'id1',
+        },
+      ],
+    },
+    path: '/v2/service-accounts?limit=1000',
   });
   const fakeGetSubscriptions: nock.Scope = fakeAPI({
     baseUrl: fakeAlgoanBaseUrl,

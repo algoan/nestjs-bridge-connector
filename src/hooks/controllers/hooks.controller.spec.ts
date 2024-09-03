@@ -47,7 +47,7 @@ describe('Hooks Controller', () => {
       time: 1586177798388,
       index: 32,
       id: 'eventId',
-    };
+    } as unknown as EventDTO;
 
     const spy = jest.spyOn(hooksService, 'handleWebhook').mockReturnValue(Promise.resolve());
     await controller.controlHook(event, {

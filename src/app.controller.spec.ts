@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { AlgoanService } from './algoan/services/algoan.service';
+import { AlgoanServiceAcountService } from './algoan/services/algoan-service-account.service';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from './config/config.module';
@@ -12,7 +13,7 @@ describe('AppController', () => {
     const app: TestingModule = await Test.createTestingModule({
       imports: [ConfigModule],
       controllers: [AppController],
-      providers: [AppService, AlgoanService],
+      providers: [AppService, AlgoanService, AlgoanServiceAcountService],
     }).compile();
 
     appController = app.get<AppController>(AppController);
