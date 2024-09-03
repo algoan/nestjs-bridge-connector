@@ -1,4 +1,4 @@
-import { EventName, EventStatus, ServiceAccount, Subscription, SubscriptionEvent } from '@algoan/rest';
+import { EventStatus, ServiceAccount, Subscription, SubscriptionEvent } from '@algoan/rest';
 import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import * as delay from 'delay';
 import { isEmpty } from 'lodash';
@@ -32,6 +32,9 @@ import { CONFIG } from '../../config/config.module';
 import { AggregatorLinkRequiredDTO } from '../dto/aggregator-link-required.dto';
 import { BanksDetailsRequiredDTO } from '../dto/bank-details-required.dto';
 import { EventDTO } from '../dto/event.dto';
+import { EventName } from '../enums/event-name.enum';
+import { ServiceAccountCreatedDTO } from '../dto/service-account-created.dto';
+import { ServiceAccountUpdatedDTO } from '../dto/service-account-updated.dto';
 
 /**
  * Hook service
@@ -58,32 +61,36 @@ export class HooksService {
    * @param signature Signature headers, to check if the call is from Algoan
    */
   public async handleWebhook(event: EventDTO, signature: string): Promise<void> {
-    const aggregationStartDate: Date = new Date();
-    const serviceAccount = this.algoanService.algoanClient.getServiceAccountBySubscriptionId(event.subscription.id);
+    if (event.subscription.eventName === EventName.SERVICE_ACCOUNT_CREATED) {
+      await this.handleServiceAccountCreatedEvent(event.payload as ServiceAccountCreatedDTO);
+    } else {
+      const aggregationStartDate: Date = new Date();
+      const serviceAccount = this.algoanService.algoanClient.getServiceAccountBySubscriptionId(event.subscription.id);
 
-    this.logger.debug(`Found a service account for subscription "${event.subscription.id}"`);
+      this.logger.debug(`Found a service account for subscription "${event.subscription.id}"`);
 
-    if (serviceAccount === undefined) {
-      throw new UnauthorizedException(`No service account found for subscription ${event.subscription.id}`);
-    }
+      if (serviceAccount === undefined) {
+        throw new UnauthorizedException(`No service account found for subscription ${event.subscription.id}`);
+      }
 
-    // From the Bridge connector, need to find the bridge equivalent
-    const subscription: Subscription | undefined = serviceAccount.subscriptions.find(
-      (sub: Subscription) => sub.id === event.subscription.id,
-    );
+      // From the Bridge connector, need to find the bridge equivalent
+      const subscription: Subscription | undefined = serviceAccount.subscriptions.find(
+        (sub: Subscription) => sub.id === event.subscription.id,
+      );
 
-    if (subscription === undefined) {
+      if (subscription === undefined) {
+        return;
+      }
+
+      if (!subscription.validateSignature(signature, event.payload as unknown as { [key: string]: string })) {
+        throw new UnauthorizedException('Invalid X-Hub-Signature: you cannot call this API');
+      }
+
+      // Handle the event asynchronously
+      void this.dispatchAndHandleWebhook(event, subscription, serviceAccount, aggregationStartDate);
+
       return;
     }
-
-    if (!subscription.validateSignature(signature, event.payload as unknown as { [key: string]: string })) {
-      throw new UnauthorizedException('Invalid X-Hub-Signature: you cannot call this API');
-    }
-
-    // Handle the event asynchronously
-    void this.dispatchAndHandleWebhook(event, subscription, serviceAccount, aggregationStartDate);
-
-    return;
   }
 
   /**
@@ -113,7 +120,9 @@ export class HooksService {
             aggregationStartDate,
           );
           break;
-
+        case EventName.SERVICE_ACCOUNT_UPDATED:
+          await this.handleServiceAccountUpdatedEvent(event.payload as ServiceAccountUpdatedDTO);
+          break;
         // The default case should never be reached, as the eventName is already checked in the DTO
         default:
           void se.update({ status: EventStatus.FAILED });
@@ -385,5 +394,22 @@ export class HooksService {
     return [...transactionByAggregatorId.values()].sort((tr1: BridgeTransaction, tr2: BridgeTransaction) =>
       moment(tr1.date).isBefore(moment(tr2.date)) ? -1 : 1,
     );
+  }
+
+  /**
+   * Handles the service_account_created event
+   * @param payload the new service account id
+   * @param subscription
+   */
+  public async handleServiceAccountCreatedEvent(payload: ServiceAccountCreatedDTO) {
+    await this.algoanService.saveServiceAccount(payload);
+  }
+
+  /**
+   * Handles the service_account_updated event
+   * @param payload service account update dto
+   */
+  public async handleServiceAccountUpdatedEvent(payload: ServiceAccountUpdatedDTO) {
+    await this.algoanService.updateServiceAccount(payload);
   }
 }

@@ -5,12 +5,18 @@ import { AggregatorLinkRequiredDTO } from './aggregator-link-required.dto';
 import { BanksDetailsRequiredDTO } from './bank-details-required.dto';
 import { ServiceAccountCreatedDTO } from './service-account-created.dto';
 import { ServiceAccountDeletedDTO } from './service-account-deleted.dto';
+import { ServiceAccountUpdatedDTO } from './service-account-updated.dto';
 import { SubscriptionDTO } from './subscription.dto';
 
 /**
  * Events payload types
  */
-type Events = ServiceAccountCreatedDTO | ServiceAccountDeletedDTO | AggregatorLinkRequiredDTO | BanksDetailsRequiredDTO;
+type Events =
+  | ServiceAccountCreatedDTO
+  | ServiceAccountDeletedDTO
+  | AggregatorLinkRequiredDTO
+  | BanksDetailsRequiredDTO
+  | ServiceAccountUpdatedDTO;
 
 /**
  * Event

@@ -4,7 +4,7 @@
   ],
   "bridge":{
     "synchronizationWaitingTime": 0,
-    "synchronizationTimeout": 2
+    "synchronizationTimeout": 1000
   },
   "customerIdPassword": "random_pass"
 }

@@ -4,13 +4,20 @@ import { AlgoanAnalysisService } from './services/algoan-analysis.service';
 import { AlgoanCustomerService } from './services/algoan-customer.service';
 import { AlgoanHttpService } from './services/algoan-http.service';
 import { AlgoanService } from './services/algoan.service';
+import { AlgoanServiceAcountService } from './services/algoan-service-account.service';
 
 /**
  * Algoan module
  */
 @Module({
   imports: [ConfigModule],
-  providers: [AlgoanAnalysisService, AlgoanCustomerService, AlgoanHttpService, AlgoanService],
-  exports: [AlgoanAnalysisService, AlgoanCustomerService, AlgoanHttpService, AlgoanService],
+  providers: [
+    AlgoanAnalysisService,
+    AlgoanCustomerService,
+    AlgoanHttpService,
+    AlgoanService,
+    AlgoanServiceAcountService,
+  ],
+  exports: [AlgoanAnalysisService, AlgoanCustomerService, AlgoanHttpService, AlgoanService, AlgoanServiceAcountService],
 })
 export class AlgoanModule {}

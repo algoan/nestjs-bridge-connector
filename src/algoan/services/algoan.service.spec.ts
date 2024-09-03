@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Algoan } from '@algoan/rest';
 import { config } from 'node-config-ts';
 
 import { CONFIG } from '../../config/config.module';
 
 import { AlgoanService } from './algoan.service';
+import { AlgoanServiceAcountService } from './algoan-service-account.service';
 
 describe('AlgoanService', () => {
   let algoanService: AlgoanService;
@@ -17,6 +17,7 @@ describe('AlgoanService', () => {
           provide: CONFIG,
           useValue: config,
         },
+        AlgoanServiceAcountService,
       ],
     }).compile();
 
@@ -28,7 +29,7 @@ describe('AlgoanService', () => {
   });
 
   it('should start properly', async () => {
-    jest.spyOn(Algoan.prototype, 'initRestHooks').mockReturnValue(Promise.resolve());
+    jest.spyOn(AlgoanService.prototype, 'initRestHooks').mockReturnValue(Promise.resolve());
     await expect(algoanService.onModuleInit()).resolves.toEqual(undefined);
   });
 
@@ -43,6 +44,7 @@ describe('AlgoanService', () => {
             eventList: [],
           },
         },
+        AlgoanServiceAcountService,
       ],
     }).compile();
 

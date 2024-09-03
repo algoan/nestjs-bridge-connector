@@ -3,7 +3,8 @@
     "baseUrl": "http://localhost:4000",
     "clientId": "a",
     "clientSecret": "b",
-    "debug": false
+    "debug": false,
+    "version": 2
   },
   "bridge":{
     "bankinVersion":"2021-06-01",
@@ -16,7 +17,9 @@
   "targetUrl": "http://localhost:8080/hooks",
   "eventList": [
     "bank_details_required",
-    "aggregator_link_required"
+    "aggregator_link_required",
+    "service_account_updated",
+    "service_account_created"
   ],
   "restHooksSecret": "a",
   "port": 8080,

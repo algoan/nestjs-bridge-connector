@@ -1,6 +1,5 @@
 /* eslint-disable max-lines */
 import {
-  Algoan,
   EventName,
   IServiceAccount,
   ISubscriptionEvent,
@@ -24,6 +23,7 @@ import { AggregatorService } from '../../aggregator/services/aggregator.service'
 import { AlgoanModule } from '../../algoan/algoan.module';
 import { analysisMock } from '../../algoan/dto/analysis.objects.mock';
 import { customerMock } from '../../algoan/dto/customer.objects.mock';
+import { AlgoanServiceAcountService } from '../../algoan/services/algoan-service-account.service';
 import { AlgoanAnalysisService } from '../../algoan/services/algoan-analysis.service';
 import { AlgoanCustomerService } from '../../algoan/services/algoan-customer.service';
 import { AlgoanHttpService } from '../../algoan/services/algoan-http.service';
@@ -42,6 +42,7 @@ describe('HooksService', () => {
   let algoanHttpService: AlgoanHttpService;
   let algoanCustomerService: AlgoanCustomerService;
   let algoanAnalysisService: AlgoanAnalysisService;
+  let algoanServiceAcountService: AlgoanServiceAcountService;
 
   const mockEvent = {
     subscription: {
@@ -99,7 +100,7 @@ describe('HooksService', () => {
       ],
     }).compile();
 
-    jest.spyOn(Algoan.prototype, 'initRestHooks').mockResolvedValue();
+    jest.spyOn(AlgoanService.prototype, 'initRestHooks').mockResolvedValue();
 
     hooksService = await moduleRef.resolve<HooksService>(HooksService, contextId);
     aggregatorService = await moduleRef.resolve<AggregatorService>(AggregatorService, contextId);
@@ -107,6 +108,10 @@ describe('HooksService', () => {
     algoanHttpService = await moduleRef.resolve<AlgoanHttpService>(AlgoanHttpService, contextId);
     algoanCustomerService = await moduleRef.resolve<AlgoanCustomerService>(AlgoanCustomerService, contextId);
     algoanAnalysisService = await moduleRef.resolve<AlgoanAnalysisService>(AlgoanAnalysisService, contextId);
+    algoanServiceAcountService = await moduleRef.resolve<AlgoanServiceAcountService>(
+      AlgoanServiceAcountService,
+      contextId,
+    );
     await algoanService.onModuleInit();
   });
 
@@ -130,7 +135,7 @@ describe('HooksService', () => {
     it('handles aggregator link required', async () => {
       mockEvent.subscription.eventName = EventName.AGGREGATOR_LINK_REQUIRED;
       const spy = jest.spyOn(hooksService, 'handleAggregatorLinkRequired').mockResolvedValue();
-      await hooksService.handleWebhook(mockEvent as EventDTO, 'mockSignature');
+      await hooksService.handleWebhook(mockEvent as unknown as EventDTO, 'mockSignature');
 
       expect(spy).toBeCalledWith(mockServiceAccount, mockEvent.payload);
     });
@@ -138,7 +143,7 @@ describe('HooksService', () => {
     it('handles bank details required', async () => {
       mockEvent.subscription.eventName = EventName.BANK_DETAILS_REQUIRED;
       const spy = jest.spyOn(hooksService, 'handleBankDetailsRequiredEvent').mockResolvedValue();
-      await hooksService.handleWebhook(mockEvent as EventDTO, 'mockSignature');
+      await hooksService.handleWebhook(mockEvent as unknown as EventDTO, 'mockSignature');
 
       expect(spy).toBeCalledWith(mockServiceAccount, mockEvent.payload, expect.any(Date));
     });
@@ -713,7 +718,6 @@ describe('HooksService', () => {
     };
 
     await hooksService.handleBankDetailsRequiredEvent(mockServiceAccount, mockEventPayload, new Date());
-
     expect(algoanAuthenticateSpy).toBeCalledWith(mockServiceAccount.clientId, mockServiceAccount.clientSecret);
     expect(getCustomerSpy).toBeCalledWith(mockEventPayload.customerId);
     expect(refreshSpy).toBeCalledWith('mockItemId', 'mockPermToken', mockServiceAccountConfig);
@@ -827,5 +831,49 @@ describe('HooksService', () => {
     expect(transactionSpy).toBeCalledTimes(2);
     expect(transactionSpy).toBeCalledWith('mockPermToken', undefined, mockServiceAccountConfig);
     expect(deleteUserSpy).toHaveBeenCalledTimes(0);
+  });
+
+  describe('Func handleServiceAccountUpdatedEvent()', () => {
+    it('should update service account config', async () => {
+      const findServiceAccountSpy = jest.spyOn(algoanServiceAcountService, 'findById').mockResolvedValue({
+        clientId: 'clientId',
+        config: {
+          test: true,
+        },
+      } as ServiceAccount);
+
+      await hooksService.handleServiceAccountUpdatedEvent({
+        serviceAccountId: 'id',
+      });
+
+      expect(findServiceAccountSpy).toBeCalled();
+    });
+  });
+
+  describe('Func handleServiceAccountCreatedEvent()', () => {
+    it('should update service account list and create subscriptions', async () => {
+      const findServiceAccountSpy = jest.spyOn(algoanServiceAcountService, 'findById').mockResolvedValue(
+        new ServiceAccount('url', {
+          id: 'id',
+          clientId: 'clientId',
+          clientSecret: 'secret',
+          createdAt: new Date().toISOString(),
+        }),
+      );
+
+      const getOrCreateSubscriptionsSpy = jest
+        .spyOn(ServiceAccount.prototype, 'getOrCreateSubscriptions')
+        .mockResolvedValue([]);
+
+      await hooksService.handleServiceAccountCreatedEvent({
+        serviceAccountId: 'id',
+      });
+
+      expect(findServiceAccountSpy).toBeCalled();
+      expect(getOrCreateSubscriptionsSpy).toBeCalledWith(
+        [{ eventName: 'service_account_created', secret: 'a', target: 'http://localhost:8080/hooks' }],
+        ['service_account_created'],
+      );
+    });
   });
 });
