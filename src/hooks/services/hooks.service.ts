@@ -90,10 +90,10 @@ export class HooksService {
       void this.dispatchAndHandleWebhook(event, subscription, serviceAccount, aggregationStartDate)
         .catch((err: Error) => {
           this.logger.error({
-            message: `An error occurred while processing the event ${event.id}`,
+            message: `Error while processing the event ${event.id}`,
             error: err?.stack ?? err,
           });
-        })
+        });
 
       return;
     }
@@ -132,10 +132,10 @@ export class HooksService {
         // The default case should never be reached, as the eventName is already checked in the DTO
         default:
           void se.update({ status: EventStatus.FAILED })
-            .catch((err: Error) => {
+            .catch((statusError: Error) => {
               this.logger.error({
-                message: `An error occurred while updating the event ${event.id} to FAILED`,
-                error: err?.stack ?? err,
+                message: `Unable to update the event ${event.id}'s status to FAILED`,
+                error: statusError?.stack ?? statusError,
               });
             });
 
@@ -143,10 +143,10 @@ export class HooksService {
       }
     } catch (err) {
       void se.update({ status: EventStatus.ERROR })
-        .catch((err: Error) => {
+        .catch((statusError: Error) => {
           this.logger.error({
-            message: `An error occurred while updating the event ${event.id} to ERROR`,
-            error: err?.stack ?? err,
+            message: `Unable to update the event ${event.id}'s status to ERROR`,
+            error: statusError?.stack ?? statusError,
           });
         });
 
@@ -154,10 +154,10 @@ export class HooksService {
     }
 
     void se.update({ status: EventStatus.PROCESSED })
-      .catch((err: Error) => {
+      .catch((statusError: Error) => {
         this.logger.error({
-          message: `An error occurred while updating the event ${event.id} to PROCESSED`,
-          error: err?.stack ?? err,
+          message: `Unable to update the event ${event.id}'s status to PROCESSED`,
+          error: statusError?.stack ?? statusError,
         });
       });
   }
