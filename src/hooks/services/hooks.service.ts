@@ -13,6 +13,7 @@ import {
 } from '../../aggregator/interfaces/bridge.interface';
 import { AggregatorService } from '../../aggregator/services/aggregator.service';
 import {
+  isValidAccount as isValidBridgeAccountV2,
   mapBridgeAccount as mapBridgeAccountV2,
   mapBridgeTransactions as mapBridgeTransactionsV2,
 } from '../../aggregator/services/bridge/bridge-v2.utils';
@@ -87,13 +88,14 @@ export class HooksService {
       }
 
       // Handle the event asynchronously
-      void this.dispatchAndHandleWebhook(event, subscription, serviceAccount, aggregationStartDate)
-        .catch((err: Error) => {
+      void this.dispatchAndHandleWebhook(event, subscription, serviceAccount, aggregationStartDate).catch(
+        (err: Error) => {
           this.logger.error({
             message: `Error while processing the event ${event.id}`,
             error: err?.stack ?? err,
           });
-        });
+        },
+      );
 
       return;
     }
@@ -131,35 +133,32 @@ export class HooksService {
           break;
         // The default case should never be reached, as the eventName is already checked in the DTO
         default:
-          void se.update({ status: EventStatus.FAILED })
-            .catch((statusError: Error) => {
-              this.logger.error({
-                message: `Unable to update the event ${event.id}'s status to FAILED`,
-                error: statusError?.stack ?? statusError,
-              });
+          void se.update({ status: EventStatus.FAILED }).catch((statusError: Error) => {
+            this.logger.error({
+              message: `Unable to update the event ${event.id}'s status to FAILED`,
+              error: statusError?.stack ?? statusError,
             });
+          });
 
           return;
       }
     } catch (err) {
-      void se.update({ status: EventStatus.ERROR })
-        .catch((statusError: Error) => {
-          this.logger.error({
-            message: `Unable to update the event ${event.id}'s status to ERROR`,
-            error: statusError?.stack ?? statusError,
-          });
+      void se.update({ status: EventStatus.ERROR }).catch((statusError: Error) => {
+        this.logger.error({
+          message: `Unable to update the event ${event.id}'s status to ERROR`,
+          error: statusError?.stack ?? statusError,
         });
+      });
 
       throw err;
     }
 
-    void se.update({ status: EventStatus.PROCESSED })
-      .catch((statusError: Error) => {
-        this.logger.error({
-          message: `Unable to update the event ${event.id}'s status to PROCESSED`,
-          error: statusError?.stack ?? statusError,
-        });
+    void se.update({ status: EventStatus.PROCESSED }).catch((statusError: Error) => {
+      this.logger.error({
+        message: `Unable to update the event ${event.id}'s status to PROCESSED`,
+        error: statusError?.stack ?? statusError,
       });
+    });
   }
 
   /**
@@ -277,8 +276,13 @@ export class HooksService {
         deleteUserAfterProcess = false;
       }
 
+      const validAccounts = accounts.filter(isValidBridgeAccountV2);
+      if (validAccounts.length < accounts.length) {
+        this.logger.warn(`Some accounts are invalid for Customer "${customer.id}"`);
+      }
+
       const algoanAccounts: AnalysisAccount[] = await mapBridgeAccountV2(
-        accounts,
+        validAccounts,
         accountInfo,
         accessToken,
         this.aggregator,

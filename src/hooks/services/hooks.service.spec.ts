@@ -16,6 +16,7 @@ import { AggregatorModule } from '../../aggregator/aggregator.module';
 import {
   mockAccount,
   mockAccountInformation,
+  mockInvalidAccount,
   mockRefreshStatus,
   mockTransaction,
 } from '../../aggregator/interfaces/bridge-mock';
@@ -33,7 +34,7 @@ import { CONFIG, ConfigModule } from '../../config/config.module';
 import { AggregatorLinkRequiredDTO } from '../dto/aggregator-link-required.dto';
 import { EventDTO } from '../dto/event.dto';
 import { HooksService } from './hooks.service';
-import { BridgeAccountType } from '../../aggregator/interfaces/bridge.interface';
+import { BridgeAccount, BridgeAccountType } from '../../aggregator/interfaces/bridge.interface';
 
 describe('HooksService', () => {
   let hooksService: HooksService;
@@ -214,6 +215,7 @@ describe('HooksService', () => {
     const accountSpy = jest.spyOn(aggregatorService, 'getAccounts').mockResolvedValue([
       { ...mockAccount, type: BridgeAccountType.CHECKING },
       { ...mockAccount, id: 0 },
+      { ...mockInvalidAccount, id: 1 } as BridgeAccount, // to test the invalid account handling
     ]);
     const userInfoSpy = jest
       .spyOn(aggregatorService, 'getAccountInformation')
