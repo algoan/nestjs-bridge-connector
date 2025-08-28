@@ -36,6 +36,7 @@ import { EventDTO } from '../dto/event.dto';
 import { EventName } from '../enums/event-name.enum';
 import { ServiceAccountCreatedDTO } from '../dto/service-account-created.dto';
 import { ServiceAccountUpdatedDTO } from '../dto/service-account-updated.dto';
+import { anonymizeAlgoanAccounts, anonymizeBridgeAccounts } from '../helpers/anonymize-accounts.helper';
 
 /**
  * Hook service
@@ -278,7 +279,10 @@ export class HooksService {
 
       const validAccounts = accounts.filter(isValidBridgeAccountV2);
       if (validAccounts.length < accounts.length) {
-        this.logger.warn(`Some accounts are invalid for Customer "${customer.id}"`);
+        this.logger.warn(`Some accounts are invalid for Customer "${customer.id}"`, {
+          valid: anonymizeBridgeAccounts(validAccounts),
+          all: anonymizeBridgeAccounts(accounts),
+        });
       }
 
       const algoanAccounts: AnalysisAccount[] = await mapBridgeAccountV2(
@@ -312,6 +316,7 @@ export class HooksService {
         message: `Account aggregation completed in ${aggregationDuration} milliseconds for Customer ${payload.customerId} and Analysis ${payload.analysisId}.`,
         aggregator: 'BRIDGE',
         duration: aggregationDuration,
+        data: anonymizeAlgoanAccounts(algoanAccounts),
       });
 
       // Update the analysis
