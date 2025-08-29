@@ -6,6 +6,33 @@
 
 A simple connector using [NestJS](https://github.com/nestjs/nest) framework to connect your service to [Bridge](https://bridgeapi.io/).
 
+## ⚠️ Deprecation Warning
+
+**This Bridge connector is deprecated and will no longer be maintained.**
+
+This connector uses Bridge API v2, while Bridge has migrated to API v3 with significant changes and improvements.
+[View Bridge's migration guide →](https://docs.bridgeapi.io/docs/migration-guide-from-2021-to-2025-version)
+
+We recommend migrating to one of the following modern alternatives based on your needs:
+
+### 🚀 For End-to-End Solution
+
+**Transaction Data API** - If you want a complete solution from user data aggregation to analysis:
+
+- Automated data aggregation and enrichment
+- Simplified integration with built-in data processing
+- [View documentation →](https://docs.algoan.com/developer-doc/use-algoan-transaction-data)
+
+### 🔧 For Custom Aggregator Integration
+
+**Aggregator Raw Data Format** - If you want to use your own data aggregator or have specific aggregation requirements:
+
+- Access raw bank data in a standardized format
+- Full control over data processing and aggregation logic
+- [View documentation →](https://docs.algoan.com/developer-doc/aggregator-raw-data)
+
+These newer solutions provide better performance, enhanced security, up-to-date API compatibility, and improved data quality compared to this legacy Bridge v2 connector.
+
 ## Table of contents
 
 - [About Algoan and Bridge](#about-algoan-and-bridge)
