@@ -5,9 +5,7 @@ import {
   AccountInformation,
   BridgeAccount,
   BridgeAccountType,
-  BridgeSimpleAccount,
   BridgeTransaction,
-  BridgeUserInformation,
 } from '../../interfaces/bridge.interface';
 import { AggregatorService } from '../aggregator.service';
 import { ClientConfig } from './bridge.client';
@@ -30,6 +28,19 @@ export const mapBridgeAccount = async (
       fromBridgeToAlgoanAccounts(account, accountInfo, accessToken, aggregator, clientConfig),
     ),
   );
+
+/**
+ * Checks if a Bridge account is valid
+ * @param account a Bridge account
+ * @returns true if the account is valid, false otherwise
+ * @note we consider an account valid if it has a balance and a currency code
+ * because these are the minimum requirements for a valid account
+ * except for the balanceDate, type and usage
+ * which have default values set in the mapping functions
+ * and thus won't block the creation of the analysis
+ */
+export const isValidAccount = (account: Partial<BridgeAccount> | BridgeAccount): account is BridgeAccount =>
+  account.balance !== undefined && account.currency_code !== undefined;
 
 /**
  * Converts a single Bridge account instance to Algoan format

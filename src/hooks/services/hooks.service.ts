@@ -13,6 +13,7 @@ import {
 } from '../../aggregator/interfaces/bridge.interface';
 import { AggregatorService } from '../../aggregator/services/aggregator.service';
 import {
+  isValidAccount as isValidBridgeAccountV2,
   mapBridgeAccount as mapBridgeAccountV2,
   mapBridgeTransactions as mapBridgeTransactionsV2,
 } from '../../aggregator/services/bridge/bridge-v2.utils';
@@ -35,6 +36,7 @@ import { EventDTO } from '../dto/event.dto';
 import { EventName } from '../enums/event-name.enum';
 import { ServiceAccountCreatedDTO } from '../dto/service-account-created.dto';
 import { ServiceAccountUpdatedDTO } from '../dto/service-account-updated.dto';
+import { anonymizeAlgoanAccounts, anonymizeBridgeAccounts } from '../helpers/anonymize-accounts.helper';
 
 /**
  * Hook service
@@ -87,13 +89,14 @@ export class HooksService {
       }
 
       // Handle the event asynchronously
-      void this.dispatchAndHandleWebhook(event, subscription, serviceAccount, aggregationStartDate)
-        .catch((err: Error) => {
+      void this.dispatchAndHandleWebhook(event, subscription, serviceAccount, aggregationStartDate).catch(
+        (err: Error) => {
           this.logger.error({
             message: `Error while processing the event ${event.id}`,
             error: err?.stack ?? err,
           });
-        });
+        },
+      );
 
       return;
     }
@@ -131,35 +134,32 @@ export class HooksService {
           break;
         // The default case should never be reached, as the eventName is already checked in the DTO
         default:
-          void se.update({ status: EventStatus.FAILED })
-            .catch((statusError: Error) => {
-              this.logger.error({
-                message: `Unable to update the event ${event.id}'s status to FAILED`,
-                error: statusError?.stack ?? statusError,
-              });
+          void se.update({ status: EventStatus.FAILED }).catch((statusError: Error) => {
+            this.logger.error({
+              message: `Unable to update the event ${event.id}'s status to FAILED`,
+              error: statusError?.stack ?? statusError,
             });
+          });
 
           return;
       }
     } catch (err) {
-      void se.update({ status: EventStatus.ERROR })
-        .catch((statusError: Error) => {
-          this.logger.error({
-            message: `Unable to update the event ${event.id}'s status to ERROR`,
-            error: statusError?.stack ?? statusError,
-          });
+      void se.update({ status: EventStatus.ERROR }).catch((statusError: Error) => {
+        this.logger.error({
+          message: `Unable to update the event ${event.id}'s status to ERROR`,
+          error: statusError?.stack ?? statusError,
         });
+      });
 
       throw err;
     }
 
-    void se.update({ status: EventStatus.PROCESSED })
-      .catch((statusError: Error) => {
-        this.logger.error({
-          message: `Unable to update the event ${event.id}'s status to PROCESSED`,
-          error: statusError?.stack ?? statusError,
-        });
+    void se.update({ status: EventStatus.PROCESSED }).catch((statusError: Error) => {
+      this.logger.error({
+        message: `Unable to update the event ${event.id}'s status to PROCESSED`,
+        error: statusError?.stack ?? statusError,
       });
+    });
   }
 
   /**
@@ -277,8 +277,16 @@ export class HooksService {
         deleteUserAfterProcess = false;
       }
 
+      const validAccounts = accounts.filter(isValidBridgeAccountV2);
+      if (validAccounts.length < accounts.length) {
+        this.logger.warn(`Some accounts are invalid for Customer "${customer.id}"`, {
+          valid: anonymizeBridgeAccounts(validAccounts),
+          all: anonymizeBridgeAccounts(accounts),
+        });
+      }
+
       const algoanAccounts: AnalysisAccount[] = await mapBridgeAccountV2(
-        accounts,
+        validAccounts,
         accountInfo,
         accessToken,
         this.aggregator,
@@ -308,6 +316,7 @@ export class HooksService {
         message: `Account aggregation completed in ${aggregationDuration} milliseconds for Customer ${payload.customerId} and Analysis ${payload.analysisId}.`,
         aggregator: 'BRIDGE',
         duration: aggregationDuration,
+        data: anonymizeAlgoanAccounts(algoanAccounts),
       });
 
       // Update the analysis

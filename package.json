@@ -49,6 +49,7 @@
     "@algoan/eslint-config": "^1.1.5",
     "@codedependant/semantic-release-docker": "^4.3.0",
     "@commitlint/config-conventional": "^17.4.2",
+    "@nestjs/cli": "^8.2.8",
     "@nestjs/schematics": "^8.0.11",
     "@nestjs/testing": "^8.4.7",
     "@semantic-release/exec": "^6.0.3",

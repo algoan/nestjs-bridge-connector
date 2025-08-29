@@ -6,9 +6,33 @@ import {
   BridgeAccountType,
   BridgeRefreshStatus,
   BridgeTransaction,
-  BridgeUserInformation,
   UserResponse,
 } from './bridge.interface';
+
+export const mockInvalidAccount: Partial<BridgeAccount> = {
+  id: 1235,
+  name: 'mockBridgeInvalidAccountName',
+  status: BridgeAccountStatus.OK,
+  status_code_info: 'mockStatusCodeInfo',
+  status_code_description: 'mockStatusCodeDescription',
+  item_id: 5,
+  bank_id: 6,
+  loan_details: {
+    next_payment_date: '2019-04-30',
+    next_payment_amount: 1000,
+    maturity_date: '2026-12-31',
+    opening_date: '2013-01-10',
+    interest_rate: 1.25,
+    type: 'Prêtimmobilier',
+    borrowed_capital: 140200,
+    repaid_capital: 40200,
+    remaining_capital: 100000,
+  },
+
+  // eslint-disable-next-line no-null/no-null
+  savings_details: null,
+  iban: 'mockIban',
+};
 
 export const mockAccount: BridgeAccount = {
   id: 1234,
