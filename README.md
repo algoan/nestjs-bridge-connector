@@ -10,7 +10,7 @@ A simple connector using [NestJS](https://github.com/nestjs/nest) framework to c
 
 **This Bridge connector is deprecated and will no longer be maintained.**
 
-This connector uses Bridge API v2, while Bridge has migrated to API v3 with significant changes and improvements.
+*This connector uses Bridge API v2, while Bridge has migrated to API v3 with significant changes.*
 [View Bridge's migration guide →](https://docs.bridgeapi.io/docs/migration-guide-from-2021-to-2025-version)
 
 We recommend migrating to one of the following modern alternatives based on your needs:
@@ -115,7 +115,7 @@ Clone the repository:
 $ git clone https://github.com/algoan/nestjs-bridge-connector.git --depth=1
 ```
 
-Install all dependencies running:
+Install all dependencies, by running:
 
 ```bash
 $ npm i -g @nestjs/cli
@@ -194,7 +194,7 @@ If you use a Docker environment, you can pull the latest version of the connecto
 $ docker pull algoan/nestjs-bridge-connector
 ```
 
-Then run the application:
+Then, run the application:
 
 ```bash
 $ docker run -p 8080:8080 algoan/nestjs-bridge-connector
