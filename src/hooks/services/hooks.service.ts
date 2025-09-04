@@ -1,5 +1,6 @@
 import { EventStatus, ServiceAccount, Subscription, SubscriptionEvent } from '@algoan/rest';
 import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { AxiosError } from 'axios';
 import * as delay from 'delay';
 import { isEmpty } from 'lodash';
 import * as moment from 'moment';
@@ -93,7 +94,7 @@ export class HooksService {
         (err: Error) => {
           this.logger.error({
             message: `Error while processing the event ${event.id}`,
-            error: err?.stack ?? err,
+            error: this.maskErrorSecrets(err?.stack ?? err),
           });
         },
       );
@@ -137,7 +138,7 @@ export class HooksService {
           void se.update({ status: EventStatus.FAILED }).catch((statusError: Error) => {
             this.logger.error({
               message: `Unable to update the event ${event.id}'s status to FAILED`,
-              error: statusError?.stack ?? statusError,
+              error: this.maskErrorSecrets(statusError?.stack ?? statusError),
             });
           });
 
@@ -147,7 +148,7 @@ export class HooksService {
       void se.update({ status: EventStatus.ERROR }).catch((statusError: Error) => {
         this.logger.error({
           message: `Unable to update the event ${event.id}'s status to ERROR`,
-          error: statusError?.stack ?? statusError,
+          error: this.maskErrorSecrets(statusError?.stack ?? statusError),
         });
       });
 
@@ -157,7 +158,7 @@ export class HooksService {
     void se.update({ status: EventStatus.PROCESSED }).catch((statusError: Error) => {
       this.logger.error({
         message: `Unable to update the event ${event.id}'s status to PROCESSED`,
-        error: statusError?.stack ?? statusError,
+        error: this.maskErrorSecrets(statusError?.stack ?? statusError),
       });
     });
   }
@@ -352,7 +353,7 @@ export class HooksService {
 
       this.logger.debug({
         message: `An error occurred while fetching data from the aggregator for analysis id ${payload.analysisId} and customer id ${payload.customerId}`,
-        error: err,
+        error: this.maskErrorSecrets(err as Error),
       });
 
       // Update the analysis error
@@ -444,5 +445,30 @@ export class HooksService {
    */
   public async handleServiceAccountUpdatedEvent(payload: ServiceAccountUpdatedDTO) {
     await this.algoanService.updateServiceAccount(payload);
+  }
+
+  /**
+   * Mask secret information in error messages for logging
+   * @param error Error message or stack
+   * @returns Masked error message or original error if not a string
+   */
+  private maskErrorSecrets(error: string | Error): string | Record<string, unknown> {
+    if (typeof error === 'string') {
+      return error;
+    }
+
+    const requestConfig = (error as AxiosError)?.config ?? {};
+
+    return {
+      ...error,
+      config: {
+        ...requestConfig,
+        headers: {
+          ...requestConfig?.headers,
+          Authorization: this.config.disableMasking ? requestConfig.headers?.Authorization : '****',
+          'Client-Secret': this.config.disableMasking ? requestConfig.headers?.['Client-Secret'] : '****',
+        },
+      },
+    };
   }
 }

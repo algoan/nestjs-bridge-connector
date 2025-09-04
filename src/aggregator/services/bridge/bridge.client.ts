@@ -1,6 +1,6 @@
 import { HttpService } from '@nestjs/axios';
 import { CACHE_MANAGER, Inject, Injectable, Logger } from '@nestjs/common';
-import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { AxiosError, AxiosRequestConfig, AxiosRequestHeaders, AxiosResponse, AxiosResponseHeaders } from 'axios';
 import { Cache } from 'cache-manager';
 import { isNil } from 'lodash';
 import { config } from 'node-config-ts';
@@ -15,7 +15,6 @@ import {
   BridgeCategory,
   BridgeRefreshStatus,
   BridgeTransaction,
-  BridgeUserInformation,
   ConnectItemResponse,
   ListResponse,
   UserAccount,
@@ -64,7 +63,7 @@ export class BridgeClient {
               data: error.response?.data,
               status: error.response?.status,
               statusText: error.response?.statusText,
-              headers: error.response?.headers,
+              headers: BridgeClient.maskSecretHeaders(error.response?.headers),
             },
             error.stack,
             error.message,
@@ -354,5 +353,23 @@ export class BridgeClient {
    */
   private static async toPromise<T>(response: Observable<T>): Promise<T> {
     return lastValueFrom(response);
+  }
+
+  /**
+   * Mask secret headers for logging
+   * @param headers Axios response headers
+   * @returns Masked headers
+   */
+  private static maskSecretHeaders(headers?: AxiosResponseHeaders): AxiosRequestHeaders | undefined {
+    if (headers === undefined || config.disableMasking) {
+      return undefined;
+    }
+
+    const masked = { ...headers } as AxiosRequestHeaders;
+
+    masked['Client-Secret'] = '****';
+    masked.Authorization = '****';
+
+    return masked;
   }
 }

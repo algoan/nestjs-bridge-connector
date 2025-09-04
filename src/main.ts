@@ -57,7 +57,6 @@ const bootstrap = async (): Promise<void> => {
   logger.log(`Application is listening to port ${port}`);
 };
 bootstrap().catch((err: Error): void => {
-  // eslint-disable-next-line
-  logger.error(err.message, `An error occurred when bootstrapping the application`, err.stack);
+  logger.error('An error occurred during bootstrapping', err.stack, { rawErrorMessage: err.message });
   process.exit(1);
 });
