@@ -361,8 +361,11 @@ export class BridgeClient {
    * @returns Masked headers
    */
   private static maskSecretHeaders(headers?: AxiosResponseHeaders): AxiosRequestHeaders | undefined {
-    if (headers === undefined || config.disableMasking) {
+    if (headers === undefined) {
       return undefined;
+    }
+    if (config.disableMasking) {
+      return headers;
     }
 
     const masked = { ...headers } as AxiosRequestHeaders;
